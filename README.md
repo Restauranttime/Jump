@@ -36,12 +36,15 @@ Am linken Rand hinaus zu fliegen bringt dich rechts wieder herein.
 
 - **Grüne Blätter** — tragen dich immer.
 - **Blaue Blätter** — wandern hin und her.
-- **Braune Blätter** — brechen beim Landen weg.
+- **Braune Blätter** — tragen genau einen Sprung, dann brechen sie unter dir weg.
 - **Laternen** — katapultieren dich sehr viel höher als ein normaler Sprung.
 - **Spinnen** — tödlich bei Berührung, außer du landest von oben auf ihnen oder triffst sie mit Staub.
 
 Der Himmel färbt sich mit der Höhe von der Abenddämmerung bis in den Sternenraum,
-die Sprünge werden weiter und die Blätter unzuverlässiger. Der Bestwert liegt im
+die Sprünge werden weiter und die Blätter unzuverlässiger. Jede Reihe wird beim
+Erzeugen auf Erreichbarkeit geprüft: der seitliche Spielraum folgt aus der Zeit, die
+ein Sprung über der Zielhöhe verbringt, mal einem Sicherheitsfaktor — es kann also
+keine unmögliche Lücke entstehen. Der Bestwert liegt im
 `localStorage` des Browsers.
 
 ## Technik

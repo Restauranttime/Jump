@@ -351,7 +351,7 @@
   var p = { x: 0, y: 0, vx: 0, vy: 0, face: 1, flap: 0 };
   var plats = [], spiders = [], bullets = [], bits = [], stars = [];
   var camY = 0, startY = 0, topY = 0, score = 0, shown = -1, best = 0;
-  var shootCool = 0, lastLoose = false, tSec = 0;
+  var shootCool = 0, lastLoose = false, lastRoam = 0, topX = 0, tSec = 0;
 
   try { best = parseInt(localStorage.getItem('nachtfalter.best') || '0', 10) || 0; } catch (e) { best = 0; }
   elBest.firstChild.nodeValue = String(best);
@@ -399,7 +399,11 @@
     if (oldVW !== VW) {
       var k = VW / oldVW;
       p.x *= k;
-      for (var i = 0; i < plats.length; i++) plats[i].x = clamp(plats[i].x * k, plats[i].w / 2, VW - plats[i].w / 2);
+      for (var i = 0; i < plats.length; i++) {
+        plats[i].x = clamp(plats[i].x * k, plats[i].w / 2, VW - plats[i].w / 2);
+        plats[i].home *= k;
+      }
+      topX *= k;
       for (var j = 0; j < spiders.length; j++) spiders[j].x = clamp(spiders[j].x * k, 30, VW - 30);
     }
     seedStars();
@@ -407,7 +411,30 @@
 
   /* ---------------------------------------------------------- world gen */
   function mk(x, y, w, type) {
-    return { x: x, y: y, w: w, type: type, vx: 0, spring: false, broken: false, fade: 1, spin: 0, vy: 0, pulse: 0 };
+    return { x: x, y: y, w: w, type: type, vx: 0, home: x, range: 0,
+             spring: false, broken: false, fade: 1, spin: 0, vy: 0, pulse: 0 };
+  }
+
+  /* How far sideways one jump can carry you while still at or above `gap`.
+     Solves gap = v0·t − ½·g·t² for the descending root, then integrates the
+     horizontal accelerate-then-cruise profile over that time. The 0.72 factor
+     is the margin for reaction time and drag — the generator never places a
+     platform outside this window, so no row can be unreachable. */
+  function reachFor(gap) {
+    var disc = JUMP * JUMP - 2 * G * gap;
+    if (disc <= 0) return 0;
+    var T = (-JUMP + Math.sqrt(disc)) / G;
+    var tAcc = MAXVX / ACC;
+    var d = T <= tAcc ? 0.5 * ACC * T * T
+                      : 0.5 * MAXVX * tAcc + MAXVX * (T - tAcc);
+    return d * 0.72;
+  }
+
+  /* Places the next platform: gap first, then an x the previous one can reach. */
+  function place(gap, w, prevRoams) {
+    var half = w / 2 + 6;
+    var reach = Math.max(40, reachFor(gap) - prevRoams);
+    return clamp(topX + rnd(-reach, reach), half, VW - half);
   }
 
   function spawnSpider(y) {
@@ -417,7 +444,8 @@
   function fill() {
     while (topY > camY - VH * 0.8) {
       var d = clamp(alt(topY) / 1400, 0, 1);
-      var y = topY - rnd(58, 96 + 80 * d);
+      var gap = rnd(58, 92 + 68 * d);
+      var y = topY - gap;
       var r = Math.random();
       var type = 'solid';
       if (r < 0.06 + 0.20 * d) type = 'crumble';
@@ -426,10 +454,15 @@
       lastLoose = type !== 'solid';
 
       var w = type === 'mover' ? 58 : (type === 'crumble' ? 62 : 68);
-      var pl = mk(rnd(w / 2 + 6, VW - w / 2 - 6), y, w, type);
-      if (type === 'mover') pl.vx = (Math.random() < 0.5 ? -1 : 1) * rnd(45, 60 + 75 * d);
+      var pl = mk(place(gap, w, lastRoam), y, w, type);
+      if (type === 'mover') {
+        pl.vx = (Math.random() < 0.5 ? -1 : 1) * rnd(45, 60 + 75 * d);
+        pl.range = 55;   // patrols around its spot, so the next row stays reachable
+      }
       if (type === 'solid' && Math.random() < 0.05 + 0.03 * d) pl.spring = true;
       plats.push(pl);
+      topX = pl.x;
+      lastRoam = pl.range;
 
       if (alt(y) > 160 && Math.random() < 0.012 + 0.05 * d) spawnSpider(y - rnd(28, 66));
       topY = y;
@@ -438,16 +471,19 @@
 
   function reset(ready) {
     plats.length = 0; spiders.length = 0; bullets.length = 0; bits.length = 0;
-    startY = 0; score = 0; shown = -1; shootCool = 0; lastLoose = false;
+    startY = 0; score = 0; shown = -1; shootCool = 0; lastLoose = false; lastRoam = 0;
     p.x = VW / 2; p.y = startY; p.vx = 0; p.vy = JUMP * 0.7; p.face = 1; p.flap = 0;
     camY = startY - VH * (ready ? 0.30 : 0.55);
 
     plats.push(mk(VW / 2, startY + 64, VW + 40, 'solid'));
     topY = startY + 64;
+    topX = VW / 2;
     for (var i = 0; i < 10; i++) {
-      var y = topY - rnd(62, 92);
-      plats.push(mk(rnd(46, VW - 46), y, 68, 'solid'));
-      topY = y;
+      var gap = rnd(62, 92);
+      var x = place(gap, 68, 0);
+      plats.push(mk(x, topY - gap, 68, 'solid'));
+      topY -= gap;
+      topX = x;
     }
     fill();
   }
@@ -688,8 +724,10 @@
       if (pl.type === 'mover' && !pl.broken) {
         pl.x += pl.vx * dt;
         var half = pl.w / 2;
-        if (pl.x < half) { pl.x = half; pl.vx = -pl.vx; }
-        else if (pl.x > VW - half) { pl.x = VW - half; pl.vx = -pl.vx; }
+        var lo = Math.max(half, pl.home - pl.range);
+        var hi = Math.min(VW - half, pl.home + pl.range);
+        if (pl.x < lo) { pl.x = lo; pl.vx = -pl.vx; }
+        else if (pl.x > hi) { pl.x = hi; pl.vx = -pl.vx; }
       }
       if (pl.broken) { pl.vy += G * 0.6 * dt; pl.y += pl.vy * dt; pl.spin += dt * 2.2; pl.fade -= dt * 1.4; }
       if (pl.pulse > 0) pl.pulse -= dt * 3;
@@ -703,14 +741,16 @@
         if (q.broken) continue;
         if (!playing && j !== 0) continue;              // title screen: bounce on the garden ledge only
         if (prevFeet <= q.y && feet >= q.y && Math.abs(p.x - q.x) < q.w / 2 + PR * 0.6) {
+          p.y = q.y - PR;
           if (q.type === 'crumble') {
-            q.broken = true; q.vy = 70;
+            // carries exactly one jump, then breaks away under you
+            q.broken = true; q.vy = 90;
             burst(q.x, q.y + 4, 'rgba(201,164,111,.9)', 10, 130);
-            Sfx.brk();
+            bounce(JUMP); Sfx.brk();
+          } else if (q.spring) {
+            bounce(SPRING); q.pulse = 1; Sfx.spring();
           } else {
-            p.y = q.y - PR;
-            if (q.spring) { bounce(SPRING); q.pulse = 1; Sfx.spring(); }
-            else { bounce(JUMP); Sfx.jump(); }
+            bounce(JUMP); Sfx.jump();
           }
           break;
         }
