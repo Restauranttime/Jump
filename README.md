@@ -14,10 +14,21 @@ Datei auf einen beliebigen Webspace oder GitHub Pages legen und die Seite
 
 | Eingabe | Wirkung |
 | --- | --- |
-| Handy neigen | Nach links / rechts fliegen (iOS fragt einmal nach der Sensor-Freigabe) |
 | Linke / rechte Bildschirmhälfte halten | Nach links / rechts fliegen |
 | Kurz tippen | Staubwolke nach oben schießen — trifft Spinnen |
+| Handy neigen | Dasselbe per Sensor — optional, siehe unten |
 | ← / → , Leertaste | Dasselbe mit Tastatur |
+
+Beim ersten Start blendet das Spiel kurz ein, welche Bildschirmhälfte was tut.
+
+### Zur Neigungssteuerung
+
+Sie ist ein Extra, kein Muss — die Bildschirmhälften sind gleichwertig. iOS gibt den
+Bewegungssensor nur nach einem Tipp auf **Neigungssteuerung aktivieren** frei, und nur
+auf einer Seite, die über HTTPS und **nicht in einem fremden Frame** läuft. In
+eingebetteten Vorschauen bleibt der Sensor gesperrt; das Spiel sagt das dann auch statt
+stumm liegenzubleiben. Ein einmal abgelehnter Zugriff wird gemerkt und lässt sich unter
+*Einstellungen › Safari › Bewegung & Ausrichtung* zurücksetzen.
 
 Am linken Rand hinaus zu fliegen bringt dich rechts wieder herein.
 

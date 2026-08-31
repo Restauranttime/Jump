@@ -164,6 +164,29 @@
     font-variant-numeric:tabular-nums;color:var(--parchment);
   }
   .tally .num.gold{color:var(--gold)}
+  .status{
+    font-family:var(--mono);font-size:11px;line-height:1.5;color:var(--muted);
+    margin:10px 0 0;text-align:left;
+  }
+  .status[hidden]{display:none}
+  .status b{color:var(--gold);font-weight:700}
+
+  .hint{
+    position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;
+    pointer-events:none;opacity:1;transition:opacity .5s ease;
+  }
+  .hint[hidden]{display:none}
+  .hint.fade{opacity:0}
+  .hint .half{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    color:rgba(243,230,200,.62);
+  }
+  .hint .half:first-child{background:linear-gradient(90deg,rgba(255,201,120,.13),transparent)}
+  .hint .half:last-child{background:linear-gradient(270deg,rgba(255,201,120,.13),transparent)}
+  .hint .arrow{font-size:19px;letter-spacing:0;color:var(--gold)}
+  @media (prefers-reduced-motion:reduce){.hint{transition:none}}
+
   .note{
     font-family:var(--mono);font-size:11px;color:var(--muted);margin:0 0 18px;line-height:1.5;
   }
@@ -191,18 +214,25 @@
     </div>
   </div>
 
+  <div class="hint" id="hint" hidden aria-hidden="true">
+    <div class="half"><span class="arrow">◀</span>halten</div>
+    <div class="half">halten<span class="arrow">▶</span></div>
+  </div>
+
   <div class="screen" id="screen-start">
     <div class="card">
       <p class="eyebrow">Endloser Aufstieg</p>
       <h1>Nachtfalter</h1>
       <p class="lede">Von der Gartenlaterne bis zwischen die Sterne — ein Sprung nach dem anderen.</p>
       <div class="keys">
-        <div><b>Steuern</b><span>Handy neigen — oder linke/rechte Bildschirmhälfte halten</span></div>
+        <div><b>Steuern</b><span>Linke oder rechte Bildschirmhälfte gedrückt halten</span></div>
         <div><b>Schießen</b><span>Kurz tippen und Staub auf Spinnen werfen</span></div>
+        <div><b>Neigen</b><span>Optional — nur wenn der Bewegungssensor freigegeben ist</span></div>
         <div><b>Am Rechner</b><span>← → bewegen, Leertaste schießt</span></div>
       </div>
       <button class="btn" id="btn-start" type="button">Los geht's</button>
-      <button class="btn ghost" id="btn-tilt" type="button" hidden>Bewegungssensor erlauben</button>
+      <button class="btn ghost" id="btn-tilt" type="button" hidden>Neigungssteuerung aktivieren</button>
+      <p class="status" id="tilt-status" hidden></p>
     </div>
   </div>
 
@@ -236,6 +266,8 @@
   var btnStart = document.getElementById('btn-start');
   var btnAgain = document.getElementById('btn-again');
   var btnTilt = document.getElementById('btn-tilt');
+  var elTiltStatus = document.getElementById('tilt-status');
+  var elHint = document.getElementById('hint');
   var btnSound = document.getElementById('sound');
   var wave1 = document.getElementById('wave1');
   var wave2 = document.getElementById('wave2');
@@ -444,6 +476,7 @@
     if (e.target.closest && e.target.closest('button')) return;
     if (state !== 'play') return;
     ptr.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, t: performance.now(), moved: false });
+    hideHint();
     refreshDir();
     e.preventDefault();
   }, { passive: false });
@@ -468,8 +501,8 @@
 
   window.addEventListener('keydown', function (e) {
     var k = e.key;
-    if (k === 'ArrowLeft' || k === 'a' || k === 'A') { input.left = true; e.preventDefault(); }
-    else if (k === 'ArrowRight' || k === 'd' || k === 'D') { input.right = true; e.preventDefault(); }
+    if (k === 'ArrowLeft' || k === 'a' || k === 'A') { input.left = true; hideHint(); e.preventDefault(); }
+    else if (k === 'ArrowRight' || k === 'd' || k === 'D') { input.right = true; hideHint(); e.preventDefault(); }
     else if (k === ' ' || k === 'Spacebar') {
       e.preventDefault();
       if (state === 'play') shoot();
@@ -500,14 +533,42 @@
   }
   function listenTilt() { window.addEventListener('deviceorientation', onOrient, true); }
 
+  function say(html) { elTiltStatus.innerHTML = html; elTiltStatus.hidden = false; }
+  var embedded = false;
+  try { embedded = window.self !== window.top; } catch (e) { embedded = true; }
+
+  /* A sensor grant only counts once real readings arrive. In an embedded preview the
+     permission is refused or stays silent, so say what to do instead of pretending. */
+  function watchForReadings() {
+    setTimeout(function () {
+      if (tiltOn) return;
+      btnTilt.textContent = 'Neigung liefert keine Werte';
+      say(embedded
+        ? 'Der Sensor ist in der eingebetteten Vorschau gesperrt. <b>Spiel im eigenen Tab öffnen</b> — oder einfach die Bildschirmhälften halten, das ist gleichwertig.'
+        : 'Vom Gerät kommen keine Neigungswerte. <b>Halte die Bildschirmhälften</b> — das ist gleichwertig.');
+    }, 2200);
+  }
+
   if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
     btnTilt.hidden = false;   // iOS 13+ needs an explicit gesture
     btnTilt.addEventListener('click', function () {
+      btnTilt.disabled = true;
       DeviceOrientationEvent.requestPermission().then(function (res) {
-        if (res === 'granted') { listenTilt(); btnTilt.textContent = 'Bewegungssensor aktiv'; btnTilt.disabled = true; }
-        else { btnTilt.textContent = 'Sensor abgelehnt — Halten funktioniert'; btnTilt.disabled = true; }
+        if (res === 'granted') {
+          listenTilt();
+          btnTilt.textContent = 'Neigungssteuerung aktiv';
+          watchForReadings();
+        } else {
+          btnTilt.textContent = 'Neigung nicht freigegeben';
+          say(embedded
+            ? 'Eingebettete Seiten dürfen den Sensor nicht abfragen. <b>Öffne das Spiel in einem eigenen Tab</b> — oder halte einfach die Bildschirmhälften.'
+            : 'Safari merkt sich das Nein. Erlauben unter <b>Einstellungen › Safari › Bewegung &amp; Ausrichtung</b>, danach Seite neu laden. Ohne Sensor: Bildschirmhälften halten.');
+        }
       }).catch(function () {
-        btnTilt.textContent = 'Sensor nicht verfügbar — Halten funktioniert'; btnTilt.disabled = true;
+        btnTilt.textContent = 'Neigung nicht verfügbar';
+        say(embedded
+          ? 'Eingebettete Seiten dürfen den Sensor nicht abfragen. <b>Öffne das Spiel in einem eigenen Tab</b> — oder halte einfach die Bildschirmhälften.'
+          : 'Der Sensor antwortet nicht. <b>Halte die Bildschirmhälften</b> — das ist gleichwertig.');
       });
     });
   } else if (window.DeviceOrientationEvent) {
@@ -524,6 +585,20 @@
   });
 
   /* -------------------------------------------------------------- actions */
+  var hintTimer = 0;
+  function showHint() {
+    elHint.hidden = false;
+    elHint.classList.remove('fade');
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(hideHint, 4000);
+  }
+  function hideHint() {
+    if (elHint.hidden) return;
+    clearTimeout(hintTimer);
+    elHint.classList.add('fade');
+    setTimeout(function () { elHint.hidden = true; }, 520);
+  }
+
   function shoot() {
     if (state !== 'play' || shootCool > 0 || bullets.length >= 3) return;
     shootCool = 0.22;
@@ -544,6 +619,7 @@
     scStart.hidden = true;
     scOver.hidden = true;
     state = 'play';
+    if (!tiltOn) showHint();
   }
 
   function rank(s) {
@@ -558,6 +634,7 @@
   function gameOver(cause) {
     if (state !== 'play') return;
     state = 'over';
+    hideHint();
     clearInput();
     Sfx.hit();
     var s = Math.floor(score);
