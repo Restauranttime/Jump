@@ -26,7 +26,9 @@ cd "$(dirname "$0")"
   echo '<link rel="manifest" href="manifest.webmanifest">'
   grep -m1 '<title>' src/game.html
   echo '<style>'
-  echo ':root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}'
+  # Hier bewusst kein padding fuer die sicheren Bereiche: das Spiel verteilt sie
+  # selbst auf Kopf- und Tableiste. Um die ganze Seite herum wuerde es unter der
+  # Tableiste einen Streifen Hintergrund stehen lassen.
   echo 'html{-webkit-text-size-adjust:100%}'
   echo 'body{margin:0;font:14px system-ui,sans-serif}'
   echo 'img{max-width:100%}'
