@@ -99,6 +99,16 @@ Transferfenster im Winter und Sommer mit Vertragsverhandlung, Nationalmannschaft
 mit Länderspielpausen und Turnieren, Auf- und Abstieg mit dem eigenen Verein,
 Investitionen vom verdienten Geld.
 
+**Welt** — Ein eigener Reiter mit den Tabellen aller zehn Ligen, die Woche für Woche
+mitlaufen, der laufenden Torjägerliste deiner Liga mit echten Spielernamen, dem Europapokal
+als vollständigem Wettbewerb (24 Teilnehmer, Ligaphase mit Tabelle, K.-o.-Baum bis zum
+Finale), deinem Pokalweg und den Titelträgern der vergangenen Saisons.
+
+**Höhepunkte** — Der Verlauf ist ein Ringspeicher und vergisst nach 60 Einträgen. Besondere
+Momente bleiben dagegen dauerhaft: Profidebüt, erstes Tor, Dreierpack, Traumnote, Titel,
+Länderspieldebüt, Rekordtransfer, schwere Verletzung, jedes 50. Karrieretor und jedes
+100. Pflichtspiel. Im Profil als Zeitleiste, am Karriereende als Rückblick.
+
 **Langfristig** — Attribute wachsen mit dem Training und dem Alter gegen dein verborgenes
 Potenzial, ab 29 baut der Körper ab. Saisonbilanz mit Torschützenkönig, Spieler der Saison
 und Goldenem Ball, Weltrangliste, Titelvitrine, Karrieretabelle über alle Saisons.

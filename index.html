@@ -172,10 +172,10 @@ a{color:var(--accent)}
 .hud-chips::-webkit-scrollbar{display:none}
 #main{flex:1;min-height:0;overflow-y:auto;padding:14px 16px 22px}
 .view{display:flex;flex-direction:column;gap:14px}
-#tabbar{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line-soft);background:var(--surface)}
-.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px 10px;background:none;border:0;color:var(--muted);
-  font-family:var(--font-data);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase}
-.tab svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#tabbar{display:grid;grid-template-columns:repeat(6,1fr);border-top:1px solid var(--line-soft);background:var(--surface)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 1px 10px;background:none;border:0;color:var(--muted);
+  font-family:var(--font-data);font-size:9.5px;letter-spacing:.02em;text-transform:uppercase;overflow:hidden}
+.tab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .tab[aria-selected="true"]{color:var(--accent)}
 .tab-dot{position:absolute;margin:-8px 0 0 15px;width:7px;height:7px;border-radius:99px;background:var(--bad)}
 
@@ -224,6 +224,17 @@ table.tbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-
 .zone-cl td:first-child{box-shadow:inset 2px 0 0 var(--good)}
 .zone-el td:first-child{box-shadow:inset 2px 0 0 var(--accent)}
 .zone-ab td:first-child{box-shadow:inset 2px 0 0 var(--bad)}
+
+/* ---------- Höhepunkte ---------- */
+.zeitleiste{position:relative;padding-left:22px}
+.zeitleiste::before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:1px;background:var(--line)}
+.hoehe{position:relative;padding:8px 0}
+.hoehe::before{content:"";position:absolute;left:-21px;top:13px;width:9px;height:9px;border-radius:99px;
+  background:var(--surface-3);border:1px solid var(--line)}
+.hoehe.gross::before{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+.hoehe .wann{font-family:var(--font-data);font-size:10.5px;letter-spacing:.07em;color:var(--muted);text-transform:uppercase}
+.hoehe .was{font-size:13.5px;line-height:1.4;margin-top:1px}
+.hoehe.gross .was{font-weight:600}
 
 /* ---------- Stab ---------- */
 .stab{display:flex;flex-direction:column;gap:2px;padding:11px 0;border-top:1px solid var(--line-soft)}
@@ -390,6 +401,7 @@ textarea.input{min-height:120px;font-family:var(--font-data);font-size:12px;resi
     <main id="main">
       <div class="view" id="view-home"></div>
       <div class="view" id="view-club" hidden></div>
+      <div class="view" id="view-world" hidden></div>
       <div class="view" id="view-market" hidden></div>
       <div class="view" id="view-social" hidden></div>
       <div class="view" id="view-profile" hidden></div>
@@ -399,6 +411,8 @@ textarea.input{min-height:120px;font-family:var(--font-data);font-size:12px;resi
         <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5h4v5"/></svg>Heim</button>
       <button class="tab" data-view="club" aria-selected="false">
         <svg viewBox="0 0 24 24"><path d="M12 3 5 5.5v6c0 4.5 3 7.7 7 9.5 4-1.8 7-5 7-9.5v-6L12 3Z"/><path d="M9.5 12h5"/><path d="M12 9.5v5"/></svg>Verein</button>
+      <button class="tab" data-view="world" aria-selected="false">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18"/></svg>Welt</button>
       <button class="tab" data-view="market" aria-selected="false">
         <svg viewBox="0 0 24 24"><path d="M4 8h13l-3-3"/><path d="M20 16H7l3 3"/></svg>Markt</button>
       <button class="tab" data-view="social" aria-selected="false">
@@ -1261,6 +1275,23 @@ function rolleNachStaerke() {
 }
 function saisonLabel(j) { return j + '/' + String((j + 1) % 100).padStart(2, '0'); }
 
+/* ========================== KARRIERE-GEDÄCHTNIS ==========================
+   Der Verlauf ist ein Ringspeicher und vergisst nach 60 Einträgen. Höhepunkte
+   bleiben dagegen die ganze Karriere erhalten — sie sind am Ende die Geschichte,
+   die eine Zahlenreihe nicht erzählen kann. */
+function karriereTore() { return S.karriere.reduce((a, k) => a + k.tore, 0) + S.stats.tore; }
+function karriereSpiele() { return S.karriere.reduce((a, k) => a + k.spiele, 0) + S.stats.spiele; }
+function merken(art, text, gross) {
+  S.hoehepunkte = S.hoehepunkte || [];
+  if (!S.welt || !S.welt.ligen) weltAufsetzen();
+  if (!Array.isArray(S.torjaeger)) torjaegerAufsetzen();
+  S.hoehepunkte.push({ j: S.jahr, w: S.woche, alter: S.p.alter, art, t: text, gross: gross ? 1 : 0 });
+  if (S.hoehepunkte.length > 400) S.hoehepunkte.shift();
+}
+function schonErlebt(art) { return (S.hoehepunkte || []).some(h => h.art === art); }
+const HOEHEPUNKT_ICON = { debuet: '1', tor: 'T', serie: '3', note: '1,0', titel: 'P', nat: 'N',
+  transfer: '€', verletzung: '+', jubilaeum: 'J', award: 'A', auf: '↑', ab: '↓', ende: '★' };
+
 function log(text, typ) {
   S.verlauf.unshift({ w: S.woche, j: S.jahr, t: text, typ: typ || '' });
   if (S.verlauf.length > 60) S.verlauf.length = 60;
@@ -1470,8 +1501,11 @@ function starteSaison(neueEuroQuali) {
   S.winterWoche = Math.round(S.saisonWochen / 2);
   saisonZielSetzen();
   if (!S.trainer) S.trainer = trainerErzeugen(CL(S.p.clubId));
+  weltAufsetzen();
+  torjaegerAufsetzen();
   S.spieleCache = null;
   S.titelDieseSaison = [];
+  S.pokalWeg = [];
   S.transferOffen = false;
   S.angebote = [];
 }
@@ -1484,14 +1518,123 @@ function tabellenListe() {
 }
 function tabellenPlatz(clubId) { return tabellenListe().findIndex(x => x.id === clubId) + 1; }
 
-function buchen(heim, gast, th, tg) {
-  const T = S.liga.tabelle;
-  if (!T[heim] || !T[gast]) return;
+function buchenIn(T, heim, gast, th, tg) {
+  if (!T || !T[heim] || !T[gast]) return;
   T[heim].s++; T[gast].s++;
   T[heim].t += th; T[heim].gt += tg; T[gast].t += tg; T[gast].gt += th;
   if (th > tg) { T[heim].g++; T[heim].p += 3; T[gast].n++; }
   else if (th < tg) { T[gast].g++; T[gast].p += 3; T[heim].n++; }
   else { T[heim].u++; T[gast].u++; T[heim].p++; T[gast].p++; }
+}
+function buchen(heim, gast, th, tg) { buchenIn(S.liga.tabelle, heim, gast, th, tg); }
+const leereZeile = () => ({ s: 0, g: 0, u: 0, n: 0, t: 0, gt: 0, p: 0 });
+function tabelleSortiert(T) {
+  return Object.keys(T).map(id => ({ id, ...T[id], diff: T[id].t - T[id].gt }))
+    .sort((a, b) => b.p - a.p || b.diff - a.diff || b.t - a.t || CL(b.id).staerke - CL(a.id).staerke);
+}
+
+/* ========================== DIE ÜBRIGE FUSSBALLWELT ==========================
+   Bisher existierte nur die Tabelle der eigenen Liga. Damit man sich alle Ligen
+   und den Europapokal ansehen kann, laufen die anderen Ligen jede Woche mit —
+   ohne echten Spielplan, aber mit vollständiger, plausibler Tabelle. */
+function weltAufsetzen() {
+  S.welt = { ligen: {}, euro: null, meister: S.welt && S.welt.meister ? S.welt.meister : {} };
+  for (const lg of LEAGUES) {
+    const clubs = ligaClubs(lg.id);
+    const tabelle = {};
+    clubs.forEach(c => tabelle[c.id] = leereZeile());
+    S.welt.ligen[lg.id] = { tabelle, spieltag: 0, max: 2 * (clubs.length - 1) };
+  }
+  euroAufsetzen();
+}
+function weltTabelle(ligaId) {
+  if (S.liga && S.liga.id === ligaId) return S.liga.tabelle;
+  return S.welt && S.welt.ligen[ligaId] ? S.welt.ligen[ligaId].tabelle : null;
+}
+function weltSpieltag() {
+  if (!S.welt) return;
+  for (const lg of LEAGUES) {
+    if (S.liga && lg.id === S.liga.id) continue;
+    const w = S.welt.ligen[lg.id];
+    if (!w || w.spieltag >= w.max) continue;
+    const ids = shuffle(Object.keys(w.tabelle));
+    for (let i = 0; i + 1 < ids.length; i += 2) {
+      const [th, tg] = simErgebnis(CL(ids[i]).staerke, CL(ids[i + 1]).staerke);
+      buchenIn(w.tabelle, ids[i], ids[i + 1], th, tg);
+    }
+    w.spieltag++;
+  }
+}
+
+/* ---------- Europapokal als echter Wettbewerb mit 24 Teilnehmern ---------- */
+const EURO_RUNDEN = { 6: 'Achtelfinale', 7: 'Viertelfinale', 8: 'Halbfinale', 9: 'Finale' };
+function euroAufsetzen() {
+  const pool = [];
+  for (const lg of LEAGUES.filter(l => l.euro)) {
+    pool.push(...ligaClubs(lg.id).slice().sort((a, b) => b.staerke - a.staerke).slice(0, 4));
+  }
+  pool.sort((a, b) => b.staerke - a.staerke);
+  const teil = pool.slice(0, 24).map(c => c.id);
+  if (S.euro && S.euro.drin && teil.indexOf(S.p.clubId) < 0) teil[teil.length - 1] = S.p.clubId;
+  const tabelle = {};
+  teil.forEach(id => tabelle[id] = leereZeile());
+  S.welt.euro = { teilnehmer: teil, tabelle, phase: 0, runden: {}, sieger: null };
+}
+function euroSpieltag(ausgenommen) {
+  const e = S.welt && S.welt.euro;
+  if (!e) return;
+  const frei = shuffle(e.teilnehmer.filter(id => !ausgenommen || ausgenommen.indexOf(id) < 0));
+  for (let i = 0; i + 1 < frei.length; i += 2) {
+    const [th, tg] = simErgebnis(CL(frei[i]).staerke, CL(frei[i + 1]).staerke);
+    buchenIn(e.tabelle, frei[i], frei[i + 1], th, tg);
+  }
+}
+function euroKoAufbauen() {
+  const e = S.welt.euro;
+  const top = tabelleSortiert(e.tabelle).slice(0, 16).map(x => x.id);
+  e.runden[6] = [];
+  for (let i = 0; i < 8; i++) e.runden[6].push({ a: top[i], b: top[15 - i], sieger: null });
+}
+function euroKoRunde(idx) {
+  const e = S.welt.euro;
+  const paare = e.runden[idx];
+  if (!paare) return;
+  for (const pr of paare) {
+    if (pr.sieger) continue;
+    const [ta, tb] = simErgebnis(CL(pr.a).staerke + 2, CL(pr.b).staerke);
+    pr.ta = ta; pr.tb = tb;
+    pr.sieger = ta === tb ? (chance(.5) ? pr.a : pr.b) : (ta > tb ? pr.a : pr.b);
+  }
+  const sieger = paare.map(x => x.sieger);
+  if (idx < 9) {
+    e.runden[idx + 1] = [];
+    for (let i = 0; i + 1 < sieger.length; i += 2) e.runden[idx + 1].push({ a: sieger[i], b: sieger[i + 1], sieger: null });
+  } else {
+    e.sieger = sieger[0];
+  }
+}
+function euroWoche(w) {
+  const e = S.welt && S.welt.euro;
+  if (!e || !S.euro || !S.euro.wochen) return;
+  const idx = S.euro.wochen.indexOf(w);
+  if (idx < 0) return;
+  if (idx <= 5) {
+    euroSpieltag(S.euroAusnahme);
+    e.phase = idx + 1;
+    if (idx === 5) {
+      euroKoAufbauen();
+      if (S.euroEntscheidung) {
+        S.euroEntscheidung = false;
+        const drin = (e.runden[6] || []).some(x => x.a === S.p.clubId || x.b === S.p.clubId);
+        if (drin) { S.euro.phase = 6; log('Europapokal: Einzug in die K.-o.-Runde.', 'good'); }
+        else { S.euro.drin = false; log('Europapokal: in der Ligaphase gescheitert.', 'bad'); }
+      }
+    }
+  } else {
+    euroKoRunde(idx);
+    e.phase = idx + 1;
+  }
+  S.euroAusnahme = null;
 }
 
 /* ---------- Ergebnis zweier KI-Teams ---------- */
@@ -1819,6 +1962,7 @@ function verletzen() {
   S.p.verletzung = { name: v.n, wochen };
   S.p.fitness = clamp(S.p.fitness - wochen * 2.5, 12, 100);
   log(v.n + ' — voraussichtlich ' + wochen + ' Wochen Pause.', 'bad');
+  if (wochen >= 8) merken('verletzung', v.n + ' — ' + wochen + ' Wochen Pause.', wochen >= 16);
   return { name: v.n, wochen };
 }
 
@@ -1929,7 +2073,7 @@ const EREIGNISSE = [
   { id: 'kapitaen', gewicht: 2, wenn: () => S.p.trainer > 72 && S.p.alter > 23 && !S.p.kapitaen, eyebrow: 'Verantwortung', titel: 'Die Binde',
     text: () => 'Der Kapitän fällt lange aus. Der Trainer hält dir die Binde hin.',
     wahl: [
-      { l: 'Annehmen', h: 'Druck', run: () => { S.p.kapitaen = true; return { text: 'Du bist Kapitän. Ab jetzt schaut das ganze Stadion zuerst auf dich.', eff: { mentalitaet: 1.2, ruf: 5, trainer: 5, moral: 6 } }; } },
+      { l: 'Annehmen', h: 'Druck', run: () => { S.p.kapitaen = true; merken('titel', 'Kapitän von ' + CL(S.p.clubId).name + '.', 1); return { text: 'Du bist Kapitän. Ab jetzt schaut das ganze Stadion zuerst auf dich.', eff: { mentalitaet: 1.2, ruf: 5, trainer: 5, moral: 6 } }; } },
       { l: 'Ablehnen — erst Leistung', h: 'Bescheiden', run: () => ({ text: 'Er respektiert es, ist aber sichtbar enttäuscht.', eff: { trainer: -3, moral: 2 } }) }
     ] },
   { id: 'jugend', gewicht: 2, wenn: () => S.p.alter > 25, eyebrow: 'Nachwuchs', titel: 'Ein Junge aus der U19',
@@ -2222,7 +2366,16 @@ function pokalGegner() {
   return pick(gefiltert.length ? gefiltert : pool).id;
 }
 function euroGegner() {
-  const pool = CLUBS.filter(c => LG(c.liga).euro && c.id !== S.p.clubId && c.staerke >= (S.euro.phase >= 6 ? 76 : 66));
+  const e = S.welt && S.welt.euro;
+  if (e) {
+    if (S.euro.phase >= 6 && e.runden[S.euro.phase]) {
+      const pr = e.runden[S.euro.phase].find(x => x.a === S.p.clubId || x.b === S.p.clubId);
+      if (pr) return pr.a === S.p.clubId ? pr.b : pr.a;
+    }
+    const andere = e.teilnehmer.filter(id => id !== S.p.clubId);
+    if (andere.length) return pick(andere).valueOf();
+  }
+  const pool = CLUBS.filter(c => LG(c.liga).euro && c.id !== S.p.clubId && c.staerke >= 66);
   return pick(pool).id;
 }
 function wochenSpiele(w) {
@@ -2344,6 +2497,9 @@ async function wocheVor() {
     for (const fx of aktuelleSpiele()) await spielAustragen(fx);
     S.spieleCache = null;
     simLigaSpieltag(w);
+    weltSpieltag();
+    torjaegerSpieltag();
+    euroWoche(w);
     wochenAbschluss();
     if (w === S.winterWoche) await transferfenster(false);
     if (w === Math.round(S.saisonWochen * .65) && S.saisonZiel) {
@@ -2473,16 +2629,26 @@ function wechselVerein(clubId, vertrag) {
   S.trainer = trainerErzeugen(neu);
   S.p.trainer = clamp(48 + trainerStilBonus() * 60 + ri(-5, 5), 12, 85);
   log('Wechsel zu ' + neu.name + ' — ' + money(vertrag.gehalt) + ' pro Jahr bis ' + (S.jahr + vertrag.jahre) + '.', 'gold');
+  merken('transfer', 'Wechsel von ' + alt.name + ' zu ' + neu.name + '.', neu.staerke >= 80);
   if (ligaWechsel && S.woche <= S.saisonWochen) starteSaisonTeilweise(S.euro.drin);
 }
 function starteSaisonTeilweise(euroDrin) {
   const woche = S.woche, stats = S.stats, natStats = S.natStats, titel = S.titelDieseSaison;
   const pokalAlt = S.pokal, euroAlt = S.euro;
+  const weltAlt = S.welt, ligaAlt = S.liga;
   starteSaison(euroDrin);
   S.stats = stats; S.natStats = natStats; S.titelDieseSaison = titel;
   S.woche = Math.min(woche, S.saisonWochen);
   S.pokal.drin = pokalAlt.drin; S.pokal.runde = pokalAlt.runde;
   S.euro.phase = euroAlt.phase; S.euro.punkte = euroAlt.punkte;
+  /* Die bisherige Ligatabelle bleibt als Weltansicht erhalten, der Europapokal läuft weiter */
+  if (weltAlt) {
+    S.welt = weltAlt;
+    if (ligaAlt && S.welt.ligen[ligaAlt.id]) {
+      S.welt.ligen[ligaAlt.id].tabelle = ligaAlt.tabelle;
+      S.welt.ligen[ligaAlt.id].spieltag = S.woche - 1;
+    }
+  }
   for (let w = 1; w < S.woche; w++) simLigaSpieltag(w, true);
 }
 
@@ -2550,6 +2716,8 @@ function natSpiele(anzahl, turnier) {
       p.nat.spiele++; S.natStats.spiele++;
       const ch = POS(p.pos).angriff * (OVR() / 88);
       tore = Math.min(poisson(ch * .55), th);
+      if (p.nat.spiele === 1) merken('nat', 'Länderspieldebüt für ' + nat.name + ' gegen ' + gegner.name + '.', 1);
+      if (p.nat.tore === 0 && tore > 0) merken('nat', 'Erstes Länderspieltor für ' + nat.name + ' gegen ' + gegner.name + '.', 1);
       p.nat.tore += tore; S.natStats.tore += tore;
     }
     berichte.push({ gegner: gegner.name, flag: gegner.flag, th, tg, spielt, tore });
@@ -2593,6 +2761,7 @@ function titelGeben(name, jahr, wo) {
   const eintrag = { name, jahr: jahr || S.jahr + 1, club: wo || CL(S.p.clubId).name };
   S.p.titel.push(eintrag);
   S.titelDieseSaison.push(eintrag);
+  merken('titel', name + ' mit ' + eintrag.club + '.', /Goldener Ball|Weltmeister|Europapokal|Kontinentalmeister|Meister/.test(name));
   log('Titel gewonnen: ' + name + '.', 'gold');
 }
 
@@ -2628,13 +2797,23 @@ function weltrangliste() {
   liste.push({ name: S.p.vorname + ' ' + S.p.nachname, club: CL(S.p.clubId).name, punkte: meinePunkte(), tore: S.stats.tore, ovr: OVR(), ich: true });
   return liste.sort((a, b) => b.punkte - a.punkte);
 }
-function torjaegerListe() {
-  const clubs = ligaClubs(S.liga.id);
-  const liste = clubs.filter(c => c.id !== S.p.clubId).map(c => {
-    const n = zufallsname(pick(NATIONEN).pool);
-    return { name: n.v + ' ' + n.n, club: c.kurz, tore: Math.round(poisson(clamp((c.staerke - 42) / 3.1, .6, 22))) };
+/* Torjäger der eigenen Liga: einmal pro Saison festgelegt, danach Woche für
+   Woche fortgeschrieben — sonst würfelte die Liste bei jedem Aufruf neu. */
+function torjaegerAufsetzen() {
+  S.torjaeger = ligaClubs(S.liga.id).filter(c => c.id !== S.p.clubId).map(c => {
+    const echt = (ECHTE_KADER[c.id] || []).filter(e => e[1] === 'ST' || e[1] === 'FL').sort((x, y) => y[4] - x[4]);
+    let name, staerke;
+    if (echt.length) { name = echt[0][0]; staerke = echt[0][4]; }
+    else { const nat = natFuerLiga(c.liga); const nm = zufallsname(nat.pool); name = nm.v + ' ' + nm.n; staerke = c.staerke + 3; }
+    return { name, clubId: c.id, tore: 0, rate: clamp((staerke - 60) / 42, .04, .72) };
   });
-  liste.push({ name: S.p.vorname + ' ' + S.p.nachname, club: CL(S.p.clubId).kurz, tore: S.stats.tore, ich: true });
+}
+function torjaegerSpieltag() {
+  (S.torjaeger || []).forEach(t => { t.tore += poisson(t.rate); });
+}
+function torjaegerListe() {
+  const liste = (S.torjaeger || []).map(t => ({ name: t.name, club: CL(t.clubId).kurz, clubId: t.clubId, tore: t.tore }));
+  liste.push({ name: S.p.vorname + ' ' + S.p.nachname, club: CL(S.p.clubId).kurz, clubId: S.p.clubId, tore: S.stats.tore, ich: true });
   return liste.sort((a, b) => b.tore - a.tore);
 }
 
@@ -2670,6 +2849,18 @@ async function saisonEnde() {
   const avg = st.noten.length ? st.noten.reduce((a, b) => a + b, 0) / st.noten.length : 0;
 
   if (platz === 1) titelGeben(lg.tier === 1 ? (lg.meister || 'Meister') : 'Meister der ' + lg.name);
+  /* Meister aller Ligen und Europapokalsieger für den Rückblick festhalten */
+  if (S.welt) {
+    S.welt.meister = S.welt.meister || {};
+    const jahrKey = saisonLabel(S.jahr);
+    const eintrag = {};
+    for (const l of LEAGUES) {
+      const T = weltTabelle(l.id);
+      if (T) { const ob = tabelleSortiert(T)[0]; if (ob) eintrag[l.id] = ob.id; }
+    }
+    if (S.welt.euro && S.welt.euro.sieger) eintrag.euro = S.welt.euro.sieger;
+    S.welt.meister[jahrKey] = eintrag;
+  }
 
   /* Auf- und Abstieg */
   let aufstieg = null;
@@ -2730,8 +2921,10 @@ async function saisonEnde() {
   if (meinWeltRang === 1) { ehrungen.push('Goldener Ball — Weltfußballer des Jahres'); titelGeben('Goldener Ball'); }
   else if (meinWeltRang <= 3) ehrungen.push('Platz ' + meinWeltRang + ' bei der Wahl zum Weltfußballer');
   if (p.alter <= 21 && meinWeltRang <= 12) { ehrungen.push('Talent des Jahres'); titelGeben('Talent des Jahres'); }
-  if (aufstieg && aufstieg !== 'ab') ehrungen.push('Aufstieg in die ' + LG(aufstieg).name + ' mit ' + club.name);
-  if (aufstieg === 'ab') ehrungen.push('Abstieg mit ' + club.name);
+  if (aufstieg && aufstieg !== 'ab') { ehrungen.push('Aufstieg in die ' + LG(aufstieg).name + ' mit ' + club.name); merken('auf', 'Aufstieg in die ' + LG(aufstieg).name + ' mit ' + club.name + '.', 1); }
+  if (aufstieg === 'ab') { ehrungen.push('Abstieg mit ' + club.name); merken('ab', 'Abstieg mit ' + club.name + '.', 1); }
+  if (meinWeltRang <= 3 && meinWeltRang > 1) merken('award', 'Platz ' + meinWeltRang + ' bei der Wahl zum Weltfußballer.', 1);
+  if (st.tore >= 15) merken('award', st.tore + ' Tore in der Saison ' + saisonLabel(S.jahr) + '.', st.tore >= 25);
 
   if (ehrungen.length || S.titelDieseSaison.length) {
     await sagen({
@@ -2835,6 +3028,14 @@ async function karriereEnde(grund) {
       + p.titel.length + ' Titel · Kontostand ' + money(p.geld),
     effekte: p.titel.slice(0, 8).map(t => ({ t: t.name, gut: true }))
   });
+  const grosse = (S.hoehepunkte || []).filter(h => h.gross);
+  if (grosse.length) {
+    await sagen({
+      eyebrow: 'Rückblick', titel: 'Woran man sich erinnert',
+      text: grosse.slice(0, 14).map(h => saisonLabel(h.j) + ', mit ' + h.alter + ': ' + h.t).join('\n')
+        + (grosse.length > 14 ? '\n\n… und ' + (grosse.length - 14) + ' weitere.' : '')
+    });
+  }
   speichern();
   render();
 }
@@ -3051,6 +3252,21 @@ async function spielAustragen(fx) {
     S.stats.minuten += minuten;
     S.wochenMinuten = (S.wochenMinuten || 0) + minuten;
     S.stats.noten.push(noteWert);
+    /* Höhepunkte aus dem Spiel */
+    const vorherSpiele = karriereSpiele() - 1, vorherTore = karriereTore() - meineTore;
+    const gegnerName = CL(fx.gegnerId).name;
+    if (vorherSpiele === 0) merken('debuet', 'Profidebüt für ' + club.name + ' gegen ' + gegnerName + '.', 1);
+    if (vorherTore === 0 && meineTore > 0) merken('tor', 'Erstes Profitor — gegen ' + gegnerName + '.', 1);
+    if (meineTore >= 3) merken('serie', meineTore + ' Tore in einem Spiel gegen ' + gegnerName + '.', 1);
+    if (noteWert <= 1.5) merken('note', 'Note ' + note(noteWert) + ' gegen ' + gegnerName + ' — ein Spiel wie aus dem Lehrbuch.', 1);
+    if (fx.comp === 'euro' && fx.phase >= 9 && meineTore > 0) merken('tor', 'Tor im Europapokalfinale gegen ' + gegnerName + '.', 1);
+    if (fx.comp === 'pokal' && fx.runde >= 5 && meineTore > 0) merken('tor', 'Tor im Pokalfinale gegen ' + gegnerName + '.', 1);
+    for (const marke of [50, 100, 150, 200, 250, 300, 400, 500]) {
+      if (vorherTore < marke && karriereTore() >= marke) merken('jubilaeum', marke + '. Karrieretor.', marke >= 100);
+    }
+    for (const marke of [100, 200, 300, 400, 500, 600]) {
+      if (vorherSpiele < marke && karriereSpiele() >= marke) merken('jubilaeum', marke + '. Pflichtspiel.', marke >= 300);
+    }
     p.formNoten.push(noteWert);
     if (p.formNoten.length > 14) p.formNoten.shift();
     wirke({
@@ -3083,17 +3299,37 @@ async function spielAustragen(fx) {
   }
   if (fx.comp === 'pokal') {
     const weiter = ergebnis === 'sieg' || (elfer === true);
+    S.pokalWeg = (S.pokalWeg || []).concat({
+      runde: POKAL_RUNDEN[Math.min(fx.runde, 5)], gegner: CL(fx.gegnerId).name,
+      tore: fx.heim ? toreMein : toreGegner, gegentore: fx.heim ? toreGegner : toreMein, weiter
+    });
     if (weiter) {
       if (S.pokal.runde >= 5) { titelGeben(S.pokal.name); S.pokal.drin = false; }
       else S.pokal.runde++;
     } else { S.pokal.drin = false; log('Im ' + S.pokal.name + ' ausgeschieden (' + POKAL_RUNDEN[Math.min(fx.runde, 5)] + ').', 'bad'); }
   }
   if (fx.comp === 'euro') {
+    const ew = S.welt && S.welt.euro;
+    S.euroAusnahme = [club.id, fx.gegnerId];
     S.euro.punkte = (S.euro.punkte || 0) + (ergebnis === 'sieg' ? 3 : ergebnis === 'unentschieden' ? 1 : 0);
+    if (ew && fx.phase <= 5) {
+      buchenIn(ew.tabelle, fx.heim ? club.id : fx.gegnerId, fx.heim ? fx.gegnerId : club.id,
+        fx.heim ? toreMein : toreGegner, fx.heim ? toreGegner : toreMein);
+    }
+    if (ew && fx.phase >= 6 && ew.runden[fx.phase]) {
+      const pr = ew.runden[fx.phase].find(x => x.a === club.id || x.b === club.id);
+      if (pr) {
+        const eigenerIstA = pr.a === club.id;
+        pr.ta = eigenerIstA ? toreMein : toreGegner;
+        pr.tb = eigenerIstA ? toreGegner : toreMein;
+        const weiter = ergebnis === 'sieg' || elfer === true;
+        pr.sieger = weiter ? club.id : (eigenerIstA ? pr.b : pr.a);
+      }
+    }
     if (fx.phase < 5) S.euro.phase++;
     else if (fx.phase === 5) {
-      if ((S.euro.punkte || 0) >= 7) { S.euro.phase = 6; log('Europapokal: Einzug in die K.-o.-Runde.', 'good'); }
-      else { S.euro.drin = false; log('Europapokal: in der Ligaphase gescheitert.', 'bad'); }
+      /* Die Entscheidung faellt in euroWoche, sobald der ganze Spieltag gebucht ist */
+      S.euroEntscheidung = true;
     } else {
       const weiter = ergebnis === 'sieg' || elfer === true;
       if (weiter) {
@@ -3177,7 +3413,7 @@ function render() {
     '<span class="pill">' + money(p.geld) + '</span>',
     '<span class="pill">' + followers(p.follower) + ' Follower</span>'
   ].join('');
-  ({ home: renderHome, club: renderClub, market: renderMarkt, social: renderSocial, profile: renderProfil })[aktiveAnsicht]();
+  ({ home: renderHome, club: renderClub, world: renderWelt, market: renderMarkt, social: renderSocial, profile: renderProfil })[aktiveAnsicht]();
 }
 
 function renderHome() {
@@ -3320,16 +3556,7 @@ function renderClub() {
       return '<div class="gruppe-titel">' + titel + '</div>' + teil.map(k => spielerZeile(k, null, true)).join('');
     }).join('') + '</div></section>';
 
-  html += '<section><div class="sect-title"><h3>' + esc(lg.name) + '</h3><span class="small muted">' + (S.woche > 1 ? 'nach ' + Math.min(S.woche - 1, S.saisonWochen) + '. Spieltag' : 'vor dem 1. Spieltag') + '</span></div>'
-    + '<div class="card tablewrap"><table class="tbl"><thead><tr><th class="pos">#</th><th>Verein</th><th>Sp</th><th>Diff</th><th>Pkt</th></tr></thead><tbody>'
-    + tab.map((t, i) => {
-      const c = CL(t.id);
-      const zone = i === 0 ? 'zone-cl' : i < 4 ? 'zone-cl' : i >= absteiger ? 'zone-ab' : i < 6 ? 'zone-el' : '';
-      return '<tr class="' + (t.id === club.id ? 'me ' : '') + zone + '"><td class="pos">' + (i + 1) + '</td>'
-        + '<td><div class="row" style="gap:7px">' + badgeHtml(c, 'badge-sm') + '<span class="truncate">' + esc(c.name) + '</span></div></td>'
-        + '<td>' + t.s + '</td><td>' + (t.diff > 0 ? '+' : '') + t.diff + '</td><td><b>' + t.p + '</b></td></tr>';
-    }).join('')
-    + '</tbody></table></div></section>';
+  html += '<p class="tiny muted">Die vollständige Tabelle und alle anderen Ligen findest du im Reiter Welt.</p>';
   el('view-club').innerHTML = html;
 }
 
@@ -3515,6 +3742,20 @@ function renderProfil() {
         + '<div class="small muted">' + t.jahr + ' · ' + esc(t.club) + '</div></div></div>').join('')
       + '</div></section>';
   }
+  const hp = (S.hoehepunkte || []).slice().reverse();
+  if (hp.length) {
+    const zeigen = S.hoeheAlle ? hp : hp.slice(0, 12);
+    html += '<section><div class="sect-title"><h3>Höhepunkte</h3><span class="small muted">' + hp.length + ' Momente</span></div>'
+      + '<div class="card"><div class="zeitleiste">'
+      + zeigen.map(h => '<div class="hoehe' + (h.gross ? ' gross' : '') + '">'
+        + '<div class="wann">' + esc(saisonLabel(h.j)) + ' · mit ' + h.alter + '</div>'
+        + '<div class="was">' + esc(h.t) + '</div></div>').join('')
+      + '</div>'
+      + (hp.length > 12 ? '<button class="btn btn-sm" data-act="hoehe" style="width:100%;margin-top:10px">'
+        + (S.hoeheAlle ? 'Weniger zeigen' : 'Alle ' + hp.length + ' Momente zeigen') + '</button>' : '')
+      + '</div></section>';
+  }
+
   html += '<section><div class="sect-title"><h3>Spielstand</h3></div><div class="card stack-sm">'
     + '<div class="row" style="gap:9px;align-items:flex-start">'
     + '<span class="pill ' + (speicherOrt === 'cloud' ? 'pill-good' : speicherOrt === 'lokal' ? '' : 'pill-bad') + '">'
@@ -3527,9 +3768,105 @@ function renderProfil() {
   el('view-profile').innerHTML = html;
 }
 
+function tabelleHtml(ligaId, eigene) {
+  const T = weltTabelle(ligaId);
+  if (!T) return '<p class="small muted">Für diese Liga liegt noch keine Tabelle vor.</p>';
+  const liste = tabelleSortiert(T), n = liste.length;
+  const lg = LG(ligaId);
+  return '<div class="tablewrap"><table class="tbl"><thead><tr><th class="pos">#</th><th>Verein</th><th>Sp</th><th>Diff</th><th>Pkt</th></tr></thead><tbody>'
+    + liste.map((t, i) => {
+      const c = CL(t.id);
+      const zone = i < 4 && lg.euro ? 'zone-cl' : (i < 6 && lg.euro ? 'zone-el' : (i >= n - 2 && lg.tier < 3 ? 'zone-ab' : ''));
+      return '<tr class="' + (t.id === S.p.clubId ? 'me ' : '') + zone + '"><td class="pos">' + (i + 1) + '</td>'
+        + '<td><div class="row" style="gap:7px">' + badgeHtml(c, 'badge-sm') + '<span class="truncate">' + esc(c.name) + '</span></div></td>'
+        + '<td>' + t.s + '</td><td>' + (t.diff > 0 ? '+' : '') + t.diff + '</td><td><b>' + t.p + '</b></td></tr>';
+    }).join('') + '</tbody></table></div>';
+}
+function renderWelt() {
+  const p = S.p, eigene = S.liga.id;
+  const auswahl = S.weltAuswahl || eigene;
+  let html = '<section><div class="chips" style="overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px">'
+    + LEAGUES.map(l => '<button class="chip" data-welt="' + l.id + '" aria-pressed="' + (auswahl === l.id) + '" style="flex:none">'
+      + l.flag + ' ' + esc(l.name) + '</button>').join('')
+    + '<button class="chip" data-welt="euro" aria-pressed="' + (auswahl === 'euro') + '" style="flex:none">★ Europapokal</button>'
+    + '</div></section>';
+
+  if (auswahl === 'euro') {
+    const e = S.welt && S.welt.euro;
+    if (!e) html += '<div class="card"><p class="small muted">Der Europapokal beginnt mit der neuen Saison.</p></div>';
+    else if (e.phase <= 5) {
+      html += '<section><div class="sect-title"><h3>Europapokal</h3><span class="small muted">Ligaphase '
+        + e.phase + '/6</span></div><div class="card"><div class="tablewrap">'
+        + '<table class="tbl"><thead><tr><th class="pos">#</th><th>Verein</th><th>Sp</th><th>Diff</th><th>Pkt</th></tr></thead><tbody>'
+        + tabelleSortiert(e.tabelle).map((t, i) => {
+          const c = CL(t.id);
+          return '<tr class="' + (t.id === p.clubId ? 'me ' : '') + (i < 16 ? 'zone-cl' : '') + '"><td class="pos">' + (i + 1) + '</td>'
+            + '<td><div class="row" style="gap:7px">' + badgeHtml(c, 'badge-sm') + '<span class="truncate">' + esc(c.name) + '</span></div></td>'
+            + '<td>' + t.s + '</td><td>' + (t.diff > 0 ? '+' : '') + t.diff + '</td><td><b>' + t.p + '</b></td></tr>';
+        }).join('')
+        + '</tbody></table></div><p class="tiny muted" style="margin-top:9px">Die ersten 16 erreichen die K.-o.-Runde.</p></div></section>';
+    } else {
+      html += '<section><div class="sect-title"><h3>Europapokal</h3><span class="small muted">'
+        + (e.sieger ? 'Sieger: ' + esc(CL(e.sieger).kurz) : 'K.-o.-Runde') + '</span></div><div class="card">'
+        + [6, 7, 8, 9].map(r => {
+          const paare = e.runden[r];
+          if (!paare) return '';
+          return '<div class="gruppe-titel">' + EURO_RUNDEN[r] + '</div>'
+            + paare.map(pr => {
+              const a = CL(pr.a), b = CL(pr.b);
+              const fertig = !!pr.sieger;
+              return '<div class="spieler" style="grid-template-columns:1fr auto 1fr">'
+                + '<span class="nm" style="text-align:right;' + (pr.sieger === pr.a ? 'font-weight:700' : 'opacity:.6') + '">'
+                + (pr.a === p.clubId ? '➜ ' : '') + esc(a.name) + '</span>'
+                + '<span class="st" style="min-width:52px;text-align:center;font-size:14px">' + (fertig ? pr.ta + ':' + pr.tb : '–:–') + '</span>'
+                + '<span class="nm" style="' + (pr.sieger === pr.b ? 'font-weight:700' : 'opacity:.6') + '">'
+                + esc(b.name) + (pr.b === p.clubId ? ' ➜' : '') + '</span></div>';
+            }).join('');
+        }).join('') + '</div></section>';
+    }
+    if (S.pokalWeg && S.pokalWeg.length) {
+      html += '<section><div class="sect-title"><h3>' + esc(S.pokal.name) + '</h3><span class="small muted">dein Weg</span></div><div class="card">'
+        + S.pokalWeg.map(x => '<div class="spieler" style="grid-template-columns:78px 1fr auto">'
+          + '<span class="meta">' + esc(x.runde) + '</span>'
+          + '<span class="nm">' + esc(x.gegner) + '</span>'
+          + '<span class="st" style="font-size:15px;color:' + (x.weiter ? 'var(--good)' : 'var(--bad)') + '">' + x.tore + ':' + x.gegentore + '</span></div>').join('')
+        + '</div></section>';
+    }
+  } else {
+    const lg = LG(auswahl), w = S.welt.ligen[auswahl];
+    const spieltag = auswahl === eigene ? Math.min(S.woche - 1, S.saisonWochen) : (w ? w.spieltag : 0);
+    html += '<section><div class="sect-title"><h3>' + lg.flag + ' ' + esc(lg.name) + '</h3>'
+      + '<span class="small muted">' + spieltag + '. Spieltag</span></div>'
+      + '<div class="card">' + tabelleHtml(auswahl, auswahl === eigene) + '</div></section>';
+    if (auswahl === eigene) {
+      const tj = torjaegerListe().slice(0, 10);
+      html += '<section><div class="sect-title"><h3>Torjäger</h3><span class="small muted">' + esc(lg.name) + '</span></div>'
+        + '<div class="card"><div class="tablewrap"><table class="tbl"><thead><tr><th class="pos">#</th><th>Spieler</th><th>Tore</th></tr></thead><tbody>'
+        + tj.map((t, i) => '<tr class="' + (t.ich ? 'me' : '') + '"><td class="pos">' + (i + 1) + '</td>'
+          + '<td><span class="truncate">' + esc(t.name) + '</span><div class="tiny muted">' + esc(CL(t.clubId).name) + '</div></td>'
+          + '<td><b>' + t.tore + '</b></td></tr>').join('')
+        + '</tbody></table></div></div></section>';
+    }
+  }
+
+  /* Meister der vergangenen Saisons */
+  const jahre = Object.keys((S.welt && S.welt.meister) || {}).slice(-5).reverse();
+  if (jahre.length) {
+    html += '<section><div class="sect-title"><h3>Titelträger</h3></div><div class="card">'
+      + jahre.map(j => {
+        const m = S.welt.meister[j];
+        const zeilen = LEAGUES.filter(l => m[l.id]).slice(0, 10)
+          .map(l => l.flag + ' ' + CL(m[l.id]).kurz).join(' · ');
+        return '<div class="spieler" style="grid-template-columns:62px 1fr"><span class="meta">' + esc(j) + '</span>'
+          + '<span class="nm" style="white-space:normal">' + esc(zeilen) + (m.euro ? ' · ★ ' + esc(CL(m.euro).kurz) : '') + '</span></div>';
+      }).join('') + '</div></section>';
+  }
+  el('view-world').innerHTML = html;
+}
+
 function setzeAnsicht(name) {
   aktiveAnsicht = name;
-  ['home', 'club', 'market', 'social', 'profile'].forEach(v => el('view-' + v).hidden = v !== name);
+  ['home', 'club', 'world', 'market', 'social', 'profile'].forEach(v => el('view-' + v).hidden = v !== name);
   document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.view === name)));
   el('main').scrollTop = 0;
   render();
@@ -3539,6 +3876,7 @@ async function aktion(name) {
   if (name === 'woche') return wocheVor();
   if (name === 'berater') { S.p.wechselwunsch = true; wirke({ trainer: -3 }); speichern(); render(); return; }
   if (name === 'bleiben') { S.p.wechselwunsch = false; speichern(); render(); return; }
+  if (name === 'hoehe') { S.hoeheAlle = !S.hoeheAlle; render(); return; }
   if (name === 'speichern') {
     const ok = await speichernJetzt();
     toast(ok ? (speicherOrt === 'cloud' ? 'Gespeichert' : 'Lokal gespeichert') : 'Speichern fehlgeschlagen');
@@ -3708,7 +4046,7 @@ function karriereStarten() {
   const gehalt = Math.max(24000, Math.round(Math.pow(club.staerke / 10, 5.2) * 45 * .35 / 1000) * 1000);
   S = {
     v: 1, jahr: 2026, woche: 1, plan: 'technik', trainFokus: top2[0],
-    beendet: false, ligaTausch: {}, staerkeTausch: {}, verlauf: [], karriere: [], stars: [],
+    beendet: false, ligaTausch: {}, staerkeTausch: {}, verlauf: [], karriere: [], stars: [], hoehepunkte: [],
     p: {
       vorname: NEU.vorname, nachname: NEU.nachname, natId: NEU.natId, pos: NEU.pos, fuss: NEU.fuss, archetyp: NEU.archetyp,
       alter: 17, attr, potenzial: clamp(o + ri(19, 35) + weg.potenzial, 62, 99), kondition: ri(10, 20),
@@ -3757,6 +4095,7 @@ function migriere() {
   if (!S.trainer) S.trainer = trainerErzeugen(CL(S.p.clubId));
   if (!S.saisonZiel) saisonZielSetzen();
   S.serie = S.serie || [];
+  S.hoehepunkte = S.hoehepunkte || [];
   /* Ligagröße hat sich geändert: laufende Saison neu aufsetzen, Karriere bleibt */
   const anzahl = ligaClubs(CL(S.p.clubId).liga).length;
   if (!S.liga || !S.liga.tabelle || Object.keys(S.liga.tabelle).length !== anzahl) {
@@ -4009,6 +4348,8 @@ function verdrahten() {
   el('main').addEventListener('click', e => {
     const plan = e.target.closest('[data-plan]');
     if (plan) { S.plan = plan.dataset.plan; speichern(); render(); return; }
+    const welt = e.target.closest('[data-welt]');
+    if (welt) { S.weltAuswahl = welt.dataset.welt; render(); return; }
     const fokus = e.target.closest('[data-fokus]');
     if (fokus) { S.trainFokus = fokus.dataset.fokus; speichern(); render(); return; }
     const act = e.target.closest('[data-act]');
