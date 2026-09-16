@@ -7,10 +7,26 @@ Verletzungen, Alterung — bis zum Rücktritt und der Legacy-Wertung.
 ## Spielen
 
 `index.html` im Browser öffnen. Sonst nichts — keine Installation, kein Server, keine
-Abhängigkeiten. Die Datei ist eigenständig, funktioniert offline und speichert den
-Spielstand automatisch im `localStorage` des Browsers.
+Abhängigkeiten. Die Datei ist eigenständig und funktioniert offline.
 
 Auf dem Handy: Seite öffnen, „Zum Home-Bildschirm hinzufügen" — läuft dann wie eine App.
+
+## Speichern
+
+Der Spielstand wird nach jeder Woche automatisch gesichert, über drei Stufen:
+
+1. **`localStorage`** — sofort und offline, funktioniert auch, wenn die Datei direkt von
+   der Platte geöffnet wird. In eingebetteten Ansichten ist der Browser-Speicher allerdings
+   teils abgeschottet und kommt beim nächsten Öffnen leer zurück; als einzige Quelle reicht
+   er deshalb nicht.
+2. **`db`-Fähigkeit der Artifact-Plattform** — dauerhafter Speicher, überlebt das Schließen
+   der Seite und gilt geräteübergreifend. Wird über `capabilities: {db: {}}` angefordert und
+   ist nur in der veröffentlichten Fassung verfügbar; das Spiel läuft ohne sie unverändert
+   weiter.
+3. **Sicherungscode** — ein kopierbarer Textblock im Profil, mit dem sich die Karriere in
+   jedem Browser zurückholen lässt. Die Rückfallebene, falls beides versagt.
+
+Das Profil zeigt jederzeit an, wo der Stand liegt, und erlaubt manuelles Speichern.
 
 ## Was drin ist
 

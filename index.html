@@ -292,6 +292,12 @@ table.tbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-
 .trophy-ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--surface-3);flex:none;
   font-family:var(--font-display);font-size:15px;color:var(--accent)}
 .legacy{font-family:var(--font-display);font-size:60px;color:var(--accent);line-height:1;letter-spacing:.02em}
+#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
+  z-index:60;padding:10px 18px;border-radius:999px;background:var(--surface-3);border:1px solid var(--line);
+  color:var(--ink);font-family:var(--font-data);font-weight:600;font-size:13.5px;letter-spacing:.02em;
+  box-shadow:0 8px 24px rgba(0,0,0,.45);max-width:88%;text-align:center;animation:toastin .18s ease}
+@keyframes toastin{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+textarea.input{min-height:120px;font-family:var(--font-data);font-size:12px;resize:vertical;line-height:1.35;word-break:break-all}
 </style>
 
 <div id="app">
@@ -317,7 +323,7 @@ table.tbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-
         <button id="btn-new" class="btn btn-primary">Neue Karriere</button>
         <button id="btn-delete" class="btn btn-quiet" hidden>Gespeicherte Karriere löschen</button>
       </div>
-      <p class="start-note">Speichert automatisch in diesem Browser. Zum Weiterspielen einfach die Seite erneut öffnen.</p>
+      <p class="start-note" id="start-note">Speichert automatisch. Zum Weiterspielen einfach die Seite erneut öffnen.</p>
     </div>
   </section>
 
@@ -369,6 +375,8 @@ table.tbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-
     </nav>
   </section>
 </div>
+
+<div id="toast" hidden></div>
 
 <!-- ============ MODAL ============ -->
 <div id="modal" class="modal" hidden>
@@ -1825,6 +1833,14 @@ function frage({ eyebrow, titel, text, wahlen, extra }) {
     el('modal').querySelector('.sheet-body').scrollTop = 0;
   });
 }
+let toastTimer = null;
+function toast(text) {
+  const t = el('toast');
+  t.textContent = text;
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 2600);
+}
 function sagen({ eyebrow, titel, text, effekte, knopf }) {
   const extra = effekte && effekte.length
     ? '<div class="fx">' + effekte.map(e => '<span class="pill ' + (e.gut ? 'pill-good' : 'pill-bad') + '">' + esc(e.t) + '</span>').join('') + '</div>' : '';
@@ -2350,6 +2366,14 @@ function renderProfil() {
         + '<div class="small muted">' + t.jahr + ' · ' + esc(t.club) + '</div></div></div>').join('')
       + '</div></section>';
   }
+  html += '<section><div class="sect-title"><h3>Spielstand</h3></div><div class="card stack-sm">'
+    + '<div class="row" style="gap:9px;align-items:flex-start">'
+    + '<span class="pill ' + (speicherOrt === 'cloud' ? 'pill-good' : speicherOrt === 'lokal' ? '' : 'pill-bad') + '">'
+    + (speicherOrt === 'cloud' ? 'dauerhaft' : speicherOrt === 'lokal' ? 'nur hier' : 'kein Speicher') + '</span>'
+    + '<span class="small ink2 grow">' + esc(speicherText()) + '</span></div>'
+    + '<div class="btn-row"><button class="btn btn-sm" data-act="speichern">Jetzt speichern</button>'
+    + '<button class="btn btn-sm" data-act="code">Sicherungscode</button></div>'
+    + '</div></section>';
   html += '<button class="btn btn-quiet" data-act="loeschen">Karriere löschen und neu beginnen</button>';
   el('view-profile').innerHTML = html;
 }
@@ -2366,9 +2390,16 @@ async function aktion(name) {
   if (name === 'woche') return wocheVor();
   if (name === 'berater') { S.p.wechselwunsch = true; wirke({ trainer: -3 }); speichern(); render(); return; }
   if (name === 'bleiben') { S.p.wechselwunsch = false; speichern(); render(); return; }
+  if (name === 'speichern') {
+    const ok = await speichernJetzt();
+    toast(ok ? (speicherOrt === 'cloud' ? 'Gespeichert' : 'Lokal gespeichert') : 'Speichern fehlgeschlagen');
+    render();
+    return;
+  }
+  if (name === 'code') return sicherungscode();
   if (name === 'loeschen' || name === 'neustart') {
     const idx = await frage({ eyebrow: 'Achtung', titel: 'Karriere löschen?', text: 'Der aktuelle Spielstand wird unwiderruflich gelöscht.', wahlen: [{ label: 'Abbrechen' }, { label: 'Löschen und neu starten' }] });
-    if (idx === 1) { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} S = null; el('screen-game').hidden = true; el('screen-start').hidden = false; startseite(); }
+    if (idx === 1) { await standLoeschen(); S = null; el('screen-game').hidden = true; el('screen-start').hidden = false; startseite(); }
     return;
   }
   if (name.startsWith('kauf:')) {
@@ -2380,6 +2411,52 @@ async function aktion(name) {
     S.p.extras[id] = true;
     log('Investition getätigt: ' + id + '.', 'gold');
     speichern(); render();
+  }
+}
+
+/* ---------- Sicherungscode: letzte Rettung, wenn kein Speicher greift ---------- */
+function standKodieren() {
+  return btoa(unescape(encodeURIComponent(JSON.stringify(S))));
+}
+function standDekodieren(code) {
+  return JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
+}
+async function sicherungscode() {
+  const code = S ? standKodieren() : '';
+  const idx = await frage({
+    eyebrow: 'Sicherungscode',
+    titel: 'Spielstand sichern',
+    text: 'Kopiere diesen Code und bewahre ihn auf. Damit holst du deine Karriere jederzeit zurück — auch in einem anderen Browser.',
+    extra: '<textarea class="input" id="code-feld" readonly rows="5">' + esc(code) + '</textarea>',
+    wahlen: [{ label: 'Code kopieren', hinweis: 'In die Zwischenablage' }, { label: 'Code einsetzen', hinweis: 'Gesicherte Karriere zurückholen' }, { label: 'Schließen' }]
+  });
+  if (idx === 0) {
+    try { await navigator.clipboard.writeText(code); toast('Code kopiert'); }
+    catch (e) { toast('Bitte den Code von Hand markieren und kopieren'); }
+    return;
+  }
+  if (idx === 1) {
+    const ein = await frage({
+      eyebrow: 'Sicherungscode', titel: 'Karriere zurückholen',
+      text: 'Füge hier den gesicherten Code ein. Der aktuelle Spielstand wird dabei überschrieben.',
+      extra: '<textarea class="input" id="code-eingabe" rows="5" placeholder="Code einfügen"></textarea>',
+      wahlen: [{ label: 'Laden' }, { label: 'Abbrechen' }]
+    });
+    if (ein !== 0) return;
+    const feld = el('code-eingabe');
+    const wert = feld ? feld.value : '';
+    try {
+      const neu = standDekodieren(wert);
+      if (!neu || !neu.p || !neu.p.clubId) throw new Error('kein Spielstand');
+      S = neu;
+      migriere();
+      dbLetzter = '';
+      speichern();
+      spielAnzeigen();
+      toast('Karriere geladen');
+    } catch (e) {
+      await sagen({ eyebrow: 'Sicherungscode', titel: 'Code nicht lesbar', text: 'Der eingefügte Code ergibt keinen gültigen Spielstand. Achte darauf, ihn vollständig und ohne Zeilenumbrüche einzufügen.' });
+    }
   }
 }
 
@@ -2489,8 +2566,114 @@ function migriere() {
   if (!PLAN(S.plan)) S.plan = 'technik';
   tauschAnwenden();
 }
-function speichern() { try { if (S) localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
-function laden() { try { const r = localStorage.getItem(SAVE_KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
+/* Drei Stufen, absichtlich redundant:
+   1. localStorage — sofort, offline, funktioniert auch als Datei auf der Platte.
+      In eingebetteten Ansichten ist er aber teils abgeschottet und kommt beim
+      nächsten Öffnen leer zurück — deshalb reicht er allein nicht.
+   2. db-Fähigkeit — dauerhafter Speicher der Artifact-Plattform. Überlebt das
+      Schließen der Seite und gilt geräteübergreifend.
+   3. Sicherungscode — vom Spieler selbst kopierbar, falls beides versagt. */
+const ZEIT_KEY = 'flutlicht.zeit.v1';
+let dbDoc = null, dbSchreibt = false, dbErneut = false, dbTimer = null, dbLetzter = '';
+let speicherOrt = 'lokal';        // 'cloud' | 'lokal' | 'fehler' | 'kein'
+let letzteSicherung = 0;
+let vorhandenerStand = null;      // { roh, zeit, quelle } für die Startseite
+
+function lokalSchreiben(roh) {
+  try {
+    localStorage.setItem(SAVE_KEY, roh);
+    localStorage.setItem(ZEIT_KEY, String(Date.now()));
+    return true;
+  } catch (e) { return false; }
+}
+function lokalLesen() {
+  try {
+    const r = localStorage.getItem(SAVE_KEY);
+    if (!r) return null;
+    return { roh: r, zeit: Number(localStorage.getItem(ZEIT_KEY)) || 0, quelle: 'lokal' };
+  } catch (e) { return null; }
+}
+function lokalLoeschen() {
+  try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem(ZEIT_KEY); } catch (e) {}
+}
+
+async function dbVerbinden() {
+  try {
+    if (!window.claude || typeof window.claude.use !== 'function') return null;
+    const db = await window.claude.use('db');
+    if (!db) return null;
+    dbDoc = db.doc('spielstand/karriere');
+    return dbDoc;
+  } catch (e) { return null; }
+}
+function cloudPlanen() {
+  if (!dbDoc) return;
+  clearTimeout(dbTimer);
+  dbTimer = setTimeout(() => cloudSchreiben(), 1200);
+}
+async function cloudSchreiben() {
+  if (!dbDoc || !S) return false;
+  if (dbSchreibt) { dbErneut = true; return false; }
+  const roh = JSON.stringify(S);
+  if (roh === dbLetzter) return true;
+  dbSchreibt = true;
+  let ok = false;
+  try {
+    await dbDoc.set({
+      stand: roh, gespeichert: Date.now(),
+      spieler: S.p.vorname + ' ' + S.p.nachname,
+      verein: CL(S.p.clubId).name, saison: saisonLabel(S.jahr), woche: S.woche
+    });
+    dbLetzter = roh;
+    speicherOrt = 'cloud';
+    letzteSicherung = Date.now();
+    ok = true;
+  } catch (e) {
+    const code = e && e.code;
+    if (code === 'not_granted' || code === 'capability_disabled' || code === 'capability_removed' || code === 'revoked') {
+      dbDoc = null;
+      speicherOrt = lokalLesen() ? 'lokal' : 'kein';
+    } else speicherOrt = 'fehler';
+  } finally { dbSchreibt = false; }
+  if (dbErneut) { dbErneut = false; await cloudSchreiben(); }
+  return ok;
+}
+
+function speichern() {
+  if (!S) return;
+  const lokalOk = lokalSchreiben(JSON.stringify(S));
+  letzteSicherung = Date.now();
+  if (!dbDoc) speicherOrt = lokalOk ? 'lokal' : 'kein';
+  cloudPlanen();
+}
+async function speichernJetzt() {
+  if (!S) return false;
+  clearTimeout(dbTimer);
+  const lokalOk = lokalSchreiben(JSON.stringify(S));
+  const cloudOk = await cloudSchreiben();
+  letzteSicherung = Date.now();
+  return cloudOk || lokalOk;
+}
+function laden() {
+  const l = lokalLesen();
+  if (!l) return null;
+  try { return JSON.parse(l.roh); } catch (e) { return null; }
+}
+function zeitHer(t) {
+  const m = Math.floor((Date.now() - t) / 60000);
+  if (m < 1) return 'gerade eben';
+  if (m < 60) return 'vor ' + m + ' Min.';
+  const h = Math.floor(m / 60);
+  if (h < 24) return 'vor ' + h + ' Std.';
+  return 'vor ' + Math.floor(h / 24) + ' Tagen';
+}
+function speicherText() {
+  const wann = letzteSicherung ? ' · ' + zeitHer(letzteSicherung) : '';
+  if (speicherOrt === 'cloud') return 'Dauerhaft gespeichert, auch auf anderen Geräten' + wann;
+  if (speicherOrt === 'lokal') return 'Gespeichert in diesem Browser' + wann;
+  if (speicherOrt === 'fehler') return 'Letztes Speichern fehlgeschlagen — sichere den Stand über den Code';
+  return 'Dieser Browser erlaubt kein Speichern — sichere den Stand über den Code';
+}
 
 function spielAnzeigen() {
   el('screen-start').hidden = true;
@@ -2499,15 +2682,71 @@ function spielAnzeigen() {
   setzeAnsicht('home');
 }
 
+function standLesen() {
+  if (!vorhandenerStand) return null;
+  try { return JSON.parse(vorhandenerStand.roh); } catch (e) { return null; }
+}
+function lokalMoeglich() {
+  try { localStorage.setItem('flutlicht.test', '1'); localStorage.removeItem('flutlicht.test'); return true; }
+  catch (e) { return false; }
+}
+function statusAktualisieren() {
+  const n = el('start-note');
+  if (n) n.textContent = speicherOrt === 'cloud'
+    ? 'Speichert automatisch und dauerhaft — du kannst die Seite jederzeit schließen.'
+    : speicherOrt === 'lokal'
+      ? 'Speichert automatisch in diesem Browser. Zum Weiterspielen die Seite erneut öffnen.'
+      : 'Achtung: Dieser Browser erlaubt kein Speichern. Sichere deinen Stand im Profil über den Sicherungscode.';
+  if (S && aktiveAnsicht === 'profile' && !el('screen-game').hidden) renderProfil();
+}
+
+/* Speicher anbinden, ohne den Seitenaufbau zu blockieren: Die Startseite steht
+   sofort mit dem lokalen Stand, der dauerhafte Speicher wird nachgereicht. */
+async function speicherStarten() {
+  const doc = await dbVerbinden();
+  if (!doc) {
+    speicherOrt = lokalMoeglich() ? 'lokal' : 'kein';
+    statusAktualisieren();
+    return;
+  }
+  speicherOrt = 'cloud';
+  try {
+    const snap = await doc.get();
+    if (snap.exists) {
+      const d = snap.data();
+      if (d && typeof d.stand === 'string') {
+        dbLetzter = d.stand;
+        const zeit = Number(d.gespeichert) || 0;
+        if (!vorhandenerStand || zeit > vorhandenerStand.zeit) {
+          vorhandenerStand = { roh: d.stand, zeit, quelle: 'cloud' };
+        }
+        letzteSicherung = Math.max(letzteSicherung, zeit);
+      }
+    }
+  } catch (e) { speicherOrt = 'fehler'; }
+  if (!S) startseite();
+  else cloudPlanen();
+  statusAktualisieren();
+}
+
+async function standLoeschen() {
+  lokalLoeschen();
+  vorhandenerStand = null;
+  dbLetzter = '';
+  clearTimeout(dbTimer);
+  if (dbDoc) { try { await dbDoc.delete(); } catch (e) {} }
+}
+
 function startseite() {
-  const g = laden();
+  const g = standLesen();
   const strip = el('save-strip');
   if (g && g.p) {
     const club = CLUBS.find(c => c.id === g.p.clubId);
     strip.hidden = false;
     strip.innerHTML = badgeHtml(club || { farbe: '#333', kurz: '?' })
       + '<div class="grow"><div style="font-weight:600;font-size:14px">' + esc(g.p.vorname + ' ' + g.p.nachname) + '</div>'
-      + '<div class="small muted">' + esc(club ? club.name : '') + ' · ' + saisonLabel(g.jahr) + ' · ' + g.p.alter + ' Jahre</div></div>';
+      + '<div class="small muted">' + esc(club ? club.name : '') + ' · ' + saisonLabel(g.jahr) + ' · Woche ' + g.woche + '</div></div>'
+      + (vorhandenerStand && vorhandenerStand.quelle === 'cloud' ? '<span class="pill pill-good">gesichert</span>' : '');
     el('btn-continue').hidden = false;
     el('btn-delete').hidden = false;
     el('btn-new').textContent = 'Neue Karriere (überschreibt)';
@@ -2531,7 +2770,7 @@ function verdrahten() {
     renderCreate();
   });
   el('btn-continue').addEventListener('click', () => {
-    const g = laden();
+    const g = standLesen();
     if (!g) return;
     S = g;
     migriere();
@@ -2539,7 +2778,7 @@ function verdrahten() {
   });
   el('btn-delete').addEventListener('click', async () => {
     const idx = await frage({ eyebrow: 'Achtung', titel: 'Spielstand löschen?', text: 'Die gespeicherte Karriere wird unwiderruflich gelöscht.', wahlen: [{ label: 'Abbrechen' }, { label: 'Löschen' }] });
-    if (idx === 1) { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} startseite(); }
+    if (idx === 1) { await standLoeschen(); startseite(); }
   });
 
   el('create-body').addEventListener('click', e => {
@@ -2581,6 +2820,8 @@ function verdrahten() {
 
 function boot(daten) {
   verdrahten();
+  vorhandenerStand = lokalLesen();
+  speicherStarten();
   if (daten && daten.stand) {
     try {
       S = JSON.parse(daten.stand);
