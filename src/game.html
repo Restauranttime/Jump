@@ -1,0 +1,2425 @@
+<title>Flutlicht Karriere</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#07100B;
+  --surface:#0F1C15;
+  --surface-2:#16271D;
+  --surface-3:#1D3326;
+  --line:#25392C;
+  --line-soft:#1B2C21;
+  --ink:#ECF4EE;
+  --ink-2:#B7C9BC;
+  --muted:#7B9285;
+  --accent:#EFA92C;
+  --accent-2:#FFC963;
+  --accent-ink:#1A1206;
+  --accent-dim:rgba(239,169,44,.13);
+  --good:#4FBE87;
+  --warn:#E5844A;
+  --bad:#E2615B;
+  --pitch:#1E7A4F;
+  --r:14px;
+  --font-display:'Anton','Arial Narrow',Impact,sans-serif;
+  --font-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-data:'IBM Plex Sans Condensed','IBM Plex Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:var(--font-body);
+  font-size:15px;line-height:1.45;
+  color:var(--ink);
+  background:
+    radial-gradient(130% 55% at 50% -8%, rgba(239,169,44,.11), rgba(239,169,44,0) 62%),
+    radial-gradient(90% 45% at 50% 108%, rgba(30,122,79,.16), rgba(30,122,79,0) 60%),
+    var(--bg);
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior:none;
+}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+h1,h2,h3,h4{margin:0;text-wrap:balance;font-weight:600}
+p{margin:0}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px;border-radius:6px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+
+#app{height:100%;width:100%;max-width:600px;margin-inline:auto;display:flex;flex-direction:column;min-height:0}
+.screen{flex:1;min-height:0;display:flex;flex-direction:column}
+
+/* ---------- Bausteine ---------- */
+.eyebrow{font-family:var(--font-data);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.stack-sm{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;align-items:center;gap:10px}
+.row-between{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.grow{flex:1;min-width:0}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.ink2{color:var(--ink-2)}
+.small{font-size:13px}
+.tiny{font-size:11.5px}
+.center{text-align:center}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:50px;padding:12px 16px;
+  border-radius:12px;border:1px solid var(--line);background:var(--surface-2);font-weight:600;transition:transform .08s ease,background .15s ease}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-primary{background:linear-gradient(180deg,var(--accent-2),var(--accent));color:var(--accent-ink);border-color:rgba(200,134,32,.6);font-weight:700;letter-spacing:.01em}
+.btn-quiet{background:transparent;border-color:transparent;color:var(--muted);min-height:42px;font-weight:500}
+.btn-sm{min-height:40px;padding:8px 14px;font-size:14px;width:auto}
+.btn-row{display:flex;gap:8px}
+.btn-row .btn{width:auto;flex:1}
+
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:999px;background:var(--surface-2);
+  border:1px solid var(--line);font-family:var(--font-data);font-size:11.5px;font-weight:600;letter-spacing:.03em;white-space:nowrap}
+.pill-accent{background:var(--accent-dim);border-color:rgba(239,169,44,.35);color:var(--accent-2)}
+.pill-good{background:rgba(79,190,135,.13);border-color:rgba(79,190,135,.35);color:var(--good)}
+.pill-bad{background:rgba(226,97,91,.13);border-color:rgba(226,97,91,.35);color:var(--bad)}
+.pill-warn{background:rgba(229,132,74,.13);border-color:rgba(229,132,74,.35);color:var(--warn)}
+
+.badge{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;flex:none;
+  font-family:var(--font-display);font-size:15px;letter-spacing:.02em;color:#0B0F0C;
+  box-shadow:inset 0 -12px 18px rgba(0,0,0,.28), 0 1px 0 rgba(255,255,255,.08)}
+.badge-sm{width:26px;height:26px;border-radius:8px;font-size:11px}
+.badge-lg{width:54px;height:54px;border-radius:15px;font-size:20px}
+
+.meter{height:6px;border-radius:99px;background:var(--surface-3);overflow:hidden}
+.meter>span{display:block;height:100%;border-radius:99px;background:var(--accent);transition:width .35s ease}
+.meter.good>span{background:var(--good)}
+.meter.warn>span{background:var(--warn)}
+.meter.bad>span{background:var(--bad)}
+
+.note{font-family:var(--font-display);font-size:17px;letter-spacing:.02em;padding:2px 8px;border-radius:8px;display:inline-block;line-height:1.25}
+.note-1{background:#2C7D55;color:#EAFBF1}
+.note-2{background:#3B6B45;color:#E6F5E9}
+.note-3{background:var(--surface-3);color:var(--ink-2)}
+.note-4{background:#5A3B22;color:#F7DCC5}
+.note-5{background:#6A2B27;color:#FBDDDB}
+
+/* ---------- Startbildschirm ---------- */
+#screen-start{justify-content:space-between;padding:22px 16px 18px;gap:18px;overflow-y:auto}
+.hero{padding-top:8px}
+.hero-title{font-family:var(--font-display);font-size:clamp(54px,17vw,86px);line-height:.86;letter-spacing:.01em;
+  color:var(--ink);text-shadow:0 0 34px rgba(239,169,44,.34)}
+.hero-title span{display:block;color:var(--accent)}
+.hero-sub{margin-top:14px;font-size:16px;color:var(--ink-2);max-width:30ch}
+.hero-rule{height:1px;background:linear-gradient(90deg,var(--accent),rgba(239,169,44,0));margin:18px 0}
+.facts{display:flex;flex-direction:column;gap:11px}
+.fact{display:flex;gap:11px;align-items:baseline}
+.fact-k{font-family:var(--font-display);font-size:15px;color:var(--accent);min-width:34px;letter-spacing:.04em}
+.fact-t{font-size:14px;color:var(--ink-2)}
+.start-actions{display:flex;flex-direction:column;gap:9px}
+.start-note{font-size:11.5px;color:var(--muted);text-align:center}
+.save-strip{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+
+/* ---------- Charaktererstellung ---------- */
+#screen-create{padding:0}
+.create-head{padding:16px 16px 10px;display:flex;flex-direction:column;gap:10px}
+.steps{display:flex;gap:5px}
+.steps i{height:3px;flex:1;border-radius:99px;background:var(--surface-3)}
+.steps i.on{background:var(--accent)}
+.create-body{flex:1;min-height:0;overflow-y:auto;padding:4px 16px 16px;display:flex;flex-direction:column;gap:16px}
+.create-foot{padding:10px 16px 14px;border-top:1px solid var(--line-soft);background:var(--surface);display:flex;gap:8px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-family:var(--font-data);font-size:11.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.input,select.input{width:100%;min-height:48px;padding:11px 13px;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.input::placeholder{color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{padding:9px 13px;border-radius:11px;border:1px solid var(--line);background:var(--surface);font-family:var(--font-data);
+  font-weight:600;font-size:14px;letter-spacing:.02em}
+.chip[aria-pressed="true"]{background:var(--accent-dim);border-color:var(--accent);color:var(--accent-2)}
+.opt{display:flex;gap:12px;text-align:left;width:100%;padding:13px;border-radius:13px;border:1px solid var(--line);background:var(--surface);align-items:flex-start}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:linear-gradient(180deg,var(--accent-dim),transparent)}
+.opt-t{font-weight:600;font-size:15px}
+.opt-d{font-size:12.5px;color:var(--muted);margin-top:2px}
+.opt-m{font-family:var(--font-data);font-size:11.5px;color:var(--accent-2);margin-top:5px;letter-spacing:.03em}
+
+/* ---------- Spiel-Shell ---------- */
+#topbar{padding:10px 14px 9px;border-bottom:1px solid var(--line-soft);background:rgba(15,28,21,.72);backdrop-filter:blur(10px);display:flex;flex-direction:column;gap:8px}
+.hud{display:flex;align-items:center;gap:10px}
+.hud-name{font-family:var(--font-data);font-weight:700;font-size:15px;letter-spacing:.01em}
+.hud-sub{font-size:11.5px;color:var(--muted)}
+.hud-ovr{margin-left:auto;text-align:right;line-height:1}
+.hud-ovr b{font-family:var(--font-display);font-size:26px;color:var(--accent);letter-spacing:.02em}
+.hud-ovr span{display:block;font-family:var(--font-data);font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.hud-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.hud-chips::-webkit-scrollbar{display:none}
+#main{flex:1;min-height:0;overflow-y:auto;padding:14px 16px 22px}
+.view{display:flex;flex-direction:column;gap:14px}
+#tabbar{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line-soft);background:var(--surface)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px 10px;background:none;border:0;color:var(--muted);
+  font-family:var(--font-data);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase}
+.tab svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tab[aria-selected="true"]{color:var(--accent)}
+.tab-dot{position:absolute;margin:-8px 0 0 15px;width:7px;height:7px;border-radius:99px;background:var(--bad)}
+
+/* ---------- Heim-Ansicht ---------- */
+.sect-title{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
+.sect-title h3{font-family:var(--font-data);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.next-card{position:relative;overflow:hidden;border-radius:16px;border:1px solid var(--line);
+  background:linear-gradient(165deg,var(--surface-3),var(--surface) 62%);padding:15px}
+.next-card::after{content:"";position:absolute;inset:-40% -10% auto auto;width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle,rgba(239,169,44,.16),transparent 66%);pointer-events:none}
+.vs{display:flex;align-items:center;gap:12px;margin:12px 0 6px}
+.vs-team{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;min-width:0}
+.vs-team span{font-family:var(--font-data);font-size:12.5px;text-align:center;line-height:1.2;color:var(--ink-2)}
+.vs-mid{font-family:var(--font-display);font-size:13px;color:var(--muted);letter-spacing:.1em}
+.plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.plan{padding:11px;border-radius:12px;border:1px solid var(--line);background:var(--surface);text-align:left;display:flex;flex-direction:column;gap:3px}
+.plan[aria-pressed="true"]{border-color:var(--accent);background:linear-gradient(180deg,var(--accent-dim),transparent)}
+.plan b{font-size:13.5px;font-weight:600}
+.plan span{font-size:11px;color:var(--muted);line-height:1.3}
+.cond{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.cond-item{display:flex;flex-direction:column;gap:5px}
+.cond-item .k{font-family:var(--font-data);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.cond-item .v{font-family:var(--font-display);font-size:19px;letter-spacing:.02em}
+.feed{display:flex;flex-direction:column;gap:0}
+.feed-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line-soft)}
+.feed-item:last-child{border-bottom:0}
+.feed-dot{width:7px;height:7px;border-radius:99px;background:var(--muted);margin-top:7px;flex:none}
+.feed-item.good .feed-dot{background:var(--good)}
+.feed-item.bad .feed-dot{background:var(--bad)}
+.feed-item.gold .feed-dot{background:var(--accent)}
+.feed-t{font-size:13.5px;line-height:1.35}
+.feed-w{font-family:var(--font-data);font-size:11px;color:var(--muted);letter-spacing:.04em}
+
+/* ---------- Tabellen ---------- */
+.tablewrap{overflow-x:auto}
+table.tbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-size:13px;font-variant-numeric:tabular-nums}
+.tbl th{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:right;padding:0 0 7px}
+.tbl th:nth-child(2){text-align:left}
+.tbl td{padding:7px 0;border-top:1px solid var(--line-soft);text-align:right;white-space:nowrap}
+.tbl td:nth-child(2){text-align:left;width:99%;padding-right:8px}
+.tbl th:nth-child(n+3),.tbl td:nth-child(n+3){padding-left:12px}
+.tbl tr.me td{background:var(--accent-dim);color:var(--accent-2);font-weight:700}
+.tbl tr.me td:nth-child(2){border-radius:0}
+.tbl .pos{color:var(--muted);width:22px;padding-right:8px}
+.zone-cl td:first-child{box-shadow:inset 2px 0 0 var(--good)}
+.zone-el td:first-child{box-shadow:inset 2px 0 0 var(--accent)}
+.zone-ab td:first-child{box-shadow:inset 2px 0 0 var(--bad)}
+
+/* ---------- Attribute ---------- */
+.attrs{display:flex;flex-direction:column;gap:9px}
+.attr{display:grid;grid-template-columns:96px 1fr 30px;align-items:center;gap:9px}
+.attr .k{font-family:var(--font-data);font-size:12.5px;color:var(--ink-2);letter-spacing:.02em}
+.attr .v{font-family:var(--font-data);font-weight:700;font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+.attr .up{color:var(--good)}
+
+/* ---------- Formkurve ---------- */
+.chart{width:100%;height:auto;display:block;overflow:visible}
+.chart text{font-family:var(--font-data);font-size:10px;fill:var(--muted);letter-spacing:.04em}
+.chart .axis{stroke:var(--line);stroke-width:1}
+.chart .grid{stroke:var(--line-soft);stroke-width:1;stroke-dasharray:3 3}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.chart .dot{fill:var(--accent);stroke:var(--surface);stroke-width:2}
+.chart .dot-last{fill:var(--accent-2);stroke:var(--surface);stroke-width:2}
+
+/* ---------- Modal ---------- */
+.modal{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;justify-content:flex-end;
+  background:rgba(4,9,6,.72);backdrop-filter:blur(3px);padding:0}
+.sheet{width:100%;max-width:600px;margin-inline:auto;background:var(--surface);border:1px solid var(--line);
+  border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));
+  max-height:92%;display:flex;flex-direction:column;gap:13px;animation:rise .22s ease}
+@keyframes rise{from{transform:translateY(18px);opacity:.4}to{transform:none;opacity:1}}
+.sheet-body{overflow-y:auto;display:flex;flex-direction:column;gap:11px}
+.sheet h2{font-family:var(--font-display);font-size:23px;letter-spacing:.01em;line-height:1.1}
+.sheet-text{font-size:14.5px;color:var(--ink-2);line-height:1.5}
+.choices{display:flex;flex-direction:column;gap:8px}
+.choice{text-align:left;padding:13px;border-radius:13px;border:1px solid var(--line);background:var(--surface-2);width:100%}
+.choice b{display:block;font-size:14.5px;font-weight:600}
+.choice span{display:block;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.35}
+.choice:active{background:var(--surface-3)}
+.choice-gold{border-color:rgba(239,169,44,.5)}
+.fx{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+
+/* ---------- Spieltag ---------- */
+#match{background:var(--bg);backdrop-filter:none;justify-content:flex-start}
+.match-wrap{flex:1;min-height:0;width:100%;max-width:600px;margin-inline:auto;display:flex;flex-direction:column}
+.scoreboard{padding:14px 16px 12px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(30,122,79,.2),transparent),var(--surface)}
+.sb-comp{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px}
+.sb-main{display:flex;align-items:center;gap:10px}
+.sb-team{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.sb-team span{font-family:var(--font-data);font-size:12px;color:var(--ink-2);text-align:center;line-height:1.15}
+.sb-score{font-family:var(--font-display);font-size:40px;letter-spacing:.04em;line-height:1;font-variant-numeric:tabular-nums}
+.sb-min{font-family:var(--font-data);font-size:11px;color:var(--accent);letter-spacing:.1em;text-align:center;margin-top:4px}
+.ticker{flex:1;min-height:0;overflow-y:auto;padding:14px 16px 8px;display:flex;flex-direction:column;gap:11px}
+.ev{display:flex;gap:11px;animation:evin .2s ease}
+@keyframes evin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.ev-min{font-family:var(--font-display);font-size:14px;color:var(--muted);min-width:30px;padding-top:1px;letter-spacing:.02em}
+.ev-body{flex:1;min-width:0;font-size:14px;line-height:1.45;color:var(--ink-2)}
+.ev-goal .ev-body{color:var(--ink)}
+.ev-goal .ev-min{color:var(--accent)}
+.ev-tag{font-family:var(--font-data);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:2px}
+.ev-goal .ev-tag{color:var(--good)}
+.ev-bad .ev-tag{color:var(--bad)}
+.ev-you .ev-tag{color:var(--accent)}
+.match-foot{padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;gap:8px}
+.moment{font-size:15px;line-height:1.45;color:var(--ink)}
+.rating-box{display:flex;align-items:center;gap:12px;padding:12px;border-radius:13px;background:var(--surface-2);border:1px solid var(--line)}
+.rating-box .note{font-size:27px;padding:4px 11px}
+
+/* ---------- Saison / Ende ---------- */
+.award{display:flex;gap:11px;align-items:center;padding:11px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line)}
+.award.gold{border-color:rgba(239,169,44,.5);background:linear-gradient(120deg,var(--accent-dim),var(--surface-2))}
+.trophy-ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--surface-3);flex:none;
+  font-family:var(--font-display);font-size:15px;color:var(--accent)}
+.legacy{font-family:var(--font-display);font-size:60px;color:var(--accent);line-height:1;letter-spacing:.02em}
+</style>
+
+<div id="app">
+
+  <!-- ============ START ============ -->
+  <section id="screen-start" class="screen">
+    <div class="hero">
+      <p class="eyebrow">Fußball-Karriere-Simulator</p>
+      <h1 class="hero-title">FLUT<span>LICHT</span></h1>
+      <p class="hero-sub">Ein Spieler. Zwanzig Jahre. Jede Entscheidung ist deine — vom Regionalliga-Kunstrasen bis zum Goldenen Ball.</p>
+      <div class="hero-rule"></div>
+      <div class="facts">
+        <div class="fact"><span class="fact-k">34</span><span class="fact-t">Ligaspiele pro Saison, dazu Pokal und Europapokal</span></div>
+        <div class="fact"><span class="fact-k">1,0</span><span class="fact-t">Jede Partie endet mit einer Note von 1,0 bis 6,0</span></div>
+        <div class="fact"><span class="fact-k">7</span><span class="fact-t">Ligen, 140 Vereine, Transferfenster im Winter und Sommer</span></div>
+        <div class="fact"><span class="fact-k">∞</span><span class="fact-t">Training, Presse, Sponsoren, Nationalelf, Verletzungen, Alterung</span></div>
+      </div>
+    </div>
+    <div class="stack">
+      <div id="save-strip" class="save-strip" hidden></div>
+      <div class="start-actions">
+        <button id="btn-continue" class="btn btn-primary" hidden>Karriere fortsetzen</button>
+        <button id="btn-new" class="btn btn-primary">Neue Karriere</button>
+        <button id="btn-delete" class="btn btn-quiet" hidden>Gespeicherte Karriere löschen</button>
+      </div>
+      <p class="start-note">Speichert automatisch in diesem Browser. Zum Weiterspielen einfach die Seite erneut öffnen.</p>
+    </div>
+  </section>
+
+  <!-- ============ KARRIERE ANLEGEN ============ -->
+  <section id="screen-create" class="screen" hidden>
+    <div class="create-head">
+      <div class="steps"><i class="on"></i><i></i><i></i></div>
+      <p class="eyebrow" id="create-step-label">Schritt 1 von 3 · Herkunft</p>
+      <h2 id="create-title" style="font-family:var(--font-display);font-size:26px;letter-spacing:.01em">Wer bist du?</h2>
+    </div>
+    <div class="create-body" id="create-body"></div>
+    <div class="create-foot">
+      <button id="create-back" class="btn btn-sm" style="flex:0 0 96px">Zurück</button>
+      <button id="create-next" class="btn btn-primary btn-sm" style="flex:1">Weiter</button>
+    </div>
+  </section>
+
+  <!-- ============ SPIEL ============ -->
+  <section id="screen-game" class="screen" hidden>
+    <header id="topbar">
+      <div class="hud">
+        <div id="hud-badge" class="badge">–</div>
+        <div class="grow">
+          <div id="hud-name" class="hud-name truncate">–</div>
+          <div id="hud-sub" class="hud-sub truncate">–</div>
+        </div>
+        <div class="hud-ovr"><b id="hud-ovr">–</b><span>Stärke</span></div>
+      </div>
+      <div class="hud-chips" id="hud-chips"></div>
+    </header>
+    <main id="main">
+      <div class="view" id="view-home"></div>
+      <div class="view" id="view-club" hidden></div>
+      <div class="view" id="view-market" hidden></div>
+      <div class="view" id="view-social" hidden></div>
+      <div class="view" id="view-profile" hidden></div>
+    </main>
+    <nav id="tabbar">
+      <button class="tab" data-view="home" aria-selected="true">
+        <svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5h4v5"/></svg>Heim</button>
+      <button class="tab" data-view="club" aria-selected="false">
+        <svg viewBox="0 0 24 24"><path d="M12 3 5 5.5v6c0 4.5 3 7.7 7 9.5 4-1.8 7-5 7-9.5v-6L12 3Z"/><path d="M9.5 12h5"/><path d="M12 9.5v5"/></svg>Verein</button>
+      <button class="tab" data-view="market" aria-selected="false">
+        <svg viewBox="0 0 24 24"><path d="M4 8h13l-3-3"/><path d="M20 16H7l3 3"/></svg>Markt</button>
+      <button class="tab" data-view="social" aria-selected="false">
+        <svg viewBox="0 0 24 24"><path d="M20 15a3 3 0 0 1-3 3H8l-4 3V6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3Z"/><path d="M8.5 9h7"/><path d="M8.5 12.5h4.5"/></svg>Presse</button>
+      <button class="tab" data-view="profile" aria-selected="false">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c.7-3.7 3.5-5.5 7-5.5s6.3 1.8 7 5.5"/></svg>Profil</button>
+    </nav>
+  </section>
+</div>
+
+<!-- ============ MODAL ============ -->
+<div id="modal" class="modal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="sheet-body">
+      <p class="eyebrow" id="modal-eyebrow"></p>
+      <h2 id="modal-title"></h2>
+      <p class="sheet-text" id="modal-text"></p>
+      <div id="modal-extra"></div>
+    </div>
+    <div class="choices" id="modal-choices"></div>
+  </div>
+</div>
+
+<!-- ============ SPIELTAG ============ -->
+<div id="match" class="modal" hidden>
+  <div class="match-wrap">
+    <div class="scoreboard">
+      <div class="sb-comp">
+        <span class="eyebrow" id="sb-comp">Bundesliga</span>
+        <span class="pill" id="sb-role">Startelf</span>
+      </div>
+      <div class="sb-main">
+        <div class="sb-team"><div class="badge" id="sb-badge-h">–</div><span id="sb-name-h">–</span></div>
+        <div style="text-align:center">
+          <div class="sb-score"><span id="sb-gh">0</span> : <span id="sb-ga">0</span></div>
+          <div class="sb-min" id="sb-min">Anpfiff</div>
+        </div>
+        <div class="sb-team"><div class="badge" id="sb-badge-a">–</div><span id="sb-name-a">–</span></div>
+      </div>
+    </div>
+    <div class="ticker" id="ticker"></div>
+    <div class="match-foot" id="match-foot"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* =========================================================================
+   FLUTLICHT KARRIERE — Fußball-Karriere-Simulator
+   Alle Vereins- und Spielernamen sind frei erfunden.
+   ========================================================================= */
+
+/* ------------------------------ Werkzeug ------------------------------ */
+const rnd = (a, b) => a + Math.random() * (b - a);
+const ri  = (a, b) => Math.floor(rnd(a, b + 1));
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const chance = p => Math.random() < p;
+const round1 = v => Math.round(v * 10) / 10;
+const shuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = ri(0, i); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const de = n => n.toLocaleString('de-DE');
+const note = v => v.toFixed(1).replace('.', ',');
+function money(v) {
+  if (v >= 1e6) return (v / 1e6).toFixed(v >= 1e7 ? 0 : 1).replace('.', ',') + ' Mio €';
+  if (v >= 1e3) return Math.round(v / 1e3) + ' Tsd €';
+  return Math.round(v) + ' €';
+}
+function followers(v) {
+  if (v >= 1e6) return (v / 1e6).toFixed(1).replace('.', ',') + ' Mio';
+  if (v >= 1e3) return Math.round(v / 1e3) + 'K';
+  return String(Math.round(v));
+}
+function poisson(lambda) {
+  let L = Math.exp(-lambda), k = 0, p = 1;
+  do { k++; p *= Math.random(); } while (p > L);
+  return k - 1;
+}
+
+/* ------------------------------ Ligen ------------------------------ */
+const LEAGUES = [
+  { id: 'de3', name: '3. Liga',          land: 'Deutschland', flag: '🇩🇪', tier: 3, euro: false, pokal: 'Deutscher Pokal' },
+  { id: 'de2', name: '2. Bundesliga',    land: 'Deutschland', flag: '🇩🇪', tier: 2, euro: false, pokal: 'Deutscher Pokal' },
+  { id: 'de1', name: 'Bundesliga',       land: 'Deutschland', flag: '🇩🇪', tier: 1, euro: true, pokal: 'Deutscher Pokal', meister: 'Deutscher Meister' },
+  { id: 'en1', name: 'Premier Division', land: 'England',     flag: '🏴', tier: 1, euro: true, pokal: 'Englischer Pokal', meister: 'Englischer Meister' },
+  { id: 'es1', name: 'Primera División', land: 'Spanien',     flag: '🇪🇸', tier: 1, euro: true, pokal: 'Spanischer Pokal', meister: 'Spanischer Meister' },
+  { id: 'it1', name: 'Serie A',          land: 'Italien',     flag: '🇮🇹', tier: 1, euro: true, pokal: 'Italienischer Pokal', meister: 'Italienischer Meister' },
+  { id: 'fr1', name: 'Ligue 1',          land: 'Frankreich',  flag: '🇫🇷', tier: 1, euro: true, pokal: 'Französischer Pokal', meister: 'Französischer Meister' },
+  { id: 'nl1', name: 'Eredivisie',       land: 'Niederlande', flag: '🇳🇱', tier: 1, euro: true, pokal: 'Niederländischer Pokal', meister: 'Niederländischer Meister' },
+  { id: 'sa1', name: 'Saudi Pro League', land: 'Saudi-Arabien', flag: '🇸🇦', tier: 1, euro: false, pokal: 'Königspokal', meister: 'Saudischer Meister' }
+];
+const LG = id => LEAGUES.find(l => l.id === id);
+
+const CLUBS_RAW = {
+  de3: [['Rostock Hansa',42,'#0055A4'],['Dresden Dynamo',42,'#F2C500'],['Bielefeld Arminia',41,'#004F9E'],['Saarbrücken FC',40,'#004E9E'],
+        ['Aachen Alemannia',40,'#FFD500'],['Mannheim Waldhof',38,'#0A5AA8'],['Essen Rot-Weiss',38,'#E2001A'],['Duisburg MSV',37,'#005CA9'],
+        ['Osnabrück VfL',37,'#5B2C83'],['Ingolstadt FC',36,'#DA1A32'],['Wiesbaden SV',36,'#D50032'],['Aue Erzgebirge',35,'#7C2529'],
+        ['Sandhausen SV',34,'#000000'],['Verl SC',33,'#005CA9'],['Unterhaching SpVgg',32,'#E2001A'],['Stuttgart Kickers',31,'#1E7A4F'],
+        ['Havelse TSV',30,'#0057B8'],['Bayreuth SpVgg',30,'#F0B323']],
+  de2: [['Hamburg SV',62,'#0A4EA2'],['Gelsenkirchen 04',61,'#0057B8'],['Hertha Berlin',60,'#005CA9'],['Düsseldorf F95',56,'#E2001A'],
+        ['Hannover 96',55,'#00954C'],['Nürnberg 1.FC',55,'#AD1220'],['Kaiserslautern FCK',54,'#E2001A'],['Karlsruhe KSC',52,'#004E9E'],
+        ['Paderborn SC',51,'#004E9E'],['Magdeburg FCM',50,'#0068B4'],['Darmstadt SV',50,'#004B8D'],['Fürth SpVgg',48,'#00A54F'],
+        ['Braunschweig Eintracht',47,'#F2C500'],['Elversberg SV',46,'#E2001A'],['Münster Preußen',45,'#00723F'],['Regensburg Jahn',44,'#E2001A'],
+        ['Ulm SSV',43,'#000000'],['Cottbus Energie',43,'#E2001A']],
+  de1: [['München FC',93,'#E2001A'],['Dortmund BV',84,'#FDE100'],['Leipzig SC',82,'#DD0741'],['Leverkusen 04',81,'#CE2029'],
+        ['Frankfurt SG',76,'#E1000F'],['Stuttgart VfC',74,'#D40C1E'],['Bremen SV',70,'#1D9053'],['Gladbach BM',70,'#00A650'],
+        ['Wolfsburg VfL',69,'#65B32E'],['Freiburg SC',69,'#E2001A'],['Hoffenheim TSG',67,'#1961B5'],['Union Berlin',66,'#EB1923'],
+        ['Köln FC',66,'#ED1C24'],['Mainz 05',65,'#C3141E'],['Augsburg FC',63,'#BA3733'],['Bochum VfB',60,'#005CA9'],
+        ['Heidenheim 07',58,'#E2001A'],['Kiel Holstein',57,'#0F3B7C']],
+  en1: [['Manchester Sky',92,'#6CABDD'],['Liverpool Anfield',90,'#C8102E'],['London Gunners',89,'#EF0107'],['Manchester Red',89,'#DA020E'],
+        ['London Blues',88,'#034694'],['London Spurs',83,'#FFFFFF'],['Newcastle Tyne',82,'#241F20'],['Birmingham Villa',80,'#95BFE5'],
+        ['Brighton Seagulls',77,'#0057B8'],['Nottingham Trees',75,'#DD0000'],['Liverpool Blues',74,'#003399'],['West London Cottage',74,'#000000'],
+        ['London Palace',73,'#1B458F'],['West London Bees',73,'#E30613'],['Wolverhampton Wanderer',72,'#FDB913'],['Bournemouth Cherries',72,'#DA291C'],
+        ['Leeds Whites',71,'#FFCD00'],['Solent Saints',69,'#D71920']],
+  es1: [['Madrid Blancos',93,'#FEBE10'],['Barcelona Blaugrana',90,'#A50044'],['Madrid Colchoneros',85,'#CB3524'],['Bilbao Leones',79,'#EE2523'],
+        ['Sevilla Nervión',78,'#D0021B'],['San Sebastián Txuri',78,'#0067B1'],['Villarreal Groguet',77,'#FFE667'],['Valencia Che',76,'#F18E00'],
+        ['Betis Verdiblancos',76,'#009B3A'],['Girona Blanc-i-vermell',75,'#CD2534'],['Vigo Celeste',73,'#8AC3EE'],['Osasuna Rojillos',72,'#D91A21'],
+        ['Mallorca Insular',71,'#E20613'],['Getafe Azulones',71,'#005999'],['Vallecas Rayo',70,'#E53027'],['Alavés Babazorros',69,'#0761AF'],
+        ['Las Palmas Amarillos',68,'#FFE400'],['Cádiz Amarillo',66,'#FFE500']],
+  it1: [['Mailand Nerazzurri',88,'#0068A8'],['Turin Bianconeri',86,'#000000'],['Neapel Partenopei',85,'#12A0D7'],['Mailand Rossoneri',84,'#FB090B'],
+        ['Bergamo Orobici',82,'#1D71B8'],['Rom Giallorossi',80,'#8E1F2F'],['Rom Biancocelesti',80,'#87D8F7'],['Florenz Viola',78,'#592C82'],
+        ['Bologna Rossoblù',77,'#1A2F48'],['Turin Granata',74,'#881600'],['Udine Friuli',72,'#000000'],['Genua Grifone',70,'#C8102E'],
+        ['Monza Brianzoli',69,'#E2001A'],['Parma Crociati',68,'#FFD200'],['Verona Gialloblù',67,'#FFD700'],['Empoli Azzurri',67,'#00579C'],
+        ['Cagliari Rossoblù',66,'#B2022F'],['Lecce Salentini',66,'#FFE600']],
+  fr1: [['Paris Étoile',92,'#004170'],['Marseille Olympique',80,'#2FAEE0'],['Monaco Rouge',80,'#E63946'],['Lille Dogues',78,'#E01E13'],
+        ['Lyon Rhône',78,'#DA291C'],['Nizza Aiglons',76,'#E2001A'],['Rennes Rouge-Noir',76,'#E23A2E'],['Lens Sang et Or',76,'#FFDD00'],
+        ['Straßburg Racing',72,'#0091CE'],['Brest Ty-Zefs',71,'#E2001A'],['Toulouse Violets',70,'#7B2D8B'],['Reims Champagne',70,'#E2001A'],
+        ['Saint-Étienne Verts',69,'#00843D'],['Nantes Canaris',69,'#FFDD00'],['Montpellier Paillade',68,'#005BAA'],['Auxerre Bourgogne',66,'#0069B4'],
+        ['Le Havre Ciel-Marine',65,'#87CEEB'],['Angers Noir-Blanc',65,'#000000']],
+  nl1: [['Amsterdam Ajacieden',76,'#D2122E'],['Eindhoven Boeren',76,'#ED1C24'],['Rotterdam Kuip',75,'#00A650'],['Alkmaar Kaasboeren',70,'#E2001A'],
+        ['Utrecht Domstad',68,'#E2001A'],['Twente Tukkers',68,'#E2001A'],['Arnhem Adelaars',64,'#E2001A'],['Heerenveen Friesen',64,'#0057B8'],
+        ['Groningen Trots',63,'#00A650'],['Nijmegen Keizers',63,'#E2001A'],['Sittard Fortuna',61,'#FFDD00'],['Zwolle Blauwvingers',61,'#0057B8'],
+        ['Breda Parade',60,'#E2001A'],['Waalwijk Rood-Wit',59,'#E2001A']],
+  sa1: [['Riad Al-Hilal',78,'#0055A5'],['Riad Al-Nasr',74,'#FFD700'],['Dschidda Al-Ittihad',74,'#FFD700'],['Dschidda Al-Ahli',73,'#00843D'],
+        ['Riad Al-Shabab',68,'#FFFFFF'],['Dammam Al-Ettifaq',68,'#00843D'],['Al-Qadisiyah',66,'#FFD700'],['Al-Taawoun',64,'#FFD700'],
+        ['Al-Fateh',63,'#00843D'],['Al-Khaleej',61,'#0055A5'],['Al-Riyadh',60,'#FFFFFF'],['Al-Wehda',60,'#E2001A'],
+        ['Al-Fayha',59,'#0055A5'],['Al-Okhdood',57,'#FFD700']]
+};
+
+const CLUBS = [];
+for (const lid of Object.keys(CLUBS_RAW)) {
+  CLUBS_RAW[lid].forEach((c, i) => {
+    const words = c[0].split(' ');
+    let kuerzel = words.map(w => w[0]).join('').toUpperCase().slice(0, 3);
+    if (kuerzel.length < 2) kuerzel = c[0].slice(0, 3).toUpperCase();
+    CLUBS.push({ id: lid + '-' + i, name: c[0], kurz: kuerzel, liga: lid, staerke: c[1], farbe: c[2] });
+  });
+}
+const CL = id => CLUBS.find(c => c.id === id);
+const ligaClubs = lid => CLUBS.filter(c => c.liga === lid);
+
+/* ------------------------------ Nationen ------------------------------ */
+const NATIONEN = [
+  { id: 'DE', name: 'Deutschland', flag: '🇩🇪', staerke: 85, pool: 'de' },
+  { id: 'FR', name: 'Frankreich', flag: '🇫🇷', staerke: 90, pool: 'fr' },
+  { id: 'ES', name: 'Spanien', flag: '🇪🇸', staerke: 88, pool: 'es' },
+  { id: 'BR', name: 'Brasilien', flag: '🇧🇷', staerke: 89, pool: 'pt' },
+  { id: 'AR', name: 'Argentinien', flag: '🇦🇷', staerke: 88, pool: 'es' },
+  { id: 'EN', name: 'England', flag: '🏴', staerke: 86, pool: 'en' },
+  { id: 'PT', name: 'Portugal', flag: '🇵🇹', staerke: 86, pool: 'pt' },
+  { id: 'NL', name: 'Niederlande', flag: '🇳🇱', staerke: 84, pool: 'nl' },
+  { id: 'IT', name: 'Italien', flag: '🇮🇹', staerke: 82, pool: 'it' },
+  { id: 'BE', name: 'Belgien', flag: '🇧🇪', staerke: 81, pool: 'nl' },
+  { id: 'HR', name: 'Kroatien', flag: '🇭🇷', staerke: 80, pool: 'sl' },
+  { id: 'MA', name: 'Marokko', flag: '🇲🇦', staerke: 78, pool: 'af' },
+  { id: 'JP', name: 'Japan', flag: '🇯🇵', staerke: 77, pool: 'jp' },
+  { id: 'NG', name: 'Nigeria', flag: '🇳🇬', staerke: 76, pool: 'af' },
+  { id: 'TR', name: 'Türkei', flag: '🇹🇷', staerke: 75, pool: 'tr' },
+  { id: 'PL', name: 'Polen', flag: '🇵🇱', staerke: 74, pool: 'sl' },
+  { id: 'AT', name: 'Österreich', flag: '🇦🇹', staerke: 74, pool: 'de' },
+  { id: 'CH', name: 'Schweiz', flag: '🇨🇭', staerke: 74, pool: 'de' },
+  { id: 'NO', name: 'Norwegen', flag: '🇳🇴', staerke: 73, pool: 'sk' },
+  { id: 'US', name: 'USA', flag: '🇺🇸', staerke: 72, pool: 'en' }
+];
+const NAT = id => NATIONEN.find(n => n.id === id);
+
+const NAMEN = {
+  de: { v: ['Leon','Finn','Luis','Jonas','Noah','Ben','Paul','Elias','Emil','Felix','Moritz','Jannik','Tim','Nico','Levi','Anton','Julian','David','Marlon','Mats'],
+        n: ['Brandt','Keller','Vogt','Ritter','Sommer','Hartmann','Baumann','Kuhn','Lehmann','Fuchs','Winter','Kramer','Ziegler','Bergmann','Wolff','Reinhardt','Stahl','Falk','Eberle','Nowak'] },
+  en: { v: ['Jack','Harry','Callum','Tyler','Reece','Mason','Josh','Kai','Elliot','Rory','Dean','Marcus'],
+        n: ['Hughes','Carter','Blake','Whitmore','Dalton','Ashby','Rowley','Sinclair','Pike','Marsden','Cross','Fenwick'] },
+  es: { v: ['Álvaro','Iker','Bruno','Mateo','Nico','Gonzalo','Pablo','Rodri','Hugo','Diego','Sergio','Aitor'],
+        n: ['Fernández','Ruiz','Moreno','Blanco','Ibáñez','Vidal','Cabrera','Salgado','Peralta','Nogales','Arteaga','Quintana'] },
+  pt: { v: ['Diogo','Rafael','Tomás','Gonçalo','Vinícius','Éder','Matheus','João','Ruben','Cauã','Tiago','Léo'],
+        n: ['Silva','Costa','Duarte','Gonçalves','Araújo','Pinheiro','Barbosa','Mendonça','Teixeira','Nogueira','Rezende','Macedo'] },
+  it: { v: ['Lorenzo','Matteo','Andrea','Giacomo','Davide','Samuele','Riccardo','Pietro','Nicolò','Emanuele'],
+        n: ['Rossi','Moretti','Marchetti','Vitale','Bellini','Rizzo','Pagano','Fabbri','Sartori','Colombo'] },
+  nl: { v: ['Sven','Daan','Jurriën','Milan','Thijs','Ruben','Youri','Bram','Lars','Stijn'],
+        n: ['Bakker','de Vries','van Dijken','Kuipers','Jansen','Hoekstra','Willems','van Loon','Terpstra','Berkhout'] },
+  sl: { v: ['Luka','Marko','Ivan','Jakub','Filip','Nikola','Bartosz','Dominik','Kacper','Petar'],
+        n: ['Kovač','Novak','Petrov','Marković','Wójcik','Kaminski','Zielinski','Horvat','Babić','Lewandowicz'] },
+  af: { v: ['Amadou','Youssef','Ibrahim','Chidi','Karim','Seydou','Oumar','Tunde','Anis','Malick'],
+        n: ['Traoré','Diallo','Okafor','Mensah','Mbaye','Sarr','Benali','Adeyemi','Touré','Camara'] },
+  jp: { v: ['Sora','Ren','Haruto','Yuto','Kaito','Riku','Takumi','Hiroto'],
+        n: ['Nakamura','Tanaka','Ishida','Morita','Sugawara','Kuroda','Hayashi','Miyazaki'] },
+  tr: { v: ['Emre','Arda','Kenan','Yusuf','Burak','Kerem','Mert','Onur'],
+        n: ['Yilmaz','Demir','Aksoy','Çetin','Erdoğan','Kaplan','Şahin','Toprak'] },
+  sk: { v: ['Erling','Rasmus','Viktor','Oscar','Magnus','Emil','Anton','Kasper'],
+        n: ['Andersen','Lindqvist','Berg','Nygaard','Halvorsen','Sandberg','Dahl','Eriksen'] },
+  fr: { v: ['Enzo','Ethan','Théo','Noa','Lucas','Adam','Nolan','Maël','Ilyes','Gabin'],
+        n: ['Dupont','Lemaire','Girard','Moreau','Fontaine','Perrin','Dubois','Renard','Chevalier','Marchand'] }
+};
+function zufallsname(pool) {
+  const p = NAMEN[pool] || NAMEN.de;
+  return { v: pick(p.v), n: pick(p.n) };
+}
+
+/* ------------------------------ Positionen ------------------------------ */
+const POSITIONEN = [
+  { id: 'IV', name: 'Innenverteidiger', kurz: 'IV', gruppe: 'Abwehr',
+    w: { zweikampf: .32, physis: .24, mentalitaet: .16, pass: .14, tempo: .10, dribbling: .02, schuss: .02 }, angriff: .10 },
+  { id: 'AV', name: 'Außenverteidiger', kurz: 'AV', gruppe: 'Abwehr',
+    w: { tempo: .25, zweikampf: .22, physis: .16, pass: .15, dribbling: .12, mentalitaet: .06, schuss: .04 }, angriff: .30 },
+  { id: 'DM', name: 'Defensives Mittelfeld', kurz: 'DM', gruppe: 'Mittelfeld',
+    w: { zweikampf: .28, pass: .22, physis: .18, mentalitaet: .14, tempo: .08, dribbling: .06, schuss: .04 }, angriff: .28 },
+  { id: 'ZM', name: 'Zentrales Mittelfeld', kurz: 'ZM', gruppe: 'Mittelfeld',
+    w: { pass: .30, mentalitaet: .15, zweikampf: .15, physis: .13, dribbling: .12, tempo: .08, schuss: .07 }, angriff: .50 },
+  { id: 'OM', name: 'Offensives Mittelfeld', kurz: 'OM', gruppe: 'Mittelfeld',
+    w: { pass: .26, dribbling: .24, schuss: .16, mentalitaet: .12, tempo: .12, physis: .05, zweikampf: .05 }, angriff: .78 },
+  { id: 'FL', name: 'Flügelstürmer', kurz: 'FL', gruppe: 'Angriff',
+    w: { tempo: .28, dribbling: .26, schuss: .14, pass: .14, mentalitaet: .08, physis: .05, zweikampf: .05 }, angriff: .88 },
+  { id: 'ST', name: 'Mittelstürmer', kurz: 'ST', gruppe: 'Angriff',
+    w: { schuss: .30, tempo: .18, dribbling: .15, physis: .12, mentalitaet: .12, pass: .08, zweikampf: .05 }, angriff: 1.0 }
+];
+const POS = id => POSITIONEN.find(p => p.id === id);
+const ATTR_LABEL = { tempo: 'Tempo', schuss: 'Abschluss', pass: 'Passspiel', dribbling: 'Dribbling', zweikampf: 'Zweikampf', physis: 'Physis', mentalitaet: 'Mentalität' };
+const ATTR_KEYS = Object.keys(ATTR_LABEL);
+
+const ARCHETYPEN = [
+  { id: 'knipser', name: 'Der Knipser', text: 'Lebt im Strafraum, denkt nur ans Tor.', boni: { schuss: 7, mentalitaet: 4, physis: 2, pass: -3, zweikampf: -3 } },
+  { id: 'regisseur', name: 'Der Regisseur', text: 'Sieht den Pass, bevor die Lücke da ist.', boni: { pass: 8, mentalitaet: 4, dribbling: 2, physis: -3, tempo: -2 } },
+  { id: 'tempo', name: 'Der Tempodribbler', text: 'Erste Berührung nach vorn, dann ist er weg.', boni: { tempo: 8, dribbling: 6, physis: -4, zweikampf: -3, mentalitaet: -1 } },
+  { id: 'kaempfer', name: 'Der Abräumer', text: 'Gewinnt die Bälle, die andere aufgeben.', boni: { zweikampf: 8, physis: 6, mentalitaet: 3, dribbling: -4, schuss: -4 } },
+  { id: 'komplett', name: 'Der Komplette', text: 'Keine Schwäche, aber auch kein Zaubertrick.', boni: { tempo: 2, schuss: 2, pass: 2, dribbling: 2, zweikampf: 2, physis: 2, mentalitaet: 2 } }
+];
+
+const STARTWEGE = [
+  { id: 'strasse', name: 'Straßenkicker', liga: 'de3', text: 'Kein Verein wollte dich im Nachwuchs. Du hast es dir auf dem Bolzplatz beigebracht — und ein Drittligist gibt dir eine Chance.',
+    meta: 'Start in der 3. Liga · härtester Weg · höchstes Potenzial', attr: -4, potenzial: 6, moral: 5 },
+  { id: 'nlz', name: 'Nachwuchsleistungszentrum', liga: 'de2', text: 'Seit du zehn bist im Internat. Sauber ausgebildet, taktisch geschult, jetzt der Sprung zu den Profis.',
+    meta: 'Start in der 2. Bundesliga · ausgeglichen', attr: 0, potenzial: 0, moral: 0 },
+  { id: 'wunderkind', name: 'Wunderkind', liga: 'de1', text: 'Die Zeitungen kennen deinen Namen, bevor du ein Profispiel gemacht hast. Der Druck kommt gratis dazu.',
+    meta: 'Start in der Bundesliga · viel Erwartung, wenig Geduld', attr: 5, potenzial: -2, moral: -5, ruf: 12 }
+];
+
+/* ========================== SPIELSTAND ========================== */
+const SAVE_KEY = 'flutlicht.karriere.v1';
+let S = null;
+let busy = false;
+
+function ovrVon(attr, posId) {
+  const w = POS(posId).w;
+  let v = 0;
+  for (const k of ATTR_KEYS) v += (attr[k] || 0) * w[k];
+  return Math.round(v);
+}
+const OVR = () => ovrVon(S.p.attr, S.p.pos);
+
+function formWert() {
+  const n = S.p.formNoten;
+  if (!n.length) return 0;
+  const letzte = n.slice(-5);
+  const schnitt = letzte.reduce((a, b) => a + b, 0) / letzte.length;
+  return clamp((3.4 - schnitt) * 2.2, -4, 4);   // Note 1,2 => +4,8 → gedeckelt
+}
+function formText() {
+  const f = formWert();
+  if (f > 2.4) return { t: 'Weltklasse-Form', c: 'good' };
+  if (f > 1) return { t: 'Guter Lauf', c: 'good' };
+  if (f > -1) return { t: 'Normalform', c: '' };
+  if (f > -2.4) return { t: 'Formtief', c: 'warn' };
+  return { t: 'Tiefe Krise', c: 'bad' };
+}
+function effOvr() {
+  const p = S.p;
+  const energieMalus = p.energie < 55 ? (55 - p.energie) * 0.14 : 0;
+  const fitMalus = (100 - p.fitness) * 0.08;
+  const moralBonus = (p.moral - 60) * 0.035;
+  return OVR() + formWert() * 0.9 + moralBonus - energieMalus - fitMalus;
+}
+function marktwert() {
+  const p = S.p, o = OVR();
+  let basis = Math.pow(Math.max(o - 38, 1), 3.05) * 420;
+  const alt = p.alter;
+  let f = 1;
+  if (alt <= 20) f = 1.55; else if (alt <= 23) f = 1.4; else if (alt <= 27) f = 1.15;
+  else if (alt <= 30) f = 0.85; else if (alt <= 33) f = 0.5; else f = 0.24;
+  f *= 1 + (p.ruf - 40) / 260 + formWert() / 60;
+  const tier = LG(CL(p.clubId).liga).tier;
+  f *= tier === 1 ? 1.1 : tier === 2 ? .82 : .62;
+  const v = basis * f * (1 + (p.potenzial - o) / 130);
+  return Math.max(15000, Math.round(v / 50000) * 50000);
+}
+function rolleNachStaerke() {
+  const club = CL(S.p.clubId), diff = OVR() - club.staerke;
+  if (diff >= 7) return 'Führungsspieler';
+  if (diff >= 1) return 'Stammspieler';
+  if (diff >= -5) return 'Rotationsspieler';
+  if (diff >= -11) return 'Ergänzungsspieler';
+  return 'Perspektivspieler';
+}
+function saisonLabel(j) { return j + '/' + String((j + 1) % 100).padStart(2, '0'); }
+
+function log(text, typ) {
+  S.verlauf.unshift({ w: S.woche, j: S.jahr, t: text, typ: typ || '' });
+  if (S.verlauf.length > 60) S.verlauf.length = 60;
+}
+
+/* ---------- Effekte anwenden ---------- */
+const EFFEKT_LABEL = {
+  energie: 'Energie', moral: 'Moral', fitness: 'Fitness', ruf: 'Ruf', trainer: 'Trainer-Vertrauen',
+  follower: 'Follower', geld: 'Konto', tempo: 'Tempo', schuss: 'Abschluss', pass: 'Passspiel',
+  dribbling: 'Dribbling', zweikampf: 'Zweikampf', physis: 'Physis', mentalitaet: 'Mentalität'
+};
+function wirke(eff) {
+  const p = S.p, out = [];
+  for (const k of Object.keys(eff)) {
+    let v = eff[k];
+    if (!v) continue;
+    if (ATTR_KEYS.includes(k)) {
+      const vor = Math.round(p.attr[k]);
+      p.attr[k] = clamp(p.attr[k] + v, 20, 99);
+      const diff = Math.round(p.attr[k]) - vor;
+      if (diff) out.push({ t: EFFEKT_LABEL[k] + ' ' + (diff > 0 ? '+' : '') + diff, gut: diff > 0 });
+      continue;
+    }
+    if (k === 'geld') { p.geld += v; out.push({ t: (v > 0 ? '+' : '−') + money(Math.abs(v)), gut: v > 0 }); continue; }
+    if (k === 'follower') {
+      if (v > 0 && p.extras && p.extras.medien) v = Math.round(v * 1.3);
+      if (v > 0) v = Math.round(v * (1 - clamp(Math.pow(p.follower / 1.5e8, .8), 0, .93)));
+      p.follower = clamp(Math.round(p.follower + v), 0, 4e8);
+      out.push({ t: (v > 0 ? '+' : '−') + followers(Math.abs(v)) + ' Follower', gut: v > 0 }); continue;
+    }
+    if (k === 'trainer') { p.trainer = clamp(p.trainer + v, 0, 100); }
+    else if (k === 'energie') { p.energie = clamp(p.energie + v, 0, 100); }
+    else if (k === 'moral') { p.moral = clamp(p.moral + v, 0, 100); }
+    else if (k === 'fitness') { p.fitness = clamp(p.fitness + v, 0, 100); }
+    else if (k === 'ruf') { p.ruf = clamp(p.ruf + v, 0, 100); }
+    else continue;
+    out.push({ t: EFFEKT_LABEL[k] + ' ' + (v > 0 ? '+' : '') + Math.round(v), gut: v > 0 });
+  }
+  return out;
+}
+
+/* ========================== SAISON AUFBAUEN ========================== */
+function roundRobin(ids) {
+  const n = ids.length, arr = ids.slice(), half = n / 2, hin = [];
+  let liste = arr.slice(1);
+  for (let r = 0; r < n - 1; r++) {
+    const tag = [], l = [arr[0]].concat(liste);
+    for (let i = 0; i < half; i++) {
+      const h = l[i], a = l[n - 1 - i];
+      tag.push(r % 2 === 0 ? [h, a] : [a, h]);
+    }
+    hin.push(tag);
+    liste.unshift(liste.pop());
+  }
+  return hin.concat(hin.map(t => t.map(m => [m[1], m[0]])));
+}
+
+function euroQualifiziert(clubId) {
+  const c = CL(clubId), lg = LG(c.liga);
+  if (!lg.euro) return false;
+  const rang = ligaClubs(c.liga).slice().sort((a, b) => b.staerke - a.staerke).findIndex(x => x.id === clubId);
+  return rang < 4;
+}
+
+function starteSaison(neueEuroQuali) {
+  const club = CL(S.p.clubId), lg = LG(club.liga);
+  const teams = ligaClubs(club.liga);
+  S.liga = { id: club.liga, tabelle: {}, spieltage: roundRobin(shuffle(teams.map(t => t.id))) };
+  teams.forEach(t => S.liga.tabelle[t.id] = { s: 0, g: 0, u: 0, n: 0, t: 0, gt: 0, p: 0 });
+  S.saisonWochen = S.liga.spieltage.length;
+  const W = f => clamp(Math.round(f * S.saisonWochen), 1, S.saisonWochen);
+  S.pokal = { drin: true, runde: 0, wochen: [.09, .25, .40, .57, .74, .90].map(W), name: lg.pokal || 'Landespokal' };
+  const quali = neueEuroQuali === undefined ? euroQualifiziert(S.p.clubId) : (neueEuroQuali && lg.euro);
+  S.euro = { drin: quali, phase: 0, wochen: [.14, .21, .31, .44, .52, .63, .70, .80, .87, .96].map(W) };
+  S.stats = { spiele: 0, startelf: 0, tore: 0, vorlagen: 0, noten: [], gelb: 0, rot: 0, minuten: 0 };
+  S.natStats = { spiele: 0, tore: 0 };
+  S.woche = 1;
+  S.winterWoche = Math.round(S.saisonWochen / 2);
+  S.spieleCache = null;
+  S.titelDieseSaison = [];
+  S.transferOffen = false;
+  S.angebote = [];
+}
+
+/* ---------- Tabelle ---------- */
+function tabellenListe() {
+  const t = S.liga.tabelle;
+  return Object.keys(t).map(id => ({ id, ...t[id], diff: t[id].t - t[id].gt }))
+    .sort((a, b) => b.p - a.p || b.diff - a.diff || b.t - a.t || CL(b.id).staerke - CL(a.id).staerke);
+}
+function tabellenPlatz(clubId) { return tabellenListe().findIndex(x => x.id === clubId) + 1; }
+
+function buchen(heim, gast, th, tg) {
+  const T = S.liga.tabelle;
+  if (!T[heim] || !T[gast]) return;
+  T[heim].s++; T[gast].s++;
+  T[heim].t += th; T[heim].gt += tg; T[gast].t += tg; T[gast].gt += th;
+  if (th > tg) { T[heim].g++; T[heim].p += 3; T[gast].n++; }
+  else if (th < tg) { T[gast].g++; T[gast].p += 3; T[heim].n++; }
+  else { T[heim].u++; T[gast].u++; T[heim].p++; T[gast].p++; }
+}
+
+/* ---------- Ergebnis zweier KI-Teams ---------- */
+function simErgebnis(sh, sg) {
+  const d = (sh + 3) - sg;
+  const xh = clamp(1.42 * Math.exp(d * 0.033), 0.22, 4.6);
+  const xg = clamp(1.42 * Math.exp(-d * 0.033), 0.22, 4.6);
+  return [Math.min(poisson(xh), 7), Math.min(poisson(xg), 7)];
+}
+
+/* ========================== SPIELTAG-ENGINE ========================== */
+function einsatzBestimmen(fx) {
+  const p = S.p;
+  if (p.verletzung) return { status: 'verletzt', ab: 0 };
+  const club = CL(p.clubId);
+  const diff = effOvr() - (club.staerke - 2);
+  let pStart = 0.55 + diff * 0.075 + (p.trainer - 50) * 0.012;
+  if (p.energie < 42) pStart -= 0.3;
+  if (p.alter < 19) pStart -= 0.08;
+  if (fx.comp === 'pokal') pStart += 0.06;
+  pStart = clamp(pStart, 0.02, 0.96);
+  const r = Math.random();
+  if (r < pStart) return { status: 'startelf', ab: 1 };
+  if (r < pStart + 0.33) return { status: 'einwechslung', ab: ri(58, 78) };
+  return { status: 'bank', ab: 0 };
+}
+
+const MOMENTE = {
+  Angriff: [
+    { t: 'Die Flanke kommt scharf von rechts herein. Du löst dich am Fünfer vom Verteidiger.', w: [
+      { l: 'Kopfball nach unten', h: 'Physis', a: 'physis', s: 60, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'Volleyabnahme aus der Drehung', h: 'Abschluss · sehr schwer', a: 'schuss', s: 76, gut: 'traumtor', schlecht: 'vergeben' },
+      { l: 'Ablegen auf den einlaufenden Kollegen', h: 'Passspiel · sicher', a: 'pass', s: 44, gut: 'assist', schlecht: 'vergeben' } ] },
+    { t: 'Langer Ball in den Rücken der Abwehr. Nur noch der Torwart steht zwischen dir und dem Tor.', w: [
+      { l: 'Flach ins lange Eck schieben', h: 'Abschluss', a: 'schuss', s: 58, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'Torwart ausspielen', h: 'Dribbling · riskant', a: 'dribbling', s: 70, gut: 'traumtor', schlecht: 'vergeben' },
+      { l: 'Lupfen', h: 'Abschluss · Nervensache', a: 'mentalitaet', s: 66, gut: 'traumtor', schlecht: 'vergeben' } ] },
+    { t: 'Du bekommst den Ball mit dem Rücken zum Tor, der Innenverteidiger klebt an dir.', w: [
+      { l: 'Abschirmen und drehen', h: 'Physis', a: 'physis', s: 55, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Klatschen lassen und in die Tiefe starten', h: 'Passspiel', a: 'pass', s: 50, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Sofort aus der Drehung schießen', h: 'Abschluss · sehr schwer', a: 'schuss', s: 78, gut: 'traumtor', schlecht: 'vergeben' } ] },
+    { t: 'Konter! Drei gegen zwei, du führst den Ball durchs Mittelfeld.', w: [
+      { l: 'Tempo hochhalten und selbst abschließen', h: 'Tempo', a: 'tempo', s: 62, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'Den freien Mann rechts bedienen', h: 'Passspiel · sicher', a: 'pass', s: 42, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Warten, bis alle aufgerückt sind', h: 'Mentalität', a: 'mentalitaet', s: 52, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Der Ball kommt hoch aus der eigenen Hälfte, der Innenverteidiger ist im Rücken.', w: [
+      { l: 'Ball festmachen und warten', h: 'Physis', a: 'physis', s: 54, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Direkt in den Lauf des Flügels verlängern', h: 'Passspiel', a: 'pass', s: 58, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Foul ziehen', h: 'Mentalität', a: 'mentalitaet', s: 46, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Der Gegner baut von hinten auf, der Trainer hat Pressing ausgegeben.', w: [
+      { l: 'Den Innenverteidiger anlaufen', h: 'Physis', a: 'physis', s: 56, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Passweg zum Sechser zustellen', h: 'Mentalität', a: 'mentalitaet', s: 48, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Torwart unter Druck setzen und auf den Fehler lauern', h: 'Tempo · riskant', a: 'tempo', s: 72, gut: 'tor', schlecht: 'ballverlust' } ] },
+    { t: 'Elfmeter! Das Stadion hält den Atem an. Du legst dir den Ball zurecht.', elfer: true, w: [
+      { l: 'Volle Wucht ins Eck', h: 'Abschluss', a: 'schuss', s: 46, gut: 'tor', schlecht: 'elferfehl' },
+      { l: 'Ruhig flach in die Ecke', h: 'Mentalität', a: 'mentalitaet', s: 44, gut: 'tor', schlecht: 'elferfehl' },
+      { l: 'Panenka in die Mitte', h: 'Mentalität · Wahnsinn', a: 'mentalitaet', s: 74, gut: 'traumtor', schlecht: 'elferfehl' } ] }
+  ],
+  Mittelfeld: [
+    { t: 'Der Ball tropft dir 25 Meter vor dem Tor vor die Füße. Die Schusslinie ist frei.', w: [
+      { l: 'Fernschuss ziehen', h: 'Abschluss · schwer', a: 'schuss', s: 72, gut: 'traumtor', schlecht: 'vergeben' },
+      { l: 'Steilpass in die Schnittstelle', h: 'Passspiel', a: 'pass', s: 56, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Ruhig quer und neu aufbauen', h: 'Sicher', a: 'pass', s: 32, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Der Gegner presst dich im eigenen Sechzehner an. Zwei Mann kommen.', w: [
+      { l: 'Herausdribbeln', h: 'Dribbling · sehr riskant', a: 'dribbling', s: 70, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Lang und hoch nach vorn', h: 'Sicher', a: 'physis', s: 34, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Kurz zum Innenverteidiger', h: 'Passspiel', a: 'pass', s: 48, gut: 'aktion', schlecht: 'gegentor' } ] },
+    { t: 'Der gegnerische Spielmacher zieht ins Zentrum. Du bist der Letzte vor der Kette.', w: [
+      { l: 'Attackieren und Ball erobern', h: 'Zweikampf', a: 'zweikampf', s: 60, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Taktisches Foul ziehen', h: 'Mentalität · Karte droht', a: 'mentalitaet', s: 40, gut: 'foulok', schlecht: 'karte' },
+      { l: 'Passwege zustellen', h: 'Mentalität', a: 'mentalitaet', s: 54, gut: 'aktion', schlecht: 'gegentor' } ] },
+    { t: 'Freistoß, 22 Meter, halbrechts. Der Trainer schaut zu dir herüber.', w: [
+      { l: 'Selbst schießen', h: 'Abschluss · schwer', a: 'schuss', s: 74, gut: 'traumtor', schlecht: 'vergeben' },
+      { l: 'Flanke auf den Kopf des Innenverteidigers', h: 'Passspiel', a: 'pass', s: 56, gut: 'assist', schlecht: 'vergeben' },
+      { l: 'Kurz abspielen und den Angriff neu ordnen', h: 'Sicher', a: 'pass', s: 34, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Zweikampf an der Mittellinie, beide gehen voll rein.', w: [
+      { l: 'Körper reinstellen', h: 'Physis', a: 'physis', s: 55, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Den Ball abschirmen und verzögern', h: 'Mentalität', a: 'mentalitaet', s: 50, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Mit der Sohle durchziehen', h: 'Zweikampf · Karte droht', a: 'zweikampf', s: 62, gut: 'aktion', schlecht: 'karte' } ] },
+    { t: 'Du hast Raum vor dir, der Gegner steht tief und wartet ab.', w: [
+      { l: 'Mit Tempo auf die Kette zulaufen', h: 'Dribbling', a: 'dribbling', s: 60, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Verlagern auf die andere Seite', h: 'Passspiel', a: 'pass', s: 46, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Selbst in den Sechzehner ziehen', h: 'Tempo · riskant', a: 'tempo', s: 66, gut: 'tor', schlecht: 'vergeben' } ] }
+  ],
+  Abwehr: [
+    { t: 'Der Stürmer wird steil geschickt und zieht an dir vorbei Richtung Strafraum.', w: [
+      { l: 'Grätsche ziehen', h: 'Zweikampf · Karte droht', a: 'zweikampf', s: 64, gut: 'rettung', schlecht: 'karte' },
+      { l: 'Ihn nach außen leiten', h: 'Mentalität', a: 'mentalitaet', s: 52, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Tempoduell annehmen', h: 'Tempo', a: 'tempo', s: 62, gut: 'rettung', schlecht: 'gegentor' } ] },
+    { t: 'Flanke in den Rücken der Abwehr, der Mittelstürmer geht mit dir hoch.', w: [
+      { l: 'Kopfball klären', h: 'Physis', a: 'physis', s: 56, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Vor ihm an den Ball gehen', h: 'Zweikampf', a: 'zweikampf', s: 60, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Torwart rufen lassen', h: 'Mentalität', a: 'mentalitaet', s: 48, gut: 'aktion', schlecht: 'gegentor' } ] },
+    { t: 'Ecke für dein Team. Du gehst mit nach vorn und stehst am zweiten Pfosten frei.', w: [
+      { l: 'Wuchtiger Kopfball', h: 'Physis', a: 'physis', s: 62, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'Verlängern auf den Kollegen', h: 'Passspiel', a: 'pass', s: 50, gut: 'assist', schlecht: 'vergeben' },
+      { l: 'Zurück absichern', h: 'Mentalität · kein Risiko', a: 'mentalitaet', s: 28, gut: 'aktion', schlecht: 'aktion' } ] },
+    { t: 'Aufbau von hinten. Der Gegner stellt die kurzen Wege zu.', w: [
+      { l: 'Diagonalball auf den Flügel', h: 'Passspiel · schwer', a: 'pass', s: 66, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Ball nach vorn treiben', h: 'Dribbling', a: 'dribbling', s: 58, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Weit klären', h: 'Sicher', a: 'physis', s: 30, gut: 'aktion', schlecht: 'ballverlust' } ] }
+  ]
+};
+
+const TICKER_TEXTE = {
+  torMein: ['Dein Team trifft.', 'Der Ball zappelt im Netz — ihr jubelt.', 'Tor! Die Bank springt auf.', 'Eine Ecke, ein Kopfball, drin.'],
+  torGegen: ['trifft.', 'schlägt eiskalt zu.', 'nutzt die Lücke in eurer Kette.', 'trifft nach einem Konter.', 'kommt nach einer Ecke zum Kopfball — drin.'],
+  chance: ['— vergeben.', ' kommt durch, der Abschluss misslingt.', ' scheitert am Torwart.', ' setzt den Ball an den Pfosten.'],
+  gefahr: [' kommt gefährlich vor das Tor.', ' prüft euren Torwart aus der Distanz.', ' zielt aus spitzem Winkel knapp vorbei.', ' trifft nur das Außennetz.']
+};
+const ERGEBNIS_TEXT = {
+  tor: ['Du triffst! Der Ball zappelt im Netz.', 'Drin! Das Stadion explodiert.', 'Eiskalt abgeschlossen — Tor!'],
+  traumtor: ['Ein Traumtor! Die Bank springt auf, die Kurve rastet aus.', 'Was für ein Ding! Das läuft heute Abend in jeder Zusammenfassung.', 'Unhaltbar. Ein Tor für die Saison-Highlights.'],
+  assist: ['Perfekt aufgelegt — dein Mitspieler muss nur noch einschieben. Vorlage!', 'Der Pass sitzt, der Rest ist Formsache. Assist für dich.'],
+  aktion: ['Saubere Aktion, die Bank nickt anerkennend.', 'Genau richtig gelöst. Unspektakulär, aber goldrichtig.'],
+  rettung: ['In letzter Sekunde geklärt! Die Kurve feiert dich wie einen Torschützen.', 'Du bist da, wo du sein musst. Gefahr gebannt.'],
+  foulok: ['Kluges taktisches Foul — der Konter ist gestoppt, der Schiri lässt die Karte stecken.'],
+  vergeben: ['Vorbei. Du greifst dir an den Kopf.', 'Der Torwart ist dran. Vergeben.', 'Knapp daneben — das musst du machen.'],
+  ballverlust: ['Ballverlust. Der Trainer an der Seitenlinie wird laut.', 'Zu ungenau, der Gegner schaltet um.'],
+  gegentor: ['Der Gegner nutzt es eiskalt aus. Gegentor — und alle schauen auf dich.', 'Das geht auf deine Kappe. Gegentor.'],
+  elferfehl: ['Verschossen. Stille im Stadion, dann Pfiffe.', 'Der Torwart hält! Du starrst auf den Rasen.'],
+  karte: ['Der Schiedsrichter zückt Gelb. Du diskutierst nicht mal.']
+};
+
+function baueSpielverlauf(fx, einsatz) {
+  const p = S.p, club = CL(p.clubId), gegner = CL(fx.gegnerId);
+  const spielt = einsatz.status === 'startelf' || einsatz.status === 'einwechslung';
+  const meineStr = club.staerke + (fx.heim ? 3 : 0) + (spielt ? clamp((effOvr() - club.staerke) * 0.2, -3, 6) : -1);
+  const d = meineStr - gegner.staerke;
+  const xMein = clamp(1.42 * Math.exp(d * 0.033), 0.22, 4.6);
+  const xGegen = clamp(1.42 * Math.exp(-d * 0.033), 0.22, 4.6);
+  const chancenMein = clamp(Math.round(xMein * 2.3), 1, 9);
+  const chancenGegen = clamp(Math.round(xGegen * 2.3), 1, 9);
+  const pMein = clamp(xMein / chancenMein, 0.08, 0.7);
+  const pGegen = clamp(xGegen / chancenGegen, 0.08, 0.7);
+
+  let anzMomente = 0;
+  if (einsatz.status === 'startelf') anzMomente = 2 + (POS(p.pos).angriff > .7 ? 1 : 0);
+  if (einsatz.status === 'einwechslung') anzMomente = 1;
+  anzMomente = clamp(anzMomente, 0, 3);
+
+  const ev = [];
+  const autoChancen = Math.max(1, Math.round(chancenMein - anzMomente * .7));
+  for (let i = 0; i < autoChancen; i++) ev.push({ art: 'chance', mein: true, min: ri(2, 92), tor: chance(pMein) });
+  for (let i = 0; i < chancenGegen; i++) ev.push({ art: 'chance', mein: false, min: ri(2, 92), tor: chance(pGegen) });
+  const alle = MOMENTE[POS(p.pos).gruppe];
+  const ohneElfer = shuffle(alle.filter(m => !m.elfer));
+  const gewaehlt = [];
+  for (let i = 0; i < anzMomente; i++) gewaehlt.push(ohneElfer[i % ohneElfer.length]);
+  const elfer = alle.find(m => m.elfer);
+  if (elfer && gewaehlt.length && chance(.12)) gewaehlt[ri(0, gewaehlt.length - 1)] = elfer;
+  gewaehlt.forEach(m => ev.push({ art: 'moment', min: ri(einsatz.ab + 3, 90), vorlage: m }));
+  if (spielt && chance(0.1)) ev.push({ art: 'info', min: ri(20, 80), text: 'Der Trainer brüllt dich von der Seitenlinie an. Mehr Bewegung ohne Ball.' });
+  if (einsatz.status === 'einwechslung') ev.push({ art: 'wechsel', min: einsatz.ab, text: 'Du wirst eingewechselt. Die vierte Offizielle hebt deine Nummer hoch.' });
+  ev.sort((a, b) => a.min - b.min);
+  return ev;
+}
+
+/* ---------- Note berechnen ---------- */
+function noteBerechnen(basis, tore, vorlagen, aktionen, fehler, ergebnis, minuten) {
+  let n = basis;
+  n -= tore * 0.75 + vorlagen * 0.45 + aktionen * 0.22;
+  n += fehler * 0.34;
+  n += ergebnis === 'sieg' ? -0.2 : ergebnis === 'niederlage' ? 0.2 : 0;
+  if (minuten < 30) n = 3.3 + (n - 3.3) * 0.55;
+  return clamp(round1(n), 1, 6);
+}
+
+/* ========================== WOCHENPLÄNE ========================== */
+const PLAENE = [
+  { id: 'technik', name: 'Techniktraining', text: 'Ein Attribut gezielt schärfen', eff: { energie: -9 }, train: 1 },
+  { id: 'doppel', name: 'Doppelschichten', text: 'Schneller besser — Verletzungsrisiko', eff: { energie: -21 }, train: 1.95, risiko: .1 },
+  { id: 'athletik', name: 'Athletikblock', text: 'Physis, Tempo und Robustheit', eff: { energie: -12, fitness: 7 }, train: .5, athletik: true },
+  { id: 'regen', name: 'Regeneration', text: 'Energie und Fitness auffüllen', eff: { energie: 27, fitness: 10, moral: 2 } },
+  { id: 'video', name: 'Videoanalyse', text: 'Mentalität und Trainer-Vertrauen', eff: { energie: -4, mentalitaet: .4, trainer: 2.5 } },
+  { id: 'social', name: 'Social Media', text: 'Reichweite aufbauen', eff: { energie: -3, moral: 3 }, social: true },
+  { id: 'frei', name: 'Freizeit', text: 'Kopf frei — aber der Trainer sieht es', eff: { energie: -6, moral: 12 }, skandal: .12 }
+];
+const PLAN = id => PLAENE.find(p => p.id === id);
+
+function trainingsGewinn(faktor) {
+  const p = S.p, o = OVR();
+  const alterF = p.alter <= 20 ? 1.4 : p.alter <= 23 ? 1.15 : p.alter <= 26 ? .85 : p.alter <= 29 ? .55 : p.alter <= 32 ? .25 : .08;
+  const raum = clamp((p.potenzial - o) / 20, .04, 1.5);
+  const energieF = p.energie < 35 ? .45 : 1;
+  const extra = p.extras && p.extras.coach ? 1.22 : 1;
+  return clamp(.7 * faktor * alterF * raum * energieF * extra * (.55 + Math.random()), 0, 3.2);
+}
+
+const VERLETZUNGEN = [
+  { n: 'Prellung', w: [1, 2], p: .26 }, { n: 'Sehnenreizung', w: [1, 3], p: .18 },
+  { n: 'Bänderdehnung', w: [2, 4], p: .18 }, { n: 'Muskelfaserriss', w: [3, 6], p: .17 },
+  { n: 'Muskelbündelriss', w: [5, 9], p: .09 }, { n: 'Schambeinentzündung', w: [6, 11], p: .06 },
+  { n: 'Knöchelbruch', w: [9, 16], p: .04 }, { n: 'Kreuzbandriss', w: [22, 36], p: .02 }
+];
+function verletzen() {
+  const r = Math.random();
+  let acc = 0, v = VERLETZUNGEN[0];
+  for (const x of VERLETZUNGEN) { acc += x.p; if (r <= acc) { v = x; break; } }
+  const wochen = ri(v.w[0], v.w[1]);
+  S.p.verletzung = { name: v.n, wochen };
+  S.p.fitness = clamp(S.p.fitness - wochen * 2.5, 25, 100);
+  log(v.n + ' — voraussichtlich ' + wochen + ' Wochen Pause.', 'bad');
+  return { name: v.n, wochen };
+}
+
+/* ========================== ZUFALLSEREIGNISSE ========================== */
+const EREIGNISSE = [
+  { id: 'trainergespraech', gewicht: 3, wenn: () => S.p.trainer < 45, eyebrow: 'Trainerbüro', titel: 'Aussprache',
+    text: () => 'Der Trainer bittet dich nach dem Training in sein Büro. „Ich sehe dich im Moment nicht in meiner ersten Elf. Sag mir, warum ich das ändern soll."',
+    wahl: [
+      { l: 'Respektvoll um eine Chance bitten', h: 'Sicher', run: () => ({ text: 'Er nickt langsam. „Nächstes Spiel, zwanzig Minuten. Zeig es mir."', eff: { trainer: 9, moral: 3 } }) },
+      { l: 'Ihm widersprechen — du bist besser als die anderen', h: 'Riskant', run: () => chance(.42)
+          ? ({ text: 'Er mustert dich lange. „So einen Biss will ich sehen." Du bist gegen den Tabellenführer in der Startelf.', eff: { trainer: 16, moral: 8 } })
+          : ({ text: 'Die Tür fällt hinter dir ins Schloss. Du trainierst die nächsten Tage mit der zweiten Mannschaft.', eff: { trainer: -13, moral: -9 } }) },
+      { l: 'Um einen Wechsel bitten', h: 'Konsequenz', run: () => ({ text: 'Er zuckt mit den Schultern. „Dein Berater weiß, wo mein Büro ist." Die Gerüchteküche kocht.', eff: { trainer: -5, ruf: 3, moral: -2 } }) }
+    ] },
+  { id: 'mitspieler', gewicht: 3, eyebrow: 'Kabine', titel: 'Ärger in der Kabine',
+    text: () => 'Ein Routinier stellt dich vor versammelter Mannschaft bloß: Du würdest zu viel dribbeln und zu wenig arbeiten.',
+    wahl: [
+      { l: 'Kontern, vor allen', h: 'Mentalität', run: () => chance(.5)
+          ? ({ text: 'Die Kabine lacht — mit dir, nicht über dich. Du hast dir Respekt geholt.', eff: { moral: 7, mentalitaet: .6, trainer: 2 } })
+          : ({ text: 'Es wird still. Zwei Wochen isst du beim Mittagessen allein.', eff: { moral: -9, trainer: -4 } }) },
+      { l: 'Schlucken und im Training antworten', h: 'Solide', run: () => ({ text: 'Du sagst nichts und rennst im Training alle in Grund und Boden. Auch das spricht sich herum.', eff: { zweikampf: .5, physis: .4, trainer: 4, energie: -5 } }) },
+      { l: 'Ihn danach unter vier Augen ansprechen', h: 'Klug', run: () => ({ text: '„Ich meine es nicht persönlich, Junge." Seitdem erklärt er dir nach jedem Training deine Laufwege.', eff: { mentalitaet: .8, moral: 4, pass: .3 } }) }
+    ] },
+  { id: 'sponsor', gewicht: 3, wenn: () => S.p.follower > 25000 && S.p.sponsoren.length < 3, eyebrow: 'Berater', titel: 'Ein Sponsor klopft an',
+    text: () => { const s = sponsorAngebot(); S._sponsor = s; return s.firma + ' will dich für ' + money(s.pro) + ' pro Woche als Werbegesicht. Dafür: Fototermine, Social Posts, gute Laune.'; },
+    wahl: [
+      { l: 'Unterschreiben', h: 'Geld', run: () => { const s = S._sponsor; S.p.sponsoren.push({ firma: s.firma, pro: s.pro, jahre: 2 }); return { text: 'Unterschrieben. Der erste Werbespot wird im Trainingslager gedreht.', eff: { geld: s.pro * 8, ruf: 3, energie: -4 } }; } },
+      { l: 'Mehr fordern', h: 'Riskant', run: () => { const s = S._sponsor; return chance(.45) ? (S.p.sponsoren.push({ firma: s.firma, pro: Math.round(s.pro * 1.6), jahre: 2 }), { text: 'Sie zahlen. Dein Berater grinst zum ersten Mal seit Monaten.', eff: { geld: s.pro * 12, ruf: 4 } }) : ({ text: 'Sie nehmen einen anderen Spieler. Der Werbespot läuft trotzdem — nur ohne dich.', eff: { moral: -4 } }); } },
+      { l: 'Ablehnen, Fokus auf Fußball', h: 'Sauber', run: () => ({ text: 'Dein Trainer erfährt davon und erwähnt es lobend in der Mannschaftssitzung.', eff: { trainer: 6, moral: 3 } }) }
+    ] },
+  { id: 'boulevard', gewicht: 2, wenn: () => S.p.ruf > 25, eyebrow: 'Boulevard', titel: 'Eine Schlagzeile, die du nicht wolltest',
+    text: () => 'Ein Boulevardblatt bringt Fotos von dir um drei Uhr nachts vor einem Club. Die Überschrift: „Feiert er sich aus der Startelf?"',
+    wahl: [
+      { l: 'Öffentlich entschuldigen', h: 'Demütig', run: () => ({ text: 'Der Verein stellt sich hinter dich, der Trainer verhängt intern eine Geldstrafe.', eff: { geld: -Math.min(S.p.geld * .05, 40000), trainer: 3, ruf: -2 } }) },
+      { l: 'Alles abstreiten', h: 'Riskant', run: () => chance(.5) ? ({ text: 'Die Geschichte verpufft nach zwei Tagen.', eff: { ruf: 1 } }) : ({ text: 'Weitere Fotos tauchen auf. Jetzt glaubt dir niemand mehr.', eff: { ruf: -7, trainer: -7, moral: -6 } }) },
+      { l: 'Schweigen und liefern', h: 'Mentalität', run: () => ({ text: 'Kein Kommentar. Die Presse verliert schnell das Interesse, wenn niemand Öl nachgießt.', eff: { mentalitaet: .5, moral: -2 } }) }
+    ] },
+  { id: 'party', gewicht: 2, eyebrow: 'Privat', titel: 'Einladung',
+    text: () => 'Zwei Mitspieler feiern Geburtstag, groß, in der Stadt. Am Samstag ist Spieltag.',
+    wahl: [
+      { l: 'Kurz hin, früh weg', h: 'Balance', run: () => ({ text: 'Eine Stunde, ein Wasser, viele Fotos. Die Mannschaft freut sich, dass du da warst.', eff: { moral: 6, energie: -4 } }) },
+      { l: 'Durchmachen', h: 'Teuer', run: () => ({ text: 'Es wird spät. Sehr spät. Das Training am Sonntag ist eine Qual.', eff: { moral: 13, energie: -22, fitness: -6, trainer: -5 } }) },
+      { l: 'Absagen und schlafen', h: 'Profi', run: () => ({ text: 'Du bleibst zuhause. Am Samstag bist du der Frischeste auf dem Platz.', eff: { energie: 12, moral: -4, trainer: 3 } }) }
+    ] },
+  { id: 'konkurrenz', gewicht: 3, eyebrow: 'Transfermarkt', titel: 'Konkurrenz auf deiner Position',
+    text: () => { const n = zufallsname(pick(NATIONEN).pool); S._rivale = n.v + ' ' + n.n; return 'Der Verein verpflichtet ' + S._rivale + ' — genau für deine Position, und für viel Geld.'; },
+    wahl: [
+      { l: 'Kampf annehmen', h: 'Mentalität', run: () => ({ text: 'Du gehst ab jetzt als Erster raus und als Letzter rein. Der Trainer sieht es.', eff: { trainer: 6, mentalitaet: .7, energie: -8 } }) },
+      { l: 'Von ihm lernen', h: 'Klug', run: () => ({ text: 'Du klebst im Training an ihm. Was er kann, versuchst du zu kopieren.', eff: { pass: .5, dribbling: .5, moral: 2 } }) },
+      { l: 'Berater anrufen', h: 'Ausstieg', run: () => { S.p.wechselwunsch = true; return { text: 'Dein Berater beginnt, sich umzuhören. Im nächsten Transferfenster wird es konkret.', eff: { moral: -3, trainer: -4 } }; } }
+    ] },
+  { id: 'kapitaen', gewicht: 2, wenn: () => S.p.trainer > 72 && S.p.alter > 23 && !S.p.kapitaen, eyebrow: 'Verantwortung', titel: 'Die Binde',
+    text: () => 'Der Kapitän fällt lange aus. Der Trainer hält dir die Binde hin.',
+    wahl: [
+      { l: 'Annehmen', h: 'Druck', run: () => { S.p.kapitaen = true; return { text: 'Du bist Kapitän. Ab jetzt schaut das ganze Stadion zuerst auf dich.', eff: { mentalitaet: 1.2, ruf: 5, trainer: 5, moral: 6 } }; } },
+      { l: 'Ablehnen — erst Leistung', h: 'Bescheiden', run: () => ({ text: 'Er respektiert es, ist aber sichtbar enttäuscht.', eff: { trainer: -3, moral: 2 } }) }
+    ] },
+  { id: 'jugend', gewicht: 2, wenn: () => S.p.alter > 25, eyebrow: 'Nachwuchs', titel: 'Ein Junge aus der U19',
+    text: () => 'Ein 17-Jähriger trainiert seit Wochen mit. Nach dem Abschlusstraining fragt er dich, wie man den Sprung schafft.',
+    wahl: [
+      { l: 'Ihn unter die Fittiche nehmen', h: 'Vorbild', run: () => ({ text: 'Ihr bleibt nach jedem Training eine halbe Stunde länger. Die Kabine bemerkt es.', eff: { trainer: 6, mentalitaet: .6, moral: 4, energie: -5 } }) },
+      { l: 'Kurz abwimmeln', h: 'Fokus', run: () => ({ text: 'Du hast eigene Probleme. Der Junge redet später mit jemand anderem.', eff: { moral: -2 } }) }
+    ] },
+  { id: 'wetten', gewicht: 1, eyebrow: 'Schwierig', titel: 'Der Anruf',
+    text: () => 'Ein alter Bekannter aus der Jugend meldet sich. Er redet um den heißen Brei herum, dann kommt es: eine gelbe Karte zur richtigen Minute, viel Geld.',
+    wahl: [
+      { l: 'Sofort auflegen und melden', h: 'Richtig', run: () => ({ text: 'Der Verein und der Verband nehmen es auf. Du hörst nie wieder von ihm.', eff: { ruf: 4, mentalitaet: .5, moral: 2 } }) },
+      { l: 'Auflegen, nichts sagen', h: 'Grauzone', run: () => ({ text: 'Du legst auf. Es nagt trotzdem an dir.', eff: { moral: -4 } }) }
+    ] },
+  { id: 'zwicken', gewicht: 3, wenn: () => S.p.energie < 55 && !S.p.verletzung, eyebrow: 'Körper', titel: 'Es zwickt',
+    text: () => 'Der hintere Oberschenkel meldet sich. Nicht schlimm — noch nicht.',
+    wahl: [
+      { l: 'Dem Arzt sagen und pausieren', h: 'Vernünftig', run: () => ({ text: 'Zwei Tage Rad fahren statt Rasen. Der Trainer ist genervt, der Physio erleichtert.', eff: { energie: 14, fitness: 8, trainer: -3 } }) },
+      { l: 'Durchbeißen', h: 'Riskant', run: () => chance(.45) ? (verletzen(), { text: 'Es reißt im nächsten Sprint. Du hättest es wissen müssen.', eff: { moral: -10 } }) : ({ text: 'Es hält. Diesmal.', eff: { mentalitaet: .4, energie: -6 } }) }
+    ] },
+  { id: 'trainerwechsel', gewicht: 2, eyebrow: 'Verein', titel: 'Neuer Trainer',
+    text: () => 'Der Trainer wird entlassen. Der Nachfolger bringt eine neue Spielidee mit — und kennt dich nur von Videos.',
+    wahl: [
+      { l: 'Dich sofort vorstellen', h: 'Offensiv', run: () => ({ text: 'Ihr redet eine halbe Stunde über seine Spielidee. Er mag Spieler, die fragen.', eff: { trainer: 10 } }) },
+      { l: 'Abwarten und trainieren', h: 'Neutral', run: () => { S.p.trainer = clamp(50 + ri(-8, 8), 0, 100); return { text: 'Er trifft seine Entscheidung nach dem, was er sieht. Von vorn für alle.', eff: {} }; } }
+    ] },
+  { id: 'fanaktion', gewicht: 2, eyebrow: 'Fans', titel: 'Kinderstation',
+    text: () => 'Der Verein sucht Spieler für einen Besuch in der Kinderklinik. Termin: Mittwochnachmittag, dein freier Nachmittag.',
+    wahl: [
+      { l: 'Mitfahren', h: 'Herz', run: () => ({ text: 'Drei Stunden Autogramme und Selfies. Die Bilder gehen durch die halbe Stadt.', eff: { ruf: 5, follower: Math.round(S.p.follower * .07 + 900), moral: 5, energie: -5 } }) },
+      { l: 'Absagen', h: 'Frei', run: () => ({ text: 'Du bleibst zuhause. Niemand sagt etwas — aber der Pressechef merkt es sich.', eff: { energie: 6, ruf: -2 } }) }
+    ] },
+  { id: 'shitstorm', gewicht: 2, wenn: () => S.p.follower > 60000, eyebrow: 'Netz', titel: 'Shitstorm',
+    text: () => 'Nach der Niederlage stehen unter deinem letzten Post 4.000 Kommentare. Die wenigsten sind freundlich.',
+    wahl: [
+      { l: 'Kommentare abschalten', h: 'Schutz', run: () => ({ text: 'Ruhe im Kopf, dafür Häme in den Medien: „Dünne Haut."', eff: { moral: 4, ruf: -2 } }) },
+      { l: 'Ehrlich antworten', h: 'Mutig', run: () => chance(.6) ? ({ text: 'Dein Post wird geteilt wie nie. Sogar gegnerische Fans zollen Respekt.', eff: { follower: Math.round(S.p.follower * .12 + 2500), ruf: 4, moral: 3 } }) : ({ text: 'Ein Satz wird aus dem Zusammenhang gerissen. Es wird schlimmer.', eff: { moral: -8, ruf: -4 } }) },
+      { l: 'Handy weglegen', h: 'Profi', run: () => ({ text: 'Du gibst das Handy dem Berater und trainierst. Alte Schule.', eff: { mentalitaet: .5, energie: 4 } }) }
+    ] },
+  { id: 'auto', gewicht: 1, wenn: () => S.p.geld > 400000, eyebrow: 'Privat', titel: 'Das Auto',
+    text: () => 'Ein Händler bietet dir einen Sportwagen an. Mitspieler machen schon Fotos davon.',
+    wahl: [
+      { l: 'Kaufen', h: money(280000), run: () => ({ text: 'Er steht ab morgen auf dem Spielerparkplatz. Die Kabine feiert, der Trainer verdreht die Augen.', eff: { geld: -280000, moral: 9, follower: Math.round(S.p.follower * .05 + 1200), trainer: -2 } }) },
+      { l: 'Lieber investieren', h: 'Klug', run: () => ({ text: 'Dein Berater legt das Geld an. Unspektakulär, aber in zehn Jahren wirst du dankbar sein.', eff: { geld: 40000, mentalitaet: .3 } }) }
+    ] },
+  { id: 'heimat', gewicht: 2, eyebrow: 'Herkunft', titel: 'Der alte Verein',
+    text: () => 'Dein Jugendverein braucht dringend einen neuen Kunstrasen und fragt an, ob du hilfst.',
+    wahl: [
+      { l: 'Den Platz bezahlen', h: money(90000), run: () => ({ text: 'Der Platz trägt jetzt deinen Namen. Deine Mutter schickt dir zwanzig Fotos.', eff: { geld: -90000, moral: 10, ruf: 6, follower: 3000 } }) },
+      { l: 'Trikots spenden', h: 'Klein', run: () => ({ text: 'Hundert Trikots, ein Nachmittag, viele glückliche Gesichter.', eff: { geld: -9000, moral: 5, ruf: 2 } }) },
+      { l: 'Später', h: '—', run: () => ({ text: 'Du verschiebst es. Es bleibt ein ungutes Gefühl.', eff: { moral: -3 } }) }
+    ] },
+  { id: 'ernaehrung', gewicht: 2, eyebrow: 'Betreuung', titel: 'Ernährungsberatung',
+    text: () => 'Der Verein bietet eine sechswöchige Ernährungs- und Schlafanalyse an. Kostet dich Freizeit, kein Geld.',
+    wahl: [
+      { l: 'Voll mitmachen', h: 'Körper', run: () => ({ text: 'Weniger Zucker, festere Schlafzeiten, Blutwerte alle zwei Wochen. Du fühlst dich leichter.', eff: { fitness: 11, physis: .6, energie: 6, moral: -2 } }) },
+      { l: 'Nur das Nötigste', h: 'Locker', run: () => ({ text: 'Du machst das Minimum. Reicht auch.', eff: { fitness: 3 } }) }
+    ] },
+  { id: 'schiri', gewicht: 2, eyebrow: 'Nachspiel', titel: 'Kritik am Schiedsrichter',
+    text: () => 'Im Interview hast du die Schiedsrichterleistung zerlegt. Der Verband lädt dich vor.',
+    wahl: [
+      { l: 'Aussage zurücknehmen', h: 'Ruhe', run: () => ({ text: 'Geldstrafe im niedrigen Bereich, Sache erledigt.', eff: { geld: -15000, ruf: -1 } }) },
+      { l: 'Dabei bleiben', h: 'Haltung', run: () => ({ text: 'Zwei Spiele Sperre-Androhung und eine saftige Strafe — aber die Kurve singt deinen Namen.', eff: { geld: -45000, ruf: 5, moral: 4, mentalitaet: .4 } }) }
+    ] }
+];
+
+function sponsorAngebot() {
+  const firmen = ['Nordstern Sportswear', 'Kraftwerk Energy', 'Halbzeit Getränke', 'Rasenmeister', 'Volt Mobilfunk', 'Adler Automobile', 'Pixelpass Gaming', 'Sonntagsheld Mode'];
+  const f = S.p.follower;
+  const pro = clamp(Math.round((Math.sqrt(f) * 18 + S.p.ruf * 120) / 100) * 100, 600, 150000);
+  return { firma: pick(firmen), pro };
+}
+
+function ereignisWaehlen() {
+  const moeglich = EREIGNISSE.filter(e => (!e.wenn || e.wenn()) && e.id !== S.letztesEreignis);
+  if (!moeglich.length) return null;
+  const summe = moeglich.reduce((a, e) => a + (e.gewicht || 1), 0);
+  let r = Math.random() * summe;
+  for (const e of moeglich) { r -= (e.gewicht || 1); if (r <= 0) return e; }
+  return moeglich[0];
+}
+
+/* ========================== WOCHENABLAUF ========================== */
+const POKAL_RUNDEN = ['1. Runde', '2. Runde', 'Achtelfinale', 'Viertelfinale', 'Halbfinale', 'Finale'];
+const EURO_PHASEN = ['Ligaphase 1', 'Ligaphase 2', 'Ligaphase 3', 'Ligaphase 4', 'Ligaphase 5', 'Ligaphase 6', 'Achtelfinale', 'Viertelfinale', 'Halbfinale', 'Finale'];
+
+function pokalGegner() {
+  const land = LG(CL(S.p.clubId).liga).land;
+  const pool = CLUBS.filter(c => LG(c.liga).land === land && c.id !== S.p.clubId);
+  const spaet = S.pokal.runde >= 3;
+  const gefiltert = pool.filter(c => spaet ? c.staerke > 55 : true);
+  return pick(gefiltert.length ? gefiltert : pool).id;
+}
+function euroGegner() {
+  const pool = CLUBS.filter(c => LG(c.liga).euro && c.id !== S.p.clubId && c.staerke >= (S.euro.phase >= 6 ? 76 : 66));
+  return pick(pool).id;
+}
+function wochenSpiele(w) {
+  const out = [];
+  const tag = S.liga.spieltage[w - 1];
+  if (tag) {
+    const m = tag.find(x => x[0] === S.p.clubId || x[1] === S.p.clubId);
+    if (m) out.push({ comp: 'liga', heim: m[0] === S.p.clubId, gegnerId: m[0] === S.p.clubId ? m[1] : m[0], spieltag: w });
+  }
+  if (S.pokal.drin && S.pokal.wochen.includes(w)) out.push({ comp: 'pokal', heim: chance(.5), gegnerId: pokalGegner(), runde: S.pokal.runde });
+  if (S.euro.drin && S.euro.wochen.includes(w)) out.push({ comp: 'euro', heim: chance(.5), gegnerId: euroGegner(), phase: S.euro.phase });
+  return out;
+}
+function aktuelleSpiele() {
+  if (!S.spieleCache || S.spieleCache.woche !== S.woche || S.spieleCache.club !== S.p.clubId) {
+    S.spieleCache = { woche: S.woche, club: S.p.clubId, liste: wochenSpiele(S.woche) };
+  }
+  return S.spieleCache.liste;
+}
+function wettbewerbName(fx) {
+  if (fx.comp === 'liga') return LG(S.liga.id).name + ' · ' + fx.spieltag + '. Spieltag';
+  if (fx.comp === 'pokal') return S.pokal.name + ' · ' + POKAL_RUNDEN[Math.min(fx.runde, 5)];
+  if (fx.comp === 'euro') return 'Europapokal · ' + EURO_PHASEN[Math.min(fx.phase, 9)];
+  return 'Länderspiel';
+}
+
+function simLigaSpieltag(w, eigenes) {
+  const tag = S.liga.spieltage[w - 1];
+  if (!tag) return;
+  for (const [h, a] of tag) {
+    if (h === S.p.clubId || a === S.p.clubId) continue;
+    const [th, tg] = simErgebnis(CL(h).staerke, CL(a).staerke);
+    buchen(h, a, th, tg);
+  }
+}
+
+async function planAnwenden() {
+  const plan = PLAN(S.plan) || PLAENE[0];
+  wirke(plan.eff);
+  if (plan.train) {
+    if (plan.athletik) {
+      wirke({ physis: trainingsGewinn(.6), tempo: trainingsGewinn(.45) });
+    } else {
+      const g = trainingsGewinn(plan.train);
+      const eff = {}; eff[S.trainFokus] = g;
+      wirke(eff);
+    }
+  }
+  if (plan.social) {
+    const zuwachs = Math.round(S.p.follower * .035 + 240 + S.p.ruf * 26);
+    wirke({ follower: zuwachs });
+  }
+  if (plan.risiko && chance(plan.risiko * (S.p.energie < 45 ? 1.9 : 1))) {
+    const v = verletzen();
+    await sagen({ eyebrow: 'Verletzung', titel: v.name, text: 'Doppelschichten fordern ihren Preis: Im Abschlusstraining reißt es dich. Pause: ' + v.wochen + ' Wochen.' });
+  }
+  if (plan.skandal && chance(plan.skandal)) {
+    wirke({ trainer: -7, ruf: -3 });
+    await sagen({ eyebrow: 'Ärger', titel: 'Erwischt', text: 'Ein Fan filmt dich nachts vor einem Club. Das Video läuft am nächsten Morgen in jeder Sportsendung — der Trainer sagt nichts, und genau das ist das Problem.' });
+  }
+}
+
+function wochenAbschluss() {
+  const p = S.p;
+  p.geld += p.vertrag.gehalt / 52;
+  p.sponsoren.forEach(s => p.geld += s.pro);
+  if (p.extras && p.extras.immobilie) p.geld += 2500;
+  p.energie = clamp(p.energie + (p.verletzung ? 9 : 6), 0, 100);
+  p.fitness = clamp(p.fitness + (p.verletzung ? 1.5 : 1.2), 0, 100);
+  p.moral += (62 - p.moral) * .06;
+  p.trainer += (50 - p.trainer) * .03;
+  const drift = Math.round(p.follower * .004 + p.ruf * rnd(2, 9));
+  p.follower = Math.max(200, Math.round(p.follower + drift - p.follower * .006));
+  p.ruf = clamp(p.ruf - .15, 0, 100);
+}
+
+async function wocheVor() {
+  if (busy) return;
+  busy = true;
+  try {
+    const w = S.woche;
+    if (S.p.verletzung) {
+      S.p.verletzung.wochen--;
+      S.p.energie = clamp(S.p.energie + 8, 0, 100);
+      S.p.fitness = clamp(S.p.fitness + 4, 0, 100);
+      if (S.p.verletzung.wochen <= 0) {
+        log('Nach ' + S.p.verletzung.name + ' zurück im Mannschaftstraining.', 'good');
+        S.p.verletzung = null;
+      }
+    } else {
+      await planAnwenden();
+    }
+    if (!S.p.verletzung && chance(.3)) {
+      const e = ereignisWaehlen();
+      if (e) await ereignisSpielen(e);
+    }
+    for (const fx of aktuelleSpiele()) await spielAustragen(fx);
+    S.spieleCache = null;
+    simLigaSpieltag(w);
+    wochenAbschluss();
+    if (w === S.winterWoche) await transferfenster(false);
+    if (S.p.nat.dabei && !S.p.verletzung && (w === Math.round(S.saisonWochen * .25) || w === Math.round(S.saisonWochen * .62))) {
+      const b = natSpiele(2);
+      const meine = b.filter(x => x.spielt);
+      wirke({ energie: -(meine.length ? 7 : 2) });
+      if (meine.length) {
+        const tore = meine.reduce((a, x) => a + x.tore, 0);
+        log('Länderspielpause: ' + b.map(x => x.flag + ' ' + x.gegner + ' ' + x.th + ':' + x.tg).join(' · ') + (tore ? ' · ' + tore + ' Tor(e) von dir' : ''), 'gold');
+      }
+    }
+    if (w === Math.round(S.saisonWochen * .3)) natCheck();
+    S.woche++;
+    if (S.woche > S.saisonWochen) await saisonEnde();
+  } finally {
+    busy = false;
+  }
+  speichern();
+  render();
+}
+
+async function ereignisSpielen(e) {
+  S.letztesEreignis = e.id;
+  const text = typeof e.text === 'function' ? e.text() : e.text;
+  const idx = await frage({
+    eyebrow: e.eyebrow, titel: e.titel, text,
+    wahlen: e.wahl.map(w => ({ label: w.l, hinweis: w.h }))
+  });
+  const res = e.wahl[idx].run();
+  const eff = wirke(res.eff || {});
+  log(e.titel + ': ' + res.text, 'gold');
+  await sagen({ eyebrow: e.eyebrow, titel: e.titel, text: res.text, effekte: eff });
+}
+
+/* ========================== TRANSFERS ========================== */
+function jahresGehaltFuer(club) {
+  const basis = Math.pow(club.staerke / 10, 5.2) * 45;
+  const f = clamp(.45 + (OVR() - club.staerke) * .07, .3, 2.4);
+  return Math.round(basis * f / 5000) * 5000;
+}
+function angeboteErzeugen(sommer) {
+  const p = S.p, o = OVR();
+  const niveau = o + formWert() * 1.3 + (p.ruf - 40) * .1 + (p.alter <= 21 ? 3 : 0) - (p.alter >= 32 ? 6 : 0);
+  const aktuell = CL(p.clubId);
+  const kandidaten = CLUBS.filter(c => {
+    if (c.id === p.clubId) return false;
+    if (c.liga === 'sa1' && p.alter < 28) return false;
+    const d = c.staerke - niveau;
+    return d < 4 && d > -18;
+  });
+  const gewichtet = kandidaten.map(c => ({ c, score: c.staerke + rnd(-9, 9) + (c.staerke > aktuell.staerke ? 4 : 0) }))
+    .sort((a, b) => b.score - a.score);
+  let anzahl = 0;
+  const wahrsch = clamp(.18 + (o - aktuell.staerke) * .05 + formWert() * .05 + (p.wechselwunsch ? .3 : 0) + (p.vertrag.jahre <= 0 ? .5 : 0), 0, .95);
+  if (chance(wahrsch)) anzahl = ri(1, 3);
+  if (!sommer) anzahl = Math.min(anzahl, 2);
+  const out = [];
+  for (let i = 0; i < anzahl && i < gewichtet.length; i++) {
+    const c = gewichtet[i].c;
+    const gehalt = jahresGehaltFuer(c);
+    out.push({
+      clubId: c.id, gehalt, jahre: p.alter > 31 ? ri(1, 2) : ri(3, 5),
+      abloese: p.vertrag.jahre <= 0 ? 0 : Math.round(marktwert() * rnd(.8, 1.5) / 100000) * 100000,
+      rolle: c.staerke - 4 < OVR() ? 'Stammspieler' : 'Rotationsspieler'
+    });
+  }
+  return out;
+}
+
+async function vertragVerhandeln(angebot, clubName) {
+  const idx = await frage({
+    eyebrow: 'Vertragsverhandlung', titel: clubName,
+    text: 'Auf dem Tisch liegen ' + money(angebot.gehalt) + ' pro Jahr über ' + angebot.jahre + ' Jahre. Dein Berater schaut dich an: Wie hart gehst du rein?',
+    wahlen: [
+      { label: 'Unterschreiben wie angeboten', hinweis: money(angebot.gehalt) + ' / Jahr' },
+      { label: 'Nachverhandeln', hinweis: '+35 % fordern · mittleres Risiko' },
+      { label: 'Maximum fordern', hinweis: '+80 % fordern · hohes Risiko' },
+      { label: 'Doch nicht', hinweis: 'Gespräch abbrechen' }
+    ]
+  });
+  if (idx === 3) return null;
+  if (idx === 0) return angebot;
+  const faktor = idx === 1 ? 1.35 : 1.8;
+  const erfolg = idx === 1 ? .62 : .3;
+  if (chance(erfolg + (S.p.ruf - 40) * .003)) {
+    angebot.gehalt = Math.round(angebot.gehalt * faktor / 5000) * 5000;
+    await sagen({ eyebrow: 'Verhandlung', titel: 'Sie zahlen', text: 'Der Sportdirektor braucht zwei Tage — dann liegt ein Vertrag über ' + money(angebot.gehalt) + ' pro Jahr auf dem Tisch.' });
+    return angebot;
+  }
+  if (chance(.45)) {
+    await sagen({ eyebrow: 'Verhandlung', titel: 'Abgesagt', text: 'Zu gierig. Der Verein zieht das Angebot zurück und verpflichtet einen anderen Spieler.' });
+    return null;
+  }
+  await sagen({ eyebrow: 'Verhandlung', titel: 'Letztes Wort', text: 'Der Verein bleibt hart: ' + money(angebot.gehalt) + ' pro Jahr, keinen Euro mehr. Du unterschreibst.' });
+  return angebot;
+}
+
+function wechselVerein(clubId, vertrag) {
+  const alt = CL(S.p.clubId), neu = CL(clubId);
+  const ligaWechsel = alt.liga !== neu.liga;
+  S.p.clubId = clubId;
+  S.p.vertrag = { gehalt: vertrag.gehalt, jahre: vertrag.jahre };
+  S.p.trainer = clamp(48 + (OVR() - neu.staerke) * 1.2 + ri(-5, 5), 10, 90);
+  S.p.wechselwunsch = false;
+  S.p.kapitaen = false;
+  log('Wechsel zu ' + neu.name + ' — ' + money(vertrag.gehalt) + ' pro Jahr bis ' + (S.jahr + vertrag.jahre) + '.', 'gold');
+  if (ligaWechsel && S.woche <= S.saisonWochen) starteSaisonTeilweise(S.euro.drin);
+}
+function starteSaisonTeilweise(euroDrin) {
+  const woche = S.woche, stats = S.stats, natStats = S.natStats, titel = S.titelDieseSaison;
+  const pokalAlt = S.pokal, euroAlt = S.euro;
+  starteSaison(euroDrin);
+  S.stats = stats; S.natStats = natStats; S.titelDieseSaison = titel;
+  S.woche = Math.min(woche, S.saisonWochen);
+  S.pokal.drin = pokalAlt.drin; S.pokal.runde = pokalAlt.runde;
+  S.euro.phase = euroAlt.phase; S.euro.punkte = euroAlt.punkte;
+  for (let w = 1; w < S.woche; w++) simLigaSpieltag(w);
+}
+
+async function transferfenster(sommer) {
+  const angebote = angeboteErzeugen(sommer);
+  const p = S.p;
+  if (p.vertrag.jahre <= 0 && !angebote.length) {
+    const club = CL(p.clubId);
+    const gehalt = Math.round(jahresGehaltFuer(club) * .8 / 5000) * 5000;
+    await sagen({ eyebrow: 'Vertrag', titel: 'Kein Markt', text: 'Niemand ruft an. ' + club.name + ' bietet dir einen Anschlussvertrag über ' + money(gehalt) + ' pro Jahr — nimm ihn oder such dir einen Beruf.' });
+    p.vertrag = { gehalt, jahre: 1 };
+    return;
+  }
+  if (!angebote.length) return;
+  const wahlen = angebote.map(a => {
+    const c = CL(a.clubId);
+    return { label: c.name, hinweis: LG(c.liga).flag + ' ' + LG(c.liga).name + ' · ' + money(a.gehalt) + '/Jahr · ' + a.jahre + ' Jahre · ' + a.rolle + (a.abloese ? ' · Ablöse ' + money(a.abloese) : ' · ablösefrei') };
+  });
+  wahlen.push({ label: 'Bleiben', hinweis: 'Bei ' + CL(p.clubId).name + ' weitermachen' });
+  const idx = await frage({
+    eyebrow: sommer ? 'Sommer-Transferfenster' : 'Winter-Transferfenster',
+    titel: angebote.length > 1 ? 'Angebote auf dem Tisch' : 'Ein Verein will dich',
+    text: 'Dein Marktwert liegt bei ' + money(marktwert()) + '. Dein Berater legt die Mappen vor dich hin.',
+    wahlen
+  });
+  if (idx === wahlen.length - 1) {
+    if (p.vertrag.jahre <= 0) {
+      const club = CL(p.clubId);
+      const gehalt = Math.round(jahresGehaltFuer(club) / 5000) * 5000;
+      p.vertrag = { gehalt, jahre: ri(2, 4) };
+      await sagen({ eyebrow: 'Vertrag', titel: 'Verlängert', text: club.name + ' verlängert mit dir: ' + money(gehalt) + ' pro Jahr.' });
+    } else {
+      wirke({ trainer: 4, moral: 3 });
+      await sagen({ eyebrow: 'Treue', titel: 'Du bleibst', text: 'Du schlägst alles aus. Die Kurve dankt es dir mit einem Banner im nächsten Heimspiel.' });
+    }
+    return;
+  }
+  const a = angebote[idx];
+  const fertig = await vertragVerhandeln(a, CL(a.clubId).name);
+  if (!fertig) return;
+  wechselVerein(a.clubId, fertig);
+  await sagen({ eyebrow: 'Transfer', titel: 'Willkommen bei ' + CL(a.clubId).name, text: 'Medizincheck bestanden, Foto mit Schal, Vertrag bis ' + (S.jahr + fertig.jahre) + '. Ein neues Kapitel.', effekte: [{ t: money(fertig.gehalt) + ' / Jahr', gut: true }, { t: fertig.jahre + ' Jahre', gut: true }] });
+}
+
+/* ========================== NATIONALMANNSCHAFT ========================== */
+function natCheck() {
+  const p = S.p, nat = NAT(p.natId);
+  if (p.nat.dabei) return;
+  const schwelle = nat.staerke - 14;
+  if (OVR() >= schwelle && p.ruf > 22) {
+    p.nat.dabei = true;
+    log('Erste Einladung in die Nationalmannschaft von ' + nat.name + '.', 'gold');
+    p.pendingNat = true;
+  }
+}
+function natSpiele(anzahl, turnier) {
+  const p = S.p, nat = NAT(p.natId);
+  const berichte = [];
+  for (let i = 0; i < anzahl; i++) {
+    const gegner = pick(NATIONEN.filter(n => n.id !== p.natId));
+    const [th, tg] = simErgebnis(nat.staerke + 2, gegner.staerke);
+    const spielt = chance(clamp(.35 + (OVR() - nat.staerke) * .07, .1, .95));
+    let tore = 0;
+    if (spielt) {
+      p.nat.spiele++; S.natStats.spiele++;
+      const ch = POS(p.pos).angriff * (OVR() / 88);
+      tore = Math.min(poisson(ch * .55), th);
+      p.nat.tore += tore; S.natStats.tore += tore;
+    }
+    berichte.push({ gegner: gegner.name, flag: gegner.flag, th, tg, spielt, tore });
+  }
+  return berichte;
+}
+async function turnierSpielen() {
+  const p = S.p, nat = NAT(p.natId);
+  const jahr = S.jahr + 1;
+  const name = jahr % 4 === 2 ? 'Weltmeisterschaft ' + jahr : 'Kontinentalmeisterschaft ' + jahr;
+  const gruppe = natSpiele(3, true);
+  let runden = ['Achtelfinale', 'Viertelfinale', 'Halbfinale', 'Finale'];
+  let raus = null, gewonnen = false;
+  const ko = [];
+  for (const r of runden) {
+    const gegner = pick(NATIONEN.filter(n => n.id !== p.natId && n.staerke > 70));
+    const pSieg = clamp(.5 + (nat.staerke + (OVR() - nat.staerke) * .12 - gegner.staerke) * .035, .18, .85);
+    const sieg = chance(pSieg);
+    const [th, tg] = sieg ? [ri(1, 3), ri(0, 1)] : [ri(0, 1), ri(1, 3)];
+    const spielt = chance(clamp(.4 + (OVR() - nat.staerke) * .07, .12, .96));
+    let tore = 0;
+    if (spielt) { p.nat.spiele++; S.natStats.spiele++; tore = Math.min(poisson(POS(p.pos).angriff * .5), th); p.nat.tore += tore; S.natStats.tore += tore; }
+    ko.push({ runde: r, gegner: gegner.name, flag: gegner.flag, th, tg, spielt, tore });
+    if (!sieg) { raus = r; break; }
+    if (r === 'Finale') gewonnen = true;
+  }
+  if (gewonnen) titelGeben(jahr % 4 === 2 ? 'Weltmeister' : 'Kontinentalmeister', jahr, nat.name);
+  const zeilen = gruppe.map(g => 'Gruppenphase · ' + g.flag + ' ' + g.gegner + ' — ' + g.th + ':' + g.tg + (g.spielt ? (g.tore ? ' · ' + g.tore + ' Tor(e) von dir' : ' · du gespielt') : ' · du auf der Bank'))
+    .concat(ko.map(k => k.runde + ' · ' + k.flag + ' ' + k.gegner + ' — ' + k.th + ':' + k.tg + (k.spielt ? (k.tore ? ' · ' + k.tore + ' Tor(e) von dir' : ' · du gespielt') : ' · du auf der Bank')));
+  await sagen({
+    eyebrow: nat.flag + ' ' + name,
+    titel: gewonnen ? 'Ihr seid ' + (jahr % 4 === 2 ? 'Weltmeister' : 'Europameister') + '!' : 'Aus im ' + (raus || 'Turnier'),
+    text: zeilen.join('\n'),
+    effekte: gewonnen ? [{ t: 'Ruf +14', gut: true }, { t: 'Moral +18', gut: true }] : []
+  });
+  wirke(gewonnen ? { ruf: 14, moral: 18, follower: Math.round(p.follower * .5 + 40000), energie: -14 }
+                 : { ruf: 5, moral: -3, follower: Math.round(p.follower * .12 + 4000), energie: -12 });
+}
+
+function titelGeben(name, jahr, wo) {
+  const eintrag = { name, jahr: jahr || S.jahr + 1, club: wo || CL(S.p.clubId).name };
+  S.p.titel.push(eintrag);
+  S.titelDieseSaison.push(eintrag);
+  log('Titel gewonnen: ' + name + '.', 'gold');
+}
+
+/* ========================== WELTSTARS & AUSZEICHNUNGEN ========================== */
+function baueStars() {
+  S.stars = [];
+  const top = CLUBS.filter(c => c.staerke >= 76);
+  for (let i = 0; i < 22; i++) {
+    const nat = pick(NATIONEN), nm = zufallsname(nat.pool);
+    S.stars.push({
+      name: nm.v + ' ' + nm.n, natId: nat.id, clubId: pick(top).id, alter: ri(21, 32),
+      ovr: ri(83, 93), pos: pick(['ST', 'ST', 'FL', 'FL', 'OM', 'ZM', 'IV']), tore: 0, vorlagen: 0, punkte: 0
+    });
+  }
+}
+function starsSaison() {
+  for (const s of S.stars) {
+    const ang = POS(s.pos).angriff;
+    s.tore = Math.round(poisson(clamp((s.ovr - 70) * ang * .95, .2, 26)));
+    s.vorlagen = Math.round(poisson(clamp((s.ovr - 70) * .5, .2, 14)));
+    const titel = chance(.22) ? 1 : 0;
+    s.punkte = Math.round(s.tore * 3.2 + s.vorlagen * 2 + s.ovr * 1.35 + CL(s.clubId).staerke * .3 + titel * 14 + rnd(-6, 10));
+  }
+  S.stars.sort((a, b) => b.punkte - a.punkte);
+}
+function meinePunkte() {
+  const st = S.stats, avg = st.noten.length ? st.noten.reduce((a, b) => a + b, 0) / st.noten.length : 4;
+  return Math.round(st.tore * 3.2 + st.vorlagen * 2 + Math.max(0, 3.7 - avg) * 24 + S.titelDieseSaison.length * 14
+    + OVR() * 1.35 + CL(S.p.clubId).staerke * .3 + S.natStats.tore * 2.2);
+}
+function weltrangliste() {
+  const liste = S.stars.map(s => ({ name: s.name, club: CL(s.clubId).name, punkte: s.punkte, tore: s.tore, ovr: s.ovr }));
+  liste.push({ name: S.p.vorname + ' ' + S.p.nachname, club: CL(S.p.clubId).name, punkte: meinePunkte(), tore: S.stats.tore, ovr: OVR(), ich: true });
+  return liste.sort((a, b) => b.punkte - a.punkte);
+}
+function torjaegerListe() {
+  const clubs = ligaClubs(S.liga.id);
+  const liste = clubs.filter(c => c.id !== S.p.clubId).map(c => {
+    const n = zufallsname(pick(NATIONEN).pool);
+    return { name: n.v + ' ' + n.n, club: c.kurz, tore: Math.round(poisson(clamp((c.staerke - 42) / 3.1, .6, 22))) };
+  });
+  liste.push({ name: S.p.vorname + ' ' + S.p.nachname, club: CL(S.p.clubId).kurz, tore: S.stats.tore, ich: true });
+  return liste.sort((a, b) => b.tore - a.tore);
+}
+
+/* ---------- Auf- und Abstieg des eigenen Vereins ---------- */
+const PYRAMIDE = ['de1', 'de2', 'de3'];
+function ligaTauschen(clubId, hoch) {
+  const c = CL(clubId), idx = PYRAMIDE.indexOf(c.liga);
+  if (idx < 0) return null;
+  const zielIdx = hoch ? idx - 1 : idx + 1;
+  if (zielIdx < 0 || zielIdx >= PYRAMIDE.length) return null;
+  const ziel = PYRAMIDE[zielIdx];
+  const gegenueber = ligaClubs(ziel).slice().sort((a, b) => hoch ? a.staerke - b.staerke : b.staerke - a.staerke)[0];
+  c.liga = ziel;
+  gegenueber.liga = PYRAMIDE[idx];
+  c.staerke = clamp(c.staerke + (hoch ? 5 : -5), 25, 95);
+  gegenueber.staerke = clamp(gegenueber.staerke + (hoch ? -5 : 5), 25, 95);
+  S.ligaTausch[c.id] = c.liga;
+  S.ligaTausch[gegenueber.id] = gegenueber.liga;
+  S.staerkeTausch[c.id] = c.staerke;
+  S.staerkeTausch[gegenueber.id] = gegenueber.staerke;
+  return ziel;
+}
+function tauschAnwenden() {
+  for (const id of Object.keys(S.ligaTausch || {})) { const c = CL(id); if (c) c.liga = S.ligaTausch[id]; }
+  for (const id of Object.keys(S.staerkeTausch || {})) { const c = CL(id); if (c) c.staerke = S.staerkeTausch[id]; }
+}
+
+/* ========================== SAISONENDE ========================== */
+async function saisonEnde() {
+  const p = S.p, club = CL(p.clubId), lg = LG(S.liga.id);
+  const platz = tabellenPlatz(p.clubId);
+  const st = S.stats;
+  const avg = st.noten.length ? st.noten.reduce((a, b) => a + b, 0) / st.noten.length : 0;
+
+  if (platz === 1) titelGeben(lg.tier === 1 ? (lg.meister || 'Meister') : 'Meister der ' + lg.name);
+
+  /* Auf- und Abstieg */
+  let aufstieg = null;
+  if (lg.tier > 1 && platz <= 2) aufstieg = ligaTauschen(p.clubId, true);
+  else if (lg.tier < 3 && platz >= ligaClubs(S.liga.id).length - 1) aufstieg = ligaTauschen(p.clubId, false) ? 'ab' : null;
+
+  /* Saisonbericht */
+  const tj = torjaegerListe();
+  starsSaison();
+  const rang = weltrangliste();
+  const meinWeltRang = rang.findIndex(r => r.ich) + 1;
+
+  const zeilen = [
+    'Abschlussplatz: ' + platz + '. in der ' + lg.name,
+    'Einsätze: ' + st.spiele + ' (' + st.startelf + ' von Beginn) · ' + Math.round(st.minuten) + ' Minuten',
+    'Tore: ' + st.tore + ' · Vorlagen: ' + st.vorlagen,
+    'Notenschnitt: ' + (avg ? note(avg) : '—'),
+    'Karten: ' + st.gelb + ' gelb, ' + st.rot + ' rot'
+  ];
+  if (S.natStats.spiele) zeilen.push('Länderspiele: ' + S.natStats.spiele + ' (' + S.natStats.tore + ' Tore)');
+  await sagen({ eyebrow: 'Saison ' + saisonLabel(S.jahr) + ' beendet', titel: club.name, text: zeilen.join('\n') });
+
+  /* Auszeichnungen */
+  const ehrungen = [];
+  if (tj[0].ich && st.tore > 0) { ehrungen.push('Torschützenkönig der ' + lg.name + ' (' + st.tore + ' Tore)'); titelGeben('Torschützenkönig ' + lg.name); }
+  if (avg && avg < 2.75 && st.spiele > S.saisonWochen * .5 && platz <= 4) { ehrungen.push('Spieler der Saison in der ' + lg.name); titelGeben('Spieler der Saison'); }
+  if (meinWeltRang === 1) { ehrungen.push('Goldener Ball — Weltfußballer des Jahres'); titelGeben('Goldener Ball'); }
+  else if (meinWeltRang <= 3) ehrungen.push('Platz ' + meinWeltRang + ' bei der Wahl zum Weltfußballer');
+  if (p.alter <= 21 && meinWeltRang <= 12) { ehrungen.push('Talent des Jahres'); titelGeben('Talent des Jahres'); }
+  if (aufstieg && aufstieg !== 'ab') ehrungen.push('Aufstieg in die ' + LG(aufstieg).name + ' mit ' + club.name);
+  if (aufstieg === 'ab') ehrungen.push('Abstieg mit ' + club.name);
+
+  if (ehrungen.length || S.titelDieseSaison.length) {
+    await sagen({
+      eyebrow: 'Saisonbilanz', titel: ehrungen.length ? 'Ausgezeichnet' : 'Titel',
+      text: (S.titelDieseSaison.length ? 'Titel: ' + S.titelDieseSaison.map(t => t.name).join(', ') + '\n' : '') + ehrungen.join('\n'),
+      effekte: ehrungen.map(e => ({ t: e, gut: !e.startsWith('Abstieg') }))
+    });
+    wirke({ ruf: ehrungen.length * 4, moral: 8, follower: Math.round(p.follower * (.15 * ehrungen.length) + 6000) });
+  }
+
+  /* Karriereeintrag */
+  S.karriere.push({
+    saison: saisonLabel(S.jahr), club: club.name, kurz: club.kurz, farbe: club.farbe, liga: lg.name, platz,
+    spiele: st.spiele, tore: st.tore, vorlagen: st.vorlagen, note: avg ? round1(avg) : 0, ovr: OVR(),
+    titel: S.titelDieseSaison.map(t => t.name), alter: p.alter
+  });
+
+  /* Alterung */
+  p.alter++;
+  if (p.alter >= 29) {
+    const v = p.alter >= 34 ? 3.4 : p.alter >= 32 ? 2.3 : 1.2;
+    wirke({ tempo: -rnd(v * .5, v), physis: -rnd(v * .3, v * .9), dribbling: -rnd(0, v * .6), zweikampf: -rnd(0, v * .4) });
+  }
+  if (p.alter <= 33) wirke({ mentalitaet: rnd(.25, .9), pass: p.alter > 27 ? rnd(0, .4) : 0 });
+  p.potenzial = clamp(p.potenzial + ri(-1, 1), 40, 99);
+  p.energie = clamp(p.energie + 25, 0, 100);
+  p.fitness = clamp(p.fitness + 12, 0, 100);
+  p.formNoten = [];
+
+  /* Vertrag */
+  p.vertrag.jahre--;
+  const euroQuali = platz <= 4 && LG(CL(p.clubId).liga).euro;
+
+  /* Karriereende? */
+  if (await karriereendeCheck()) return;
+
+  /* Sommerpause */
+  const turnierJahr = (S.jahr + 1) % 2 === 0;
+  if (p.nat.dabei && turnierJahr) await turnierSpielen();
+  else if (p.nat.dabei) {
+    const b = natSpiele(2);
+    if (b.some(x => x.spielt)) await sagen({
+      eyebrow: NAT(p.natId).flag + ' Nationalmannschaft', titel: 'Länderspiele im Sommer',
+      text: b.map(x => x.flag + ' ' + x.gegner + ' — ' + x.th + ':' + x.tg + (x.spielt ? (x.tore ? ' · ' + x.tore + ' Tor(e) von dir' : ' · du gespielt') : ' · ohne dich')).join('\n')
+    });
+  }
+  natCheck();
+  if (p.pendingNat) {
+    p.pendingNat = false;
+    await sagen({ eyebrow: NAT(p.natId).flag + ' Nationalmannschaft', titel: 'Du bist nominiert', text: 'Der Bundestrainer nennt deinen Namen in der Pressekonferenz. Erste Einladung in die A-Nationalmannschaft von ' + NAT(p.natId).name + '.', effekte: [{ t: 'Ruf +10', gut: true }, { t: 'Moral +12', gut: true }] });
+    wirke({ ruf: 10, moral: 12, follower: Math.round(p.follower * .3 + 12000) });
+  }
+
+  /* Sponsoren auslaufen */
+  p.sponsoren.forEach(s => s.jahre--);
+  p.sponsoren = p.sponsoren.filter(s => s.jahre > 0);
+
+  await transferfenster(true);
+
+  /* Neue Saison */
+  S.jahr++;
+  starteSaison(euroQuali || euroQualifiziert(p.clubId));
+  log('Saison ' + saisonLabel(S.jahr) + ' beginnt bei ' + CL(p.clubId).name + '.', 'gold');
+}
+
+async function karriereendeCheck() {
+  const p = S.p, o = OVR();
+  const zwang = p.alter >= 40 || (p.alter >= 35 && o < 52);
+  if (!zwang && p.alter < 34) return false;
+  if (zwang) { await karriereEnde('Der Körper macht nicht mehr mit.'); return true; }
+  const idx = await frage({
+    eyebrow: 'Entscheidung', titel: 'Noch eine Saison?',
+    text: 'Du bist ' + p.alter + '. Die Beine sind schwerer geworden, die Angebote kleiner. Dein Berater fragt vorsichtig, wie es weitergeht.',
+    wahlen: [{ label: 'Weitermachen', hinweis: 'Noch eine Saison' }, { label: 'Karriere beenden', hinweis: 'Schluss auf eigenen Wunsch' }]
+  });
+  if (idx === 1) { await karriereEnde('Du hörst auf eigenen Wunsch auf.'); return true; }
+  return false;
+}
+
+function legacyPunkte() {
+  const p = S.p;
+  const ges = S.karriere.reduce((a, k) => ({ s: a.s + k.spiele, t: a.t + k.tore, v: a.v + k.vorlagen }), { s: 0, t: 0, v: 0 });
+  const titel = p.titel.length;
+  const gross = p.titel.filter(t => /Goldener Ball|Weltmeister|Europapokal|Kontinentalmeister/.test(t.name)).length;
+  return Math.round(ges.t * 3 + ges.v * 1.6 + ges.s * .4 + titel * 22 + gross * 55 + p.nat.spiele * 1.2 + p.nat.tore * 3 + Math.max(...S.karriere.map(k => k.ovr), 40) * 3);
+}
+async function karriereEnde(grund) {
+  S.beendet = true;
+  const p = S.p;
+  const ges = S.karriere.reduce((a, k) => ({ s: a.s + k.spiele, t: a.t + k.tore, v: a.v + k.vorlagen }), { s: 0, t: 0, v: 0 });
+  const punkte = legacyPunkte();
+  const stufe = punkte > 1400 ? 'Legende des Weltfußballs' : punkte > 900 ? 'Weltklassespieler' : punkte > 550 ? 'Ein Großer seiner Liga'
+    : punkte > 280 ? 'Solider Profi' : 'Ein ehrlicher Arbeiter';
+  await sagen({
+    eyebrow: 'Karriereende · ' + saisonLabel(S.jahr), titel: stufe,
+    text: grund + '\n\n' + ges.s + ' Pflichtspiele · ' + ges.t + ' Tore · ' + ges.v + ' Vorlagen\n'
+      + p.nat.spiele + ' Länderspiele (' + p.nat.tore + ' Tore) für ' + NAT(p.natId).name + '\n'
+      + p.titel.length + ' Titel · Kontostand ' + money(p.geld),
+    effekte: p.titel.slice(0, 8).map(t => ({ t: t.name, gut: true }))
+  });
+  speichern();
+  render();
+}
+
+/* ========================== OBERFLÄCHE: GRUNDLAGEN ========================== */
+const el = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function badgeStil(farbe) {
+  const f = farbe || '#4A5A50';
+  const r = parseInt(f.substr(1, 2), 16), g = parseInt(f.substr(3, 2), 16), b = parseInt(f.substr(5, 2), 16);
+  const hell = (.299 * r + .587 * g + .114 * b) / 255;
+  return 'background:' + f + ';color:' + (hell > .55 ? '#0B0F0C' : '#F2F7F3')
+    + ';box-shadow:inset 0 -12px 18px rgba(0,0,0,.28),inset 0 0 0 1px rgba(255,255,255,' + (hell < .3 ? '.26' : '.1') + ')';
+}
+const badgeHtml = (c, kl) => '<div class="badge ' + (kl || '') + '" style="' + badgeStil(c.farbe) + '">' + esc(c.kurz) + '</div>';
+function badgeSetzen(node, club) { node.setAttribute('style', badgeStil(club.farbe)); node.textContent = club.kurz; }
+const noteKl = n => 'note note-' + clamp(Math.floor(n), 1, 5);
+
+function frage({ eyebrow, titel, text, wahlen, extra }) {
+  return new Promise(res => {
+    el('modal-eyebrow').textContent = eyebrow || '';
+    el('modal-title').textContent = titel || '';
+    el('modal-text').innerHTML = esc(text || '').replace(/\n/g, '<br>');
+    el('modal-text').hidden = !text;
+    el('modal-extra').innerHTML = extra || '';
+    const box = el('modal-choices');
+    box.innerHTML = '';
+    wahlen.forEach((w, i) => {
+      const b = document.createElement('button');
+      b.className = 'choice' + (w.gold ? ' choice-gold' : '');
+      const t = document.createElement('b'); t.textContent = w.label; b.appendChild(t);
+      if (w.hinweis) { const s = document.createElement('span'); s.textContent = w.hinweis; b.appendChild(s); }
+      b.addEventListener('click', () => { el('modal').hidden = true; res(i); });
+      box.appendChild(b);
+    });
+    el('modal').hidden = false;
+    el('modal').querySelector('.sheet-body').scrollTop = 0;
+  });
+}
+function sagen({ eyebrow, titel, text, effekte, knopf }) {
+  const extra = effekte && effekte.length
+    ? '<div class="fx">' + effekte.map(e => '<span class="pill ' + (e.gut ? 'pill-good' : 'pill-bad') + '">' + esc(e.t) + '</span>').join('') + '</div>' : '';
+  return frage({ eyebrow, titel, text, extra, wahlen: [{ label: knopf || 'Weiter' }] });
+}
+
+/* ========================== SPIELTAG ========================== */
+function tickerEintrag(min, tag, text, kl) {
+  const d = document.createElement('div');
+  d.className = 'ev ' + (kl || '');
+  d.innerHTML = '<div class="ev-min">' + (min ? min + "'" : '') + '</div><div class="ev-body">'
+    + (tag ? '<span class="ev-tag">' + esc(tag) + '</span>' : '') + esc(text) + '</div>';
+  el('ticker').appendChild(d);
+  el('ticker').scrollTop = el('ticker').scrollHeight;
+}
+function stand(toreMein, toreGegner, heim) {
+  el('sb-gh').textContent = heim ? toreMein : toreGegner;
+  el('sb-ga').textContent = heim ? toreGegner : toreMein;
+}
+function warteKnopf(label, kl) {
+  return new Promise(r => {
+    const f = el('match-foot'); f.innerHTML = '';
+    const b = document.createElement('button');
+    b.className = 'btn ' + (kl || 'btn-primary');
+    b.textContent = label;
+    b.addEventListener('click', r, { once: true });
+    f.appendChild(b);
+    b.focus({ preventScroll: true });
+  });
+}
+function warteWahl(text, optionen) {
+  return new Promise(r => {
+    const f = el('match-foot'); f.innerHTML = '';
+    const p = document.createElement('p'); p.className = 'moment'; p.textContent = text; f.appendChild(p);
+    optionen.forEach((o, i) => {
+      const b = document.createElement('button');
+      b.className = 'choice';
+      const t = document.createElement('b'); t.textContent = o.l; b.appendChild(t);
+      const s = document.createElement('span'); s.textContent = o.h; b.appendChild(s);
+      b.addEventListener('click', () => r(i), { once: true });
+      f.appendChild(b);
+    });
+  });
+}
+
+async function spielAustragen(fx) {
+  const p = S.p, club = CL(p.clubId), gegner = CL(fx.gegnerId);
+  const einsatz = einsatzBestimmen(fx);
+  const spielt = einsatz.status === 'startelf' || einsatz.status === 'einwechslung';
+  const verlauf = baueSpielverlauf(fx, einsatz);
+  const heimClub = fx.heim ? club : gegner, gastClub = fx.heim ? gegner : club;
+
+  el('sb-comp').textContent = wettbewerbName(fx);
+  el('sb-role').textContent = { startelf: 'Startelf', einwechslung: 'Bank → Einwechslung', bank: 'Nur Bank', verletzt: p.verletzung ? p.verletzung.name : 'Verletzt' }[einsatz.status];
+  el('sb-role').className = 'pill ' + (einsatz.status === 'startelf' ? 'pill-accent' : einsatz.status === 'verletzt' ? 'pill-bad' : '');
+  badgeSetzen(el('sb-badge-h'), heimClub);
+  badgeSetzen(el('sb-badge-a'), gastClub);
+  el('sb-name-h').textContent = heimClub.name;
+  el('sb-name-a').textContent = gastClub.name;
+  el('sb-min').textContent = 'Anpfiff';
+  el('ticker').innerHTML = '';
+  stand(0, 0, fx.heim);
+  el('match').hidden = false;
+
+  let toreMein = 0, toreGegner = 0, meineTore = 0, vorlagen = 0, aktionen = 0, fehler = 0, gelb = 0, rot = 0;
+  let minuten = spielt ? (einsatz.status === 'startelf' ? 90 : 90 - einsatz.ab) : 0;
+
+  tickerEintrag(0, 'Anpfiff', heimClub.name + ' gegen ' + gastClub.name + ' — ' + wettbewerbName(fx) + '.', '');
+  if (einsatz.status === 'bank') tickerEintrag(0, 'Aufstellung', 'Du sitzt auf der Bank und schaust zu.', '');
+  if (einsatz.status === 'verletzt') tickerEintrag(0, 'Aufstellung', 'Du fällst aus: ' + p.verletzung.name + '. Von der Tribüne aus fühlt sich jeder Fehlpass schlimmer an.', '');
+  if (einsatz.status === 'startelf') tickerEintrag(0, 'Aufstellung', 'Du beginnst als ' + POS(p.pos).name + '.', 'ev-you');
+
+  await warteKnopf('Anpfiff');
+
+  for (const e of verlauf) {
+    el('sb-min').textContent = e.min + '. Minute';
+    if (e.art === 'wechsel') {
+      tickerEintrag(e.min, 'Wechsel', e.text, 'ev-you');
+      await warteKnopf('Weiter');
+      continue;
+    }
+    if (e.art === 'info') { tickerEintrag(e.min, 'Seitenlinie', e.text, ''); continue; }
+    if (e.art === 'chance') {
+      if (e.mein) {
+        if (e.tor) {
+          toreMein++; stand(toreMein, toreGegner, fx.heim);
+          tickerEintrag(e.min, 'Tor ' + club.kurz, pick(TICKER_TEXTE.torMein), 'ev-goal');
+        } else { tickerEintrag(e.min, 'Chance', club.name + pick(TICKER_TEXTE.chance), ''); continue; }
+      } else {
+        if (e.tor) {
+          toreGegner++; stand(toreMein, toreGegner, fx.heim);
+          tickerEintrag(e.min, 'Gegentor', gegner.name + ' ' + pick(TICKER_TEXTE.torGegen), 'ev-bad');
+        } else { tickerEintrag(e.min, 'Gefahr', gegner.name + pick(TICKER_TEXTE.gefahr), ''); continue; }
+      }
+      if (spielt) await warteKnopf('Weiter');
+      continue;
+    }
+    /* Schlüsselmoment */
+    const m = e.vorlage;
+    tickerEintrag(e.min, 'Dein Moment', m.t, 'ev-you');
+    const idx = await warteWahl(m.t, m.w);
+    const wahl = m.w[idx];
+    const attrWert = p.attr[wahl.a];
+    const bonus = formWert() * .8 + (p.energie < 45 ? -7 : 0) + (p.moral - 60) * .07;
+    const pErfolg = clamp(.5 + (attrWert + bonus - wahl.s) * .019, .06, .86);
+    const gut = chance(pErfolg);
+    const art = gut ? wahl.gut : wahl.schlecht;
+    const txt = pick(ERGEBNIS_TEXT[art] || ['—']);
+    if (art === 'tor' || art === 'traumtor') { toreMein++; meineTore++; stand(toreMein, toreGegner, fx.heim); }
+    if (art === 'assist') { toreMein++; vorlagen++; stand(toreMein, toreGegner, fx.heim); }
+    if (art === 'aktion' || art === 'rettung' || art === 'foulok') aktionen += art === 'rettung' ? 1.6 : 1;
+    if (art === 'vergeben' || art === 'ballverlust') fehler++;
+    if (art === 'elferfehl') fehler += 2;
+    if (art === 'gegentor') { toreGegner++; fehler += 1.6; stand(toreMein, toreGegner, fx.heim); }
+    if (art === 'karte') { gelb++; fehler += .6; if (chance(.08)) { rot++; minuten = Math.min(minuten, e.min); } }
+    const kl = (art === 'tor' || art === 'traumtor' || art === 'assist') ? 'ev-goal'
+      : (art === 'gegentor' || art === 'elferfehl' || art === 'karte') ? 'ev-bad' : 'ev-you';
+    tickerEintrag(e.min, gut ? 'Gelungen' : 'Daneben', txt, kl);
+    await warteKnopf('Weiter');
+  }
+
+  /* Elfmeterschießen im K.-o. */
+  let elfer = null;
+  const koSpiel = (fx.comp === 'pokal') || (fx.comp === 'euro' && fx.phase >= 6);
+  if (koSpiel && toreMein === toreGegner) {
+    const pSieg = clamp(.5 + (club.staerke - gegner.staerke) * .012 + (spielt ? .04 : 0), .2, .8);
+    const sieg = chance(pSieg);
+    elfer = sieg;
+    tickerEintrag(120, 'Elfmeterschießen', sieg ? 'Ihr haltet den letzten Elfmeter — weiter!' : 'Der letzte Schütze scheitert. Aus.', sieg ? 'ev-goal' : 'ev-bad');
+    await warteKnopf('Weiter');
+  }
+
+  const ergebnis = toreMein > toreGegner ? 'sieg' : toreMein < toreGegner ? 'niederlage' : 'unentschieden';
+  el('sb-min').textContent = 'Abpfiff';
+
+  /* Note und Statistik */
+  let noteWert = null;
+  if (spielt) {
+    const basis = 3.5 - clamp((effOvr() - club.staerke) * .035, -.5, .6);
+    noteWert = noteBerechnen(basis, meineTore, vorlagen, aktionen, fehler, ergebnis, minuten);
+    S.stats.spiele++;
+    if (einsatz.status === 'startelf') S.stats.startelf++;
+    S.stats.tore += meineTore; S.stats.vorlagen += vorlagen;
+    S.stats.gelb += gelb; S.stats.rot += rot;
+    S.stats.minuten += minuten;
+    S.stats.noten.push(noteWert);
+    p.formNoten.push(noteWert);
+    if (p.formNoten.length > 14) p.formNoten.shift();
+    wirke({
+      energie: -(10 + minuten * .09 + (fx.comp !== 'liga' ? 2 : 0)),
+      fitness: minuten > 60 ? 1.2 : .4,
+      trainer: clamp((3.3 - noteWert) * 5, -8, 9),
+      moral: clamp((3.4 - noteWert) * 5 + (ergebnis === 'sieg' ? 4 : ergebnis === 'niederlage' ? -4 : 0), -12, 14),
+      ruf: clamp(meineTore * 1.4 + vorlagen * .8 + (noteWert < 2 ? 1.6 : 0), 0, 8),
+      follower: Math.round(p.follower * (.004 + meineTore * .022) + meineTore * 900 + (noteWert < 2 ? 1400 : 0))
+    });
+    /* Wachstum durch Einsatzzeit */
+    if (minuten > 25) {
+      const g = trainingsGewinn(.3);
+      const key = pick(Object.keys(POS(p.pos).w).filter(k => POS(p.pos).w[k] > .12));
+      const eff = {}; eff[key] = g; wirke(eff);
+    }
+    /* Verletzung im Spiel */
+    const risiko = clamp(.022 + (100 - p.fitness) * .0013 + (p.energie < 40 ? .03 : 0) + (p.alter > 31 ? .012 : 0), 0, .12)
+      * (p.extras && p.extras.physio ? .6 : 1);
+    if (chance(risiko)) verletzen();
+  } else {
+    wirke({ energie: 4, moral: einsatz.status === 'bank' ? -3 : -1, trainer: -1 });
+  }
+
+  /* Wettbewerbe fortschreiben */
+  if (fx.comp === 'liga') {
+    const th = fx.heim ? toreMein : toreGegner, tg = fx.heim ? toreGegner : toreMein;
+    buchen(fx.heim ? club.id : gegner.id, fx.heim ? gegner.id : club.id, th, tg);
+  }
+  if (fx.comp === 'pokal') {
+    const weiter = ergebnis === 'sieg' || (elfer === true);
+    if (weiter) {
+      if (S.pokal.runde >= 5) { titelGeben(S.pokal.name); S.pokal.drin = false; }
+      else S.pokal.runde++;
+    } else { S.pokal.drin = false; log('Im ' + S.pokal.name + ' ausgeschieden (' + POKAL_RUNDEN[Math.min(fx.runde, 5)] + ').', 'bad'); }
+  }
+  if (fx.comp === 'euro') {
+    S.euro.punkte = (S.euro.punkte || 0) + (ergebnis === 'sieg' ? 3 : ergebnis === 'unentschieden' ? 1 : 0);
+    if (fx.phase < 5) S.euro.phase++;
+    else if (fx.phase === 5) {
+      if ((S.euro.punkte || 0) >= 7) { S.euro.phase = 6; log('Europapokal: Einzug in die K.-o.-Runde.', 'good'); }
+      else { S.euro.drin = false; log('Europapokal: in der Ligaphase gescheitert.', 'bad'); }
+    } else {
+      const weiter = ergebnis === 'sieg' || elfer === true;
+      if (weiter) {
+        if (fx.phase >= 9) { titelGeben('Europapokal'); S.euro.drin = false; }
+        else S.euro.phase++;
+      } else { S.euro.drin = false; log('Europapokal: ausgeschieden im ' + EURO_PHASEN[fx.phase] + '.', 'bad'); }
+    }
+  }
+
+  /* Abschlussanzeige */
+  const ergText = ergebnis === 'sieg' ? 'Sieg' : ergebnis === 'niederlage' ? 'Niederlage' : 'Unentschieden';
+  const f = el('match-foot'); f.innerHTML = '';
+  const box = document.createElement('div');
+  box.className = 'rating-box';
+  if (spielt) {
+    box.innerHTML = '<span class="' + noteKl(noteWert) + '">' + note(noteWert) + '</span><div class="grow">'
+      + '<div style="font-weight:600">' + ergText + ' · ' + (fx.heim ? toreMein + ':' + toreGegner : toreGegner + ':' + toreMein) + '</div>'
+      + '<div class="small muted">' + minuten + ' Minuten · ' + meineTore + ' Tore · ' + vorlagen + ' Vorlagen' + (gelb ? ' · gelb' : '') + (rot ? ' · rot' : '') + '</div></div>';
+  } else {
+    box.innerHTML = '<div class="trophy-ico">–</div><div class="grow"><div style="font-weight:600">' + ergText + ' · ' + (fx.heim ? toreMein + ':' + toreGegner : toreGegner + ':' + toreMein) + '</div>'
+      + '<div class="small muted">Ohne Einsatz</div></div>';
+  }
+  f.appendChild(box);
+  log(wettbewerbName(fx) + ': ' + heimClub.kurz + ' ' + (fx.heim ? toreMein : toreGegner) + ':' + (fx.heim ? toreGegner : toreMein) + ' ' + gastClub.kurz
+    + (spielt ? ' · Note ' + note(noteWert) + (meineTore ? ' · ' + meineTore + ' Tor(e)' : '') : ''), ergebnis === 'sieg' ? 'good' : ergebnis === 'niederlage' ? 'bad' : '');
+  await warteKnopf('Abpfiff', 'btn btn-primary');
+  el('match').hidden = true;
+
+  /* Presse */
+  if (spielt && chance(.3)) await presseInterview(ergebnis, meineTore, noteWert);
+}
+
+async function presseInterview(ergebnis, tore, noteWert) {
+  const fragen = {
+    sieg: 'Nach dem Sieg hält dir ein Reporter das Mikrofon hin: „Das war heute Ihr Spiel. Wie ordnen Sie das ein?"',
+    niederlage: 'Nach der Niederlage wartet die Journalistin im Spielertunnel: „Woran hat es gelegen?"',
+    unentschieden: 'Ein Reporter fängt dich im Tunnel ab: „Zwei verlorene Punkte oder ein gewonnener?"'
+  };
+  const idx = await frage({
+    eyebrow: 'Nach dem Spiel', titel: 'Interview', text: fragen[ergebnis],
+    wahlen: [
+      { label: 'Die Mannschaft loben', hinweis: 'Kabine und Trainer mögen das' },
+      { label: 'Selbstbewusst auftreten', hinweis: 'Reichweite und Ruf, aber intern riskant' },
+      { label: 'Kritik austeilen', hinweis: 'Schlagzeilen — und Ärger' },
+      { label: 'Kurz und nichtssagend', hinweis: 'Niemand regt sich auf' }
+    ]
+  });
+  const eff = [
+    { trainer: 6, moral: 3, follower: Math.round(S.p.follower * .01) },
+    { ruf: 4, follower: Math.round(S.p.follower * .05 + 1800), trainer: -2 },
+    { ruf: 6, follower: Math.round(S.p.follower * .09 + 3500), trainer: -9, moral: -3 },
+    { follower: Math.round(S.p.follower * .004) }
+  ][idx];
+  const texte = [
+    'Am nächsten Morgen zitieren alle deinen Satz über die Mannschaft. Der Trainer schickt dir eine Nachricht.',
+    'Dein Zitat steht als Überschrift über der Sportseite. Zwei Mitspieler finden das nicht so witzig.',
+    'Die Schlagzeile knallt: Deine Kritik ist das Thema des Tages. In der Kabine ist es am Montag sehr still.',
+    'Drei Sätze, nichts drin. Niemand schreibt darüber — genau das war der Plan.'
+  ];
+  await sagen({ eyebrow: 'Presse', titel: 'Am nächsten Morgen', text: texte[idx], effekte: wirke(eff) });
+}
+
+/* ========================== ANSICHTEN ========================== */
+let aktiveAnsicht = 'home';
+const meter = (wert, kl) => '<div class="meter ' + (kl || '') + '"><span style="width:' + clamp(wert, 0, 100) + '%"></span></div>';
+function zustandsKlasse(v) { return v >= 70 ? 'good' : v >= 40 ? '' : v >= 22 ? 'warn' : 'bad'; }
+
+function render() {
+  if (!S) return;
+  const p = S.p, club = CL(p.clubId);
+  badgeSetzen(el('hud-badge'), club);
+  el('hud-name').textContent = p.vorname + ' ' + p.nachname + ' · ' + POS(p.pos).kurz;
+  el('hud-sub').textContent = club.name + ' · ' + p.alter + ' J. · ' + saisonLabel(S.jahr) + ', Woche ' + Math.min(S.woche, S.saisonWochen) + '/' + S.saisonWochen;
+  el('hud-ovr').textContent = OVR();
+  const f = formText();
+  el('hud-chips').innerHTML = [
+    p.verletzung ? '<span class="pill pill-bad">' + esc(p.verletzung.name) + ' · ' + p.verletzung.wochen + ' Wo.</span>' : '',
+    '<span class="pill">Energie ' + Math.round(p.energie) + '</span>',
+    '<span class="pill">Moral ' + Math.round(p.moral) + '</span>',
+    '<span class="pill ' + (f.c ? 'pill-' + f.c : '') + '">' + f.t + '</span>',
+    '<span class="pill">' + money(p.geld) + '</span>',
+    '<span class="pill">' + followers(p.follower) + ' Follower</span>'
+  ].join('');
+  ({ home: renderHome, club: renderClub, market: renderMarkt, social: renderSocial, profile: renderProfil })[aktiveAnsicht]();
+}
+
+function renderHome() {
+  const p = S.p, club = CL(p.clubId);
+  const spiele = S.beendet ? [] : aktuelleSpiele();
+  const liga = spiele.find(s => s.comp === 'liga');
+  let html = '';
+
+  if (S.beendet) {
+    html += '<div class="next-card"><p class="eyebrow">Karriere beendet</p><h2 style="font-family:var(--font-display);font-size:26px;margin-top:6px">' + esc(p.vorname + ' ' + p.nachname) + '</h2>'
+      + '<p class="small ink2" style="margin-top:8px">' + S.karriere.length + ' Saisons · ' + S.karriere.reduce((a, k) => a + k.tore, 0) + ' Tore · ' + p.titel.length + ' Titel</p>'
+      + '<div class="legacy" style="margin-top:10px">' + de(legacyPunkte()) + '</div><p class="eyebrow">Legacy-Punkte</p></div>'
+      + '<button class="btn" data-act="neustart">Neue Karriere beginnen</button>';
+  } else {
+    const anz = spiele.length;
+    html += '<div class="next-card"><div class="row-between"><span class="eyebrow">Woche ' + S.woche + ' von ' + S.saisonWochen + '</span>'
+      + '<span class="pill pill-accent">' + (anz ? (anz > 1 ? 'Englische Woche' : 'Spieltag') : 'Trainingswoche') + '</span></div>';
+    if (spiele.length) {
+      const fx = spiele[0], g = CL(fx.gegnerId);
+      const heim = fx.heim ? club : g, gast = fx.heim ? g : club;
+      html += '<div class="vs"><div class="vs-team">' + badgeHtml(heim, 'badge-lg') + '<span>' + esc(heim.name) + '</span></div>'
+        + '<div class="vs-mid">GEGEN</div>'
+        + '<div class="vs-team">' + badgeHtml(gast, 'badge-lg') + '<span>' + esc(gast.name) + '</span></div></div>'
+        + '<p class="small muted center">' + esc(wettbewerbName(fx)) + ' · ' + (fx.heim ? 'Heimspiel' : 'Auswärtsspiel') + '</p>';
+      if (spiele.length > 1) html += '<p class="small muted center" style="margin-top:6px">Dazu unter der Woche: ' + esc(wettbewerbName(spiele[1])) + '</p>';
+    } else {
+      html += '<p class="sheet-text" style="margin-top:12px">Kein Pflichtspiel. Eine ganze Woche Zeit, an dir zu arbeiten.</p>';
+    }
+    html += '</div>';
+
+    html += '<section><div class="sect-title"><h3>Zustand</h3><span class="small muted">' + rolleNachStaerke() + '</span></div>'
+      + '<div class="card cond">'
+      + '<div class="cond-item"><span class="k">Energie</span><span class="v">' + Math.round(p.energie) + '</span>' + meter(p.energie, zustandsKlasse(p.energie)) + '</div>'
+      + '<div class="cond-item"><span class="k">Moral</span><span class="v">' + Math.round(p.moral) + '</span>' + meter(p.moral, zustandsKlasse(p.moral)) + '</div>'
+      + '<div class="cond-item"><span class="k">Fitness</span><span class="v">' + Math.round(p.fitness) + '</span>' + meter(p.fitness, zustandsKlasse(p.fitness)) + '</div>'
+      + '</div></section>';
+
+    if (p.verletzung) {
+      html += '<div class="card"><p class="eyebrow">Behandlung</p><p class="sheet-text" style="margin-top:6px">'
+        + esc(p.verletzung.name) + ' — noch ' + p.verletzung.wochen + ' Woche(n). Training fällt aus, du arbeitest mit dem Physio.</p></div>';
+    } else {
+      html += '<section><div class="sect-title"><h3>Wochenplan</h3></div><div class="plan-grid">'
+        + PLAENE.map(pl => '<button class="plan" data-plan="' + pl.id + '" aria-pressed="' + (S.plan === pl.id) + '"><b>' + esc(pl.name) + '</b><span>' + esc(pl.text) + '</span></button>').join('')
+        + '</div>';
+      if (PLAN(S.plan) && PLAN(S.plan).train && !PLAN(S.plan).athletik) {
+        html += '<div class="sect-title" style="margin-top:14px"><h3>Schwerpunkt</h3></div><div class="chips">'
+          + ATTR_KEYS.map(k => '<button class="chip" data-fokus="' + k + '" aria-pressed="' + (S.trainFokus === k) + '">' + ATTR_LABEL[k] + ' ' + Math.round(p.attr[k]) + '</button>').join('')
+          + '</div>';
+      }
+      html += '</section>';
+    }
+    html += '<button class="btn btn-primary" data-act="woche">' + (spiele.length ? 'Spieltag starten' : 'Woche abschließen') + '</button>';
+  }
+
+  if (S.verlauf.length) {
+    html += '<section><div class="sect-title"><h3>Verlauf</h3></div><div class="card feed">'
+      + S.verlauf.slice(0, 8).map(v => '<div class="feed-item ' + v.typ + '"><span class="feed-dot"></span><div class="grow">'
+        + '<div class="feed-t">' + esc(v.t) + '</div><div class="feed-w">' + saisonLabel(v.j) + ' · Woche ' + v.w + '</div></div></div>').join('')
+      + '</div></section>';
+  }
+  el('view-home').innerHTML = html;
+}
+
+function renderClub() {
+  const p = S.p, club = CL(p.clubId), lg = LG(club.liga);
+  const tab = tabellenListe(), platz = tabellenPlatz(club.id);
+  const absteiger = ligaClubs(club.liga).length - 1;
+  let html = '<div class="card"><div class="row">' + badgeHtml(club, 'badge-lg') + '<div class="grow">'
+    + '<div style="font-family:var(--font-data);font-weight:700;font-size:17px">' + esc(club.name) + '</div>'
+    + '<div class="small muted">' + lg.flag + ' ' + esc(lg.name) + ' · Platz ' + platz + ' · Teamstärke ' + club.staerke + '</div></div></div>'
+    + '<div class="attrs" style="margin-top:14px">'
+    + '<div class="attr"><span class="k">Trainer-Vertrauen</span>' + meter(p.trainer, zustandsKlasse(p.trainer)) + '<span class="v">' + Math.round(p.trainer) + '</span></div>'
+    + '<div class="attr"><span class="k">Deine Rolle</span><span class="small ink2">' + rolleNachStaerke() + '</span><span class="v"></span></div>'
+    + (p.kapitaen ? '<div class="attr"><span class="k">Kapitän</span><span class="small ink2">Du trägst die Binde</span><span class="v"></span></div>' : '')
+    + '</div></div>';
+
+  html += '<section><div class="sect-title"><h3>Wettbewerbe</h3></div><div class="card stack-sm">'
+    + '<div class="row-between"><span class="small">' + esc(S.pokal.name) + '</span><span class="pill ' + (S.pokal.drin ? 'pill-good' : 'pill-bad') + '">'
+    + (S.pokal.drin ? POKAL_RUNDEN[Math.min(S.pokal.runde, 5)] : 'ausgeschieden') + '</span></div>'
+    + '<div class="row-between"><span class="small">Europapokal</span><span class="pill ' + (S.euro.drin ? 'pill-good' : '') + '">'
+    + (S.euro.drin ? EURO_PHASEN[Math.min(S.euro.phase, 9)] + (S.euro.phase < 6 ? ' · ' + (S.euro.punkte || 0) + ' Pkt' : '') : 'nicht dabei') + '</span></div>'
+    + '</div></section>';
+
+  html += '<section><div class="sect-title"><h3>' + esc(lg.name) + '</h3><span class="small muted">' + (S.woche > 1 ? 'nach ' + Math.min(S.woche - 1, S.saisonWochen) + '. Spieltag' : 'vor dem 1. Spieltag') + '</span></div>'
+    + '<div class="card tablewrap"><table class="tbl"><thead><tr><th class="pos">#</th><th>Verein</th><th>Sp</th><th>Diff</th><th>Pkt</th></tr></thead><tbody>'
+    + tab.map((t, i) => {
+      const c = CL(t.id);
+      const zone = i === 0 ? 'zone-cl' : i < 4 ? 'zone-cl' : i >= absteiger ? 'zone-ab' : i < 6 ? 'zone-el' : '';
+      return '<tr class="' + (t.id === club.id ? 'me ' : '') + zone + '"><td class="pos">' + (i + 1) + '</td>'
+        + '<td><div class="row" style="gap:7px">' + badgeHtml(c, 'badge-sm') + '<span class="truncate">' + esc(c.name) + '</span></div></td>'
+        + '<td>' + t.s + '</td><td>' + (t.diff > 0 ? '+' : '') + t.diff + '</td><td><b>' + t.p + '</b></td></tr>';
+    }).join('')
+    + '</tbody></table></div></section>';
+  el('view-club').innerHTML = html;
+}
+
+function renderMarkt() {
+  const p = S.p, club = CL(p.clubId);
+  const winter = S.winterWoche;
+  const naechstes = S.woche <= winter ? 'Winterfenster in Woche ' + winter : 'Sommerfenster nach dem ' + S.saisonWochen + '. Spieltag';
+  let html = '<div class="card"><p class="eyebrow">Marktwert</p>'
+    + '<div style="font-family:var(--font-display);font-size:34px;color:var(--accent);line-height:1.1;margin:4px 0 2px">' + money(marktwert()) + '</div>'
+    + '<p class="small muted">Stärke ' + OVR() + ' · ' + p.alter + ' Jahre · ' + formText().t + '</p></div>';
+
+  html += '<section><div class="sect-title"><h3>Vertrag</h3></div><div class="card attrs">'
+    + '<div class="attr"><span class="k">Verein</span><span class="small ink2 truncate">' + esc(club.name) + '</span><span class="v"></span></div>'
+    + '<div class="attr"><span class="k">Gehalt</span><span class="small ink2">' + money(p.vertrag.gehalt) + ' / Jahr</span><span class="v"></span></div>'
+    + '<div class="attr"><span class="k">Laufzeit</span><span class="small ink2">' + (p.vertrag.jahre > 0 ? 'noch ' + p.vertrag.jahre + ' Jahr(e)' : 'läuft aus') + '</span><span class="v"></span></div>'
+    + '<div class="attr"><span class="k">Wochenlohn</span><span class="small ink2">' + money(p.vertrag.gehalt / 52) + '</span><span class="v"></span></div>'
+    + '</div></section>';
+
+  html += '<section><div class="sect-title"><h3>Berater</h3></div><div class="card stack-sm">'
+    + '<p class="small ink2">' + (p.wechselwunsch
+      ? 'Dein Berater hört sich aktiv um. Im nächsten Transferfenster kommen mehr Angebote — dein Trainer weiß das inzwischen auch.'
+      : 'Dein Berater wartet ab. Du kannst ihn losschicken, um im nächsten Fenster mehr Angebote zu bekommen.') + '</p>'
+    + '<p class="small muted">' + naechstes + '</p>'
+    + (p.wechselwunsch ? '<button class="btn btn-sm" data-act="bleiben" style="width:100%">Wechselwunsch zurückziehen</button>'
+      : '<button class="btn btn-sm" data-act="berater" style="width:100%">Berater beauftragen</button>')
+    + '</div></section>';
+
+  const investitionen = [
+    { id: 'coach', name: 'Privater Athletiktrainer', preis: 250000, text: 'Dein Training bringt dauerhaft rund 20 % mehr.' },
+    { id: 'physio', name: 'Eigenes Physio-Team', preis: 200000, text: 'Deutlich geringeres Verletzungsrisiko im Spiel.' },
+    { id: 'medien', name: 'Medientraining', preis: 120000, text: 'Jeder Auftritt bringt mehr Reichweite.' },
+    { id: 'immobilie', name: 'Immobilienportfolio', preis: 400000, text: 'Bringt dir jede Woche 2.500 € passiv.' }
+  ];
+  html += '<section><div class="sect-title"><h3>Investitionen</h3><span class="small muted">' + money(p.geld) + '</span></div><div class="stack-sm">'
+    + investitionen.map(i => {
+      const hat = p.extras && p.extras[i.id];
+      return '<div class="card row-between"><div class="grow"><div style="font-weight:600;font-size:14px">' + esc(i.name) + '</div>'
+        + '<div class="small muted">' + esc(i.text) + '</div></div>'
+        + (hat ? '<span class="pill pill-good">gekauft</span>'
+          : '<button class="btn btn-sm" data-act="kauf:' + i.id + ':' + i.preis + '"' + (p.geld < i.preis ? ' disabled' : '') + '>' + money(i.preis) + '</button>') + '</div>';
+    }).join('') + '</div></section>';
+  el('view-market').innerHTML = html;
+}
+
+function renderSocial() {
+  const p = S.p;
+  const einnahmen = p.sponsoren.reduce((a, s) => a + s.pro, 0);
+  let html = '<div class="card cond">'
+    + '<div class="cond-item"><span class="k">Follower</span><span class="v">' + followers(p.follower) + '</span></div>'
+    + '<div class="cond-item"><span class="k">Ruf</span><span class="v">' + Math.round(p.ruf) + '</span>' + meter(p.ruf, 'good') + '</div>'
+    + '<div class="cond-item"><span class="k">Werbung</span><span class="v">' + (einnahmen ? money(einnahmen) : '—') + '</span></div>'
+    + '</div>';
+
+  html += '<section><div class="sect-title"><h3>Sponsoren</h3></div>'
+    + (p.sponsoren.length
+      ? '<div class="stack-sm">' + p.sponsoren.map(s => '<div class="card row-between"><div><div style="font-weight:600;font-size:14px">' + esc(s.firma) + '</div>'
+        + '<div class="small muted">noch ' + s.jahre + ' Jahr(e)</div></div><span class="pill pill-accent">' + money(s.pro) + ' / Woche</span></div>').join('') + '</div>'
+      : '<div class="card"><p class="small muted">Noch kein Sponsor. Ab etwa 25.000 Followern melden sich die ersten Firmen — Reichweite baust du über Social-Media-Wochen, gute Spiele und Interviews auf.</p></div>')
+    + '</section>';
+
+  const rang = weltrangliste().slice(0, 10);
+  html += '<section><div class="sect-title"><h3>Weltrangliste</h3><span class="small muted">Wertung der Fachpresse</span></div>'
+    + '<div class="card tablewrap"><table class="tbl"><thead><tr><th class="pos">#</th><th>Spieler</th><th>Tore</th><th>Pkt</th></tr></thead><tbody>'
+    + rang.map((r, i) => '<tr class="' + (r.ich ? 'me' : '') + '"><td class="pos">' + (i + 1) + '</td>'
+      + '<td><span class="truncate">' + esc(r.name) + '</span><div class="tiny muted truncate">' + esc(r.club) + '</div></td>'
+      + '<td>' + r.tore + '</td><td><b>' + r.punkte + '</b></td></tr>').join('')
+    + '</tbody></table></div></section>';
+
+  if (p.nat.dabei) {
+    html += '<section><div class="sect-title"><h3>Nationalmannschaft</h3></div><div class="card row-between">'
+      + '<div><div style="font-weight:600">' + NAT(p.natId).flag + ' ' + esc(NAT(p.natId).name) + '</div>'
+      + '<div class="small muted">' + p.nat.spiele + ' Länderspiele · ' + p.nat.tore + ' Tore</div></div>'
+      + '<span class="pill pill-accent">nominiert</span></div></section>';
+  }
+  el('view-social').innerHTML = html;
+}
+
+function formChart(noten) {
+  const n = noten.slice(-12);
+  if (n.length < 2) return '<p class="small muted">Die Formkurve startet nach deinem zweiten Einsatz.</p>';
+  const W = 320, H = 122, pl = 30, pr = 34, pt = 12, pb = 22;
+  const x = i => pl + i * (W - pl - pr) / (n.length - 1);
+  const y = v => pt + (v - 1) / 5 * (H - pt - pb);
+  const punkte = n.map((v, i) => [x(i), y(v)]);
+  const linie = punkte.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' ');
+  const flaeche = linie + ' L' + x(n.length - 1).toFixed(1) + ' ' + (H - pb) + ' L' + pl + ' ' + (H - pb) + ' Z';
+  const schnitt = n.reduce((a, b) => a + b, 0) / n.length;
+  const letzte = n[n.length - 1];
+  return '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Notenverlauf der letzten ' + n.length + ' Spiele">'
+    + '<text x="' + (pl - 6) + '" y="' + (y(1) + 4) + '" text-anchor="end">1,0</text>'
+    + '<text x="' + (pl - 6) + '" y="' + (y(6) + 4) + '" text-anchor="end">6,0</text>'
+    + '<line class="grid" x1="' + pl + '" y1="' + y(schnitt).toFixed(1) + '" x2="' + (W - pr) + '" y2="' + y(schnitt).toFixed(1) + '"/>'
+    + '<text x="' + (W - pr + 4) + '" y="' + (y(schnitt) - 4).toFixed(1) + '">Ø ' + note(schnitt) + '</text>'
+    + '<line class="axis" x1="' + pl + '" y1="' + (H - pb) + '" x2="' + (W - pr) + '" y2="' + (H - pb) + '"/>'
+    + '<path d="' + flaeche + '" fill="rgba(239,169,44,.14)"/>'
+    + '<path class="line" d="' + linie + '"/>'
+    + punkte.map((q, i) => '<circle class="' + (i === punkte.length - 1 ? 'dot-last' : 'dot') + '" cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1) + '" r="' + (i === punkte.length - 1 ? 5 : 3.4) + '"><title>Spiel ' + (i + 1) + ': Note ' + note(n[i]) + '</title></circle>').join('')
+    + '<text x="' + (x(n.length - 1) + 8) + '" y="' + (y(letzte) + 4).toFixed(1) + '" fill="var(--accent-2)">' + note(letzte) + '</text>'
+    + '<text x="' + pl + '" y="' + (H - 6) + '">älter</text>'
+    + '<text x="' + (W - pr) + '" y="' + (H - 6) + '" text-anchor="end">zuletzt</text>'
+    + '</svg>';
+}
+
+function renderProfil() {
+  const p = S.p, st = S.stats;
+  const avg = st.noten.length ? st.noten.reduce((a, b) => a + b, 0) / st.noten.length : 0;
+  const sterne = clamp(Math.round((p.potenzial - OVR()) / 4), 0, 5);
+  let html = '<div class="card"><div class="row"><div class="grow">'
+    + '<div style="font-family:var(--font-display);font-size:24px;line-height:1.1">' + esc(p.vorname + ' ' + p.nachname) + '</div>'
+    + '<div class="small muted">' + NAT(p.natId).flag + ' ' + esc(NAT(p.natId).name) + ' · ' + POS(p.pos).name + ' · ' + p.fuss + 'er Fuß · ' + p.alter + ' Jahre</div>'
+    + '</div><div class="hud-ovr"><b>' + OVR() + '</b><span>Stärke</span></div></div>'
+    + '<div class="row" style="margin-top:12px;gap:8px"><span class="pill">Entwicklung ' + ('★'.repeat(sterne) + '☆'.repeat(5 - sterne)) + '</span>'
+    + '<span class="pill">' + esc(ARCHETYPEN.find(a => a.id === p.archetyp).name) + '</span></div></div>';
+
+  html += '<section><div class="sect-title"><h3>Attribute</h3></div><div class="card attrs">'
+    + ATTR_KEYS.map(k => '<div class="attr"><span class="k">' + ATTR_LABEL[k] + '</span>' + meter(p.attr[k], p.attr[k] >= 78 ? 'good' : p.attr[k] >= 40 ? '' : 'warn')
+      + '<span class="v">' + Math.round(p.attr[k]) + '</span></div>').join('')
+    + '</div></section>';
+
+  html += '<section><div class="sect-title"><h3>Formkurve</h3><span class="small muted">Note 1,0 ist die beste</span></div>'
+    + '<div class="card">' + formChart(p.formNoten) + '</div></section>';
+
+  html += '<section><div class="sect-title"><h3>Saison ' + saisonLabel(S.jahr) + '</h3></div><div class="card cond">'
+    + '<div class="cond-item"><span class="k">Spiele</span><span class="v">' + st.spiele + '</span></div>'
+    + '<div class="cond-item"><span class="k">Tore</span><span class="v">' + st.tore + '</span></div>'
+    + '<div class="cond-item"><span class="k">Vorlagen</span><span class="v">' + st.vorlagen + '</span></div>'
+    + '<div class="cond-item"><span class="k">Ø Note</span><span class="v">' + (avg ? note(avg) : '—') + '</span></div>'
+    + '<div class="cond-item"><span class="k">Startelf</span><span class="v">' + st.startelf + '</span></div>'
+    + '<div class="cond-item"><span class="k">Karten</span><span class="v">' + st.gelb + '/' + st.rot + '</span></div>'
+    + '</div></section>';
+
+  if (S.karriere.length) {
+    html += '<section><div class="sect-title"><h3>Karriere</h3></div><div class="card tablewrap">'
+      + '<table class="tbl"><thead><tr><th class="pos"></th><th>Saison</th><th>Sp</th><th>T</th><th>V</th><th>Ø</th><th>Stk</th></tr></thead><tbody>'
+      + S.karriere.slice().reverse().map(k => '<tr><td class="pos"></td><td><span class="truncate">' + esc(k.saison) + '</span>'
+        + '<div class="tiny muted truncate">' + esc(k.club) + ' · ' + k.platz + '.</div></td>'
+        + '<td>' + k.spiele + '</td><td>' + k.tore + '</td><td>' + k.vorlagen + '</td><td>' + (k.note ? note(k.note) : '—') + '</td><td>' + k.ovr + '</td></tr>').join('')
+      + '</tbody></table></div></section>';
+  }
+
+  if (p.titel.length) {
+    html += '<section><div class="sect-title"><h3>Titel & Auszeichnungen</h3></div><div class="stack-sm">'
+      + p.titel.slice().reverse().map(t => '<div class="award ' + (/Goldener Ball|Weltmeister|Europapokal/.test(t.name) ? 'gold' : '') + '">'
+        + '<div class="trophy-ico">' + (t.name[0]) + '</div><div class="grow"><div style="font-weight:600;font-size:14px">' + esc(t.name) + '</div>'
+        + '<div class="small muted">' + t.jahr + ' · ' + esc(t.club) + '</div></div></div>').join('')
+      + '</div></section>';
+  }
+  html += '<button class="btn btn-quiet" data-act="loeschen">Karriere löschen und neu beginnen</button>';
+  el('view-profile').innerHTML = html;
+}
+
+function setzeAnsicht(name) {
+  aktiveAnsicht = name;
+  ['home', 'club', 'market', 'social', 'profile'].forEach(v => el('view-' + v).hidden = v !== name);
+  document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.view === name)));
+  el('main').scrollTop = 0;
+  render();
+}
+
+async function aktion(name) {
+  if (name === 'woche') return wocheVor();
+  if (name === 'berater') { S.p.wechselwunsch = true; wirke({ trainer: -3 }); speichern(); render(); return; }
+  if (name === 'bleiben') { S.p.wechselwunsch = false; speichern(); render(); return; }
+  if (name === 'loeschen' || name === 'neustart') {
+    const idx = await frage({ eyebrow: 'Achtung', titel: 'Karriere löschen?', text: 'Der aktuelle Spielstand wird unwiderruflich gelöscht.', wahlen: [{ label: 'Abbrechen' }, { label: 'Löschen und neu starten' }] });
+    if (idx === 1) { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} S = null; el('screen-game').hidden = true; el('screen-start').hidden = false; startseite(); }
+    return;
+  }
+  if (name.startsWith('kauf:')) {
+    const [, id, preis] = name.split(':');
+    const p = Number(preis);
+    if (S.p.geld < p) return;
+    S.p.geld -= p;
+    S.p.extras = S.p.extras || {};
+    S.p.extras[id] = true;
+    log('Investition getätigt: ' + id + '.', 'gold');
+    speichern(); render();
+  }
+}
+
+/* ========================== KARRIERE ANLEGEN ========================== */
+const NEU = { vorname: '', nachname: '', natId: 'DE', fuss: 'rechts', pos: 'ST', archetyp: 'komplett', weg: null, clubId: null, schritt: 1 };
+
+function namenSync() {
+  const a = el('in-vorname'), b = el('in-nachname');
+  if (a) NEU.vorname = a.value.slice(0, 18);
+  if (b) NEU.nachname = b.value.slice(0, 20);
+}
+function startClubs() {
+  const weg = STARTWEGE.find(w => w.id === NEU.weg);
+  if (!weg) return [];
+  const pool = ligaClubs(weg.liga).slice().sort((a, b) => a.staerke - b.staerke);
+  return shuffle(pool.slice(0, Math.ceil(pool.length * .7))).slice(0, 3);
+}
+
+function renderCreate() {
+  const s = NEU.schritt;
+  document.querySelectorAll('.steps i').forEach((i, idx) => i.classList.toggle('on', idx < s));
+  el('create-step-label').textContent = 'Schritt ' + s + ' von 3 · ' + ['Herkunft', 'Spielertyp', 'Der erste Verein'][s - 1];
+  el('create-title').textContent = ['Wer bist du?', 'Wie spielst du?', 'Wo fängt es an?'][s - 1];
+  el('create-back').hidden = s === 1;
+  el('create-next').textContent = s === 3 ? 'Karriere starten' : 'Weiter';
+  el('create-next').disabled = s === 3 && !NEU.clubId;
+  let html = '';
+  if (s === 1) {
+    html += '<div class="field"><label for="in-vorname">Vorname</label><input class="input" id="in-vorname" value="' + esc(NEU.vorname) + '" placeholder="Leon" autocomplete="off"></div>'
+      + '<div class="field"><label for="in-nachname">Nachname</label><input class="input" id="in-nachname" value="' + esc(NEU.nachname) + '" placeholder="Brandt" autocomplete="off"></div>'
+      + '<button class="btn btn-sm" data-set="zufallsname:1" style="width:auto;align-self:flex-start">Namen würfeln</button>'
+      + '<div class="field"><label>Nation</label><div class="chips">'
+      + NATIONEN.map(n => '<button class="chip" data-set="natId:' + n.id + '" aria-pressed="' + (NEU.natId === n.id) + '">' + n.flag + ' ' + n.name + '</button>').join('')
+      + '</div></div>'
+      + '<div class="field"><label>Starker Fuß</label><div class="chips">'
+      + ['rechts', 'links', 'beidfüßig'].map(f => '<button class="chip" data-set="fuss:' + f + '" aria-pressed="' + (NEU.fuss === f) + '">' + f + '</button>').join('')
+      + '</div></div>';
+  }
+  if (s === 2) {
+    html += '<div class="field"><label>Position</label><div class="chips">'
+      + POSITIONEN.map(p => '<button class="chip" data-set="pos:' + p.id + '" aria-pressed="' + (NEU.pos === p.id) + '">' + p.kurz + '</button>').join('')
+      + '</div><p class="small muted">' + esc(POS(NEU.pos).name) + ' · '
+      + Object.keys(POS(NEU.pos).w).sort((a, b) => POS(NEU.pos).w[b] - POS(NEU.pos).w[a]).slice(0, 3).map(k => ATTR_LABEL[k]).join(', ')
+      + ' zählen am meisten.</p></div>'
+      + '<div class="field"><label>Spielertyp</label><div class="stack-sm">'
+      + ARCHETYPEN.map(a => '<button class="opt" data-set="archetyp:' + a.id + '" aria-pressed="' + (NEU.archetyp === a.id) + '"><div class="grow">'
+        + '<div class="opt-t">' + esc(a.name) + '</div><div class="opt-d">' + esc(a.text) + '</div>'
+        + '<div class="opt-m">' + Object.keys(a.boni).filter(k => a.boni[k] > 0).map(k => ATTR_LABEL[k] + ' +' + a.boni[k]).join(' · ') + '</div></div></button>').join('')
+      + '</div></div>';
+  }
+  if (s === 3) {
+    html += '<div class="field"><label>Herkunftsweg</label><div class="stack-sm">'
+      + STARTWEGE.map(w => '<button class="opt" data-set="weg:' + w.id + '" aria-pressed="' + (NEU.weg === w.id) + '"><div class="grow">'
+        + '<div class="opt-t">' + esc(w.name) + '</div><div class="opt-d">' + esc(w.text) + '</div>'
+        + '<div class="opt-m">' + esc(w.meta) + '</div></div></button>').join('')
+      + '</div></div>';
+    if (NEU.weg) {
+      if (!NEU._clubs || NEU._weg !== NEU.weg) { NEU._clubs = startClubs(); NEU._weg = NEU.weg; NEU.clubId = null; }
+      html += '<div class="field"><label>Dein erster Profivertrag</label><div class="stack-sm">'
+        + NEU._clubs.map(c => '<button class="opt" data-set="clubId:' + c.id + '" aria-pressed="' + (NEU.clubId === c.id) + '">'
+          + badgeHtml(c) + '<div class="grow"><div class="opt-t">' + esc(c.name) + '</div>'
+          + '<div class="opt-d">' + LG(c.liga).flag + ' ' + LG(c.liga).name + ' · Teamstärke ' + c.staerke + '</div></div></button>').join('')
+        + '</div></div>';
+    }
+  }
+  el('create-body').innerHTML = html;
+}
+
+function karriereStarten() {
+  const weg = STARTWEGE.find(w => w.id === NEU.weg);
+  const arch = ARCHETYPEN.find(a => a.id === NEU.archetyp);
+  const club = CL(NEU.clubId);
+  const gew = POS(NEU.pos).w;
+  const top2 = Object.keys(gew).sort((a, b) => gew[b] - gew[a]).slice(0, 2);
+  const basis = 44 + weg.attr;
+  const attr = {};
+  ATTR_KEYS.forEach(k => attr[k] = clamp(Math.round(basis + ri(-4, 4) + (arch.boni[k] || 0) + (top2.includes(k) ? 5 : 0)), 24, 74));
+  const o = ovrVon(attr, NEU.pos);
+  const gehalt = Math.max(24000, Math.round(Math.pow(club.staerke / 10, 5.2) * 45 * .35 / 1000) * 1000);
+  S = {
+    v: 1, jahr: 2026, woche: 1, plan: 'technik', trainFokus: top2[0],
+    beendet: false, ligaTausch: {}, staerkeTausch: {}, verlauf: [], karriere: [], stars: [],
+    p: {
+      vorname: NEU.vorname, nachname: NEU.nachname, natId: NEU.natId, pos: NEU.pos, fuss: NEU.fuss, archetyp: NEU.archetyp,
+      alter: 17, attr, potenzial: clamp(o + ri(19, 35) + weg.potenzial, 62, 99),
+      energie: 86, moral: clamp(70 + (weg.moral || 0), 0, 100), fitness: 92, ruf: clamp(5 + (weg.ruf || 0), 0, 100),
+      follower: ri(300, 2400), geld: 0, verletzung: null, clubId: club.id, trainer: 46,
+      vertrag: { gehalt, jahre: 3 }, sponsoren: [], titel: [], formNoten: [], extras: {},
+      nat: { dabei: false, spiele: 0, tore: 0 }, wechselwunsch: false, kapitaen: false
+    }
+  };
+  baueStars();
+  starsSaison();
+  starteSaison();
+  log('Profivertrag bei ' + club.name + ' unterschrieben: ' + money(gehalt) + ' pro Jahr.', 'gold');
+  speichern();
+  spielAnzeigen();
+}
+
+/* ========================== SPEICHERN ========================== */
+function speichern() { try { if (S) localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
+function laden() { try { const r = localStorage.getItem(SAVE_KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
+
+function spielAnzeigen() {
+  el('screen-start').hidden = true;
+  el('screen-create').hidden = true;
+  el('screen-game').hidden = false;
+  setzeAnsicht('home');
+}
+
+function startseite() {
+  const g = laden();
+  const strip = el('save-strip');
+  if (g && g.p) {
+    const club = CLUBS.find(c => c.id === g.p.clubId);
+    strip.hidden = false;
+    strip.innerHTML = badgeHtml(club || { farbe: '#333', kurz: '?' })
+      + '<div class="grow"><div style="font-weight:600;font-size:14px">' + esc(g.p.vorname + ' ' + g.p.nachname) + '</div>'
+      + '<div class="small muted">' + esc(club ? club.name : '') + ' · ' + saisonLabel(g.jahr) + ' · ' + g.p.alter + ' Jahre</div></div>';
+    el('btn-continue').hidden = false;
+    el('btn-delete').hidden = false;
+    el('btn-new').textContent = 'Neue Karriere (überschreibt)';
+  } else {
+    strip.hidden = true;
+    el('btn-continue').hidden = true;
+    el('btn-delete').hidden = true;
+    el('btn-new').textContent = 'Neue Karriere';
+  }
+}
+
+/* ========================== START ========================== */
+function verdrahten() {
+  el('btn-new').addEventListener('click', () => {
+    const n = zufallsname('de');
+    if (!NEU.vorname) NEU.vorname = n.v;
+    if (!NEU.nachname) NEU.nachname = n.n;
+    NEU.schritt = 1;
+    el('screen-start').hidden = true;
+    el('screen-create').hidden = false;
+    renderCreate();
+  });
+  el('btn-continue').addEventListener('click', () => {
+    const g = laden();
+    if (!g) return;
+    S = g;
+    S.ligaTausch = S.ligaTausch || {}; S.staerkeTausch = S.staerkeTausch || {};
+    tauschAnwenden();
+    spielAnzeigen();
+  });
+  el('btn-delete').addEventListener('click', async () => {
+    const idx = await frage({ eyebrow: 'Achtung', titel: 'Spielstand löschen?', text: 'Die gespeicherte Karriere wird unwiderruflich gelöscht.', wahlen: [{ label: 'Abbrechen' }, { label: 'Löschen' }] });
+    if (idx === 1) { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} startseite(); }
+  });
+
+  el('create-body').addEventListener('click', e => {
+    const b = e.target.closest('[data-set]');
+    if (!b) return;
+    namenSync();
+    const [k, v] = b.dataset.set.split(':');
+    if (k === 'zufallsname') {
+      const n = zufallsname(NAT(NEU.natId).pool);
+      NEU.vorname = n.v; NEU.nachname = n.n;
+    } else NEU[k] = v;
+    renderCreate();
+  });
+  el('create-back').addEventListener('click', () => { namenSync(); NEU.schritt = Math.max(1, NEU.schritt - 1); renderCreate(); });
+  el('create-next').addEventListener('click', () => {
+    namenSync();
+    if (NEU.schritt === 1) {
+      if (!NEU.vorname.trim() || !NEU.nachname.trim()) {
+        const n = zufallsname(NAT(NEU.natId).pool);
+        NEU.vorname = NEU.vorname.trim() || n.v;
+        NEU.nachname = NEU.nachname.trim() || n.n;
+      }
+      NEU.schritt = 2; renderCreate(); return;
+    }
+    if (NEU.schritt === 2) { NEU.schritt = 3; renderCreate(); return; }
+    if (NEU.clubId) karriereStarten();
+  });
+
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => setzeAnsicht(t.dataset.view)));
+  el('main').addEventListener('click', e => {
+    const plan = e.target.closest('[data-plan]');
+    if (plan) { S.plan = plan.dataset.plan; speichern(); render(); return; }
+    const fokus = e.target.closest('[data-fokus]');
+    if (fokus) { S.trainFokus = fokus.dataset.fokus; speichern(); render(); return; }
+    const act = e.target.closest('[data-act]');
+    if (act && !act.disabled) aktion(act.dataset.act);
+  });
+}
+
+function boot(daten) {
+  verdrahten();
+  if (daten && daten.stand) {
+    try {
+      S = JSON.parse(daten.stand);
+      S.ligaTausch = S.ligaTausch || {}; S.staerkeTausch = S.staerkeTausch || {};
+      tauschAnwenden();
+      spielAnzeigen();
+      return;
+    } catch (e) { S = null; }
+  }
+  startseite();
+}
+try {
+  if (window.claude && window.claude.hot && window.claude.hot.snapshot) {
+    window.claude.hot.snapshot(() => ({ stand: S ? JSON.stringify(S) : null }));
+  }
+} catch (e) {}
+if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(boot);
+else boot({});
+</script>
