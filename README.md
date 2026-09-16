@@ -74,16 +74,29 @@ Am Schluss: Rücktritt und Legacy-Punkte.
 
 ## Vereine und Spieler
 
-9 Ligen in 7 Ländern, 170 Vereine mit ihren echten Namen, Trikotfarben und -mustern. Vereins-
+10 Ligen in 8 Ländern, 182 Vereine mit ihren echten Namen, Trikotfarben und -mustern. Vereins-
 logos sind bewusst nicht enthalten: Die Wappen sind aus den Trikotfarben gezeichnet, nicht
 kopiert.
 
-Echte Kader liegen für 31 Vereine vor — die komplette Bundesliga sowie Real Madrid, Barcelona,
-Atlético, Liverpool, Arsenal, Manchester City, Chelsea, Manchester United, Inter, Neapel,
-Milan, Juventus und Paris Saint-Germain. Zusammen rund 430 Spieler, Stand der Saison 2025/26.
+Echte Kader liegen für 108 der 182 Vereine vor — rund 1.300 Spieler, Stand der Saison 2025/26:
+
+| Liga | Abdeckung |
+|---|---|
+| Bundesliga | alle 18 Vereine |
+| Premier League | alle 20 Vereine |
+| LaLiga | alle 20 Vereine |
+| Serie A | alle 20 Vereine |
+| Ligue 1 | alle 18 Vereine |
+| Österreichische Bundesliga | alle 12 Vereine |
+| 2. Bundesliga, 3. Liga, Eredivisie, Saudi Pro League | erzeugte Kader |
+
 Für alle übrigen Vereine erzeugt das Spiel Kader mit zur Liga passenden Nationalitäten;
 angefangene echte Kader werden nach demselben Verfahren aufgefüllt, statt unsichere Namen zu
 erfinden. Über die Jahre wächst der Anteil erzeugter Spieler, weil der Kader altert.
+
+Die Kaderdaten werden beim Start gegen Vereins-IDs, Positionen, Nationen, Altersspannen und
+Doppeleinträge geprüft (`scratchpad`-Testskript im Entwicklungsablauf) — Nationen ohne eigenen
+Eintrag in der Nationenliste sind auf die jeweils nächstliegende abgebildet.
 
 ## Aufbau
 
