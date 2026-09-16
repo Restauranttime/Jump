@@ -1,15 +1,27 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07100B">
+<meta name="description" content="Flutlicht Karriere - ein deutschsprachiger Fussball-Karriere-Simulator fuers Handy.">
+<meta name="mobile-web-app-capable" content="yes">
 <title>Flutlicht Karriere</title>
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font:14px system-ui,sans-serif}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <style>
 :root{
   color-scheme:dark;
-  /* Sichere Bereiche: oben die Statusleiste, unten der Home-Indikator.
-     Sie gehoeren in die Leisten selbst, nicht um die ganze Seite herum --
-     sonst bleibt unter der Tableiste ein Streifen Hintergrund stehen. */
-  --sat:env(safe-area-inset-top,0px);
-  --sab:env(safe-area-inset-bottom,0px);
   --bg:#07100B;
   --surface:#0F1C15;
   --surface-2:#16271D;
@@ -34,18 +46,7 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-/* Hoehe des Spiels: 100% rechnet gegen das Wurzelelement und wird dadurch auf
-   iOS zu kurz, sobald dort ein Sicherheitsabstand als padding sitzt -- gemessen
-   fehlten unten 96 pt, genau die Summe beider Abstaende. 100dvh misst dagegen
-   immer den tatsaechlich sichtbaren Bereich. 100% bleibt als Rueckfall stehen. */
 html,body{height:100%}
-@supports (height:100dvh){ html,body{height:100dvh} }
-/* Der Hintergrund des Wurzelelements traegt die Farbe der Tableiste. Bleibt am
-   unteren Rand doch ein Streifen ausserhalb der Seite stehen -- etwa weil iOS
-   den Bereich selbst ausmalt --, sieht er wie eine Fortsetzung der Leiste aus
-   statt wie ein Loch. Der Farbverlauf der Seite liegt auf body und deckt den
-   sichtbaren Bereich vollstaendig ab. */
-html{background:var(--surface)}
 body{
   margin:0;
   font-family:var(--font-body);
@@ -122,7 +123,7 @@ a{color:var(--accent)}
 .note-5{background:#6A2B27;color:#FBDDDB}
 
 /* ---------- Startbildschirm ---------- */
-#screen-start{justify-content:space-between;padding:calc(22px + var(--sat)) 16px calc(18px + var(--sab));gap:18px;overflow-y:auto}
+#screen-start{justify-content:space-between;padding:22px 16px 18px;gap:18px;overflow-y:auto}
 .hero{padding-top:8px}
 .hero-title{font-family:var(--font-display);font-size:clamp(54px,17vw,86px);line-height:.86;letter-spacing:.01em;
   color:var(--ink);text-shadow:0 0 34px rgba(239,169,44,.34)}
@@ -139,12 +140,12 @@ a{color:var(--accent)}
 
 /* ---------- Charaktererstellung ---------- */
 #screen-create{padding:0}
-.create-head{padding:calc(16px + var(--sat)) 16px 10px;display:flex;flex-direction:column;gap:10px}
+.create-head{padding:16px 16px 10px;display:flex;flex-direction:column;gap:10px}
 .steps{display:flex;gap:5px}
 .steps i{height:3px;flex:1;border-radius:99px;background:var(--surface-3)}
 .steps i.on{background:var(--accent)}
 .create-body{flex:1;min-height:0;overflow-y:auto;padding:4px 16px 16px;display:flex;flex-direction:column;gap:16px}
-.create-foot{padding:10px 16px calc(14px + var(--sab));border-top:1px solid var(--line-soft);background:var(--surface);display:flex;gap:8px}
+.create-foot{padding:10px 16px 14px;border-top:1px solid var(--line-soft);background:var(--surface);display:flex;gap:8px}
 .field{display:flex;flex-direction:column;gap:6px}
 .field label{font-family:var(--font-data);font-size:11.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
 .input,select.input{width:100%;min-height:48px;padding:11px 13px;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
@@ -160,7 +161,7 @@ a{color:var(--accent)}
 .opt-m{font-family:var(--font-data);font-size:11.5px;color:var(--accent-2);margin-top:5px;letter-spacing:.03em}
 
 /* ---------- Spiel-Shell ---------- */
-#topbar{padding:calc(10px + var(--sat)) 14px 9px;border-bottom:1px solid var(--line-soft);background:rgba(15,28,21,.72);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:flex;flex-direction:column;gap:8px}
+#topbar{padding:10px 14px 9px;border-bottom:1px solid var(--line-soft);background:rgba(15,28,21,.72);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:flex;flex-direction:column;gap:8px}
 .hud{display:flex;align-items:center;gap:10px}
 .hud-name{font-family:var(--font-data);font-weight:700;font-size:15px;letter-spacing:.01em}
 .hud-sub{font-size:11.5px;color:var(--muted)}
@@ -171,7 +172,7 @@ a{color:var(--accent)}
 .hud-chips::-webkit-scrollbar{display:none}
 #main{flex:1;min-height:0;overflow-y:auto;padding:14px 16px 22px}
 .view{display:flex;flex-direction:column;gap:14px}
-#tabbar{display:grid;grid-template-columns:repeat(6,1fr);border-top:1px solid var(--line-soft);background:var(--surface);padding-bottom:var(--sab)}
+#tabbar{display:grid;grid-template-columns:repeat(6,1fr);border-top:1px solid var(--line-soft);background:var(--surface)}
 .tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 1px 10px;background:none;border:0;color:var(--muted);
   font-family:var(--font-data);font-size:9.5px;letter-spacing:.02em;text-transform:uppercase;overflow:hidden}
 .tab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -288,7 +289,7 @@ table.tbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-
 .modal{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;justify-content:flex-end;
   background:rgba(4,9,6,.72);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);padding:0}
 .sheet{width:100%;max-width:600px;margin-inline:auto;background:var(--surface);border:1px solid var(--line);
-  border-radius:20px 20px 0 0;padding:18px 16px calc(18px + var(--sab));
+  border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));
   max-height:92%;display:flex;flex-direction:column;gap:13px;animation:rise .22s ease}
 @keyframes rise{from{transform:translateY(18px);opacity:.4}to{transform:none;opacity:1}}
 .sheet-body{overflow-y:auto;display:flex;flex-direction:column;gap:11px}
@@ -305,7 +306,7 @@ table.tbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-
 /* ---------- Spieltag ---------- */
 #match{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none;justify-content:flex-start}
 .match-wrap{flex:1;min-height:0;width:100%;max-width:600px;margin-inline:auto;display:flex;flex-direction:column}
-.scoreboard{padding:calc(14px + var(--sat)) 16px 12px;border-bottom:1px solid var(--line);
+.scoreboard{padding:14px 16px 12px;border-bottom:1px solid var(--line);
   background:linear-gradient(180deg,rgba(30,122,79,.2),transparent),var(--surface)}
 .sb-comp{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px}
 .sb-main{display:flex;align-items:center;gap:10px}
@@ -324,7 +325,7 @@ table.tbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-
 .ev-goal .ev-tag{color:var(--good)}
 .ev-bad .ev-tag{color:var(--bad)}
 .ev-you .ev-tag{color:var(--accent)}
-.match-foot{padding:12px 16px calc(14px + var(--sab));border-top:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;gap:8px}
+.match-foot{padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;gap:8px}
 .moment{font-size:15px;line-height:1.45;color:var(--ink)}
 .rating-box{display:flex;align-items:center;gap:12px;padding:12px;border-radius:13px;background:var(--surface-2);border:1px solid var(--line)}
 .rating-box .note{font-size:27px;padding:4px 11px}
@@ -335,7 +336,7 @@ table.tbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-
 .trophy-ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--surface-3);flex:none;
   font-family:var(--font-display);font-size:15px;color:var(--accent)}
 .legacy{font-family:var(--font-display);font-size:60px;color:var(--accent);line-height:1;letter-spacing:.02em}
-#toast{position:fixed;left:50%;bottom:calc(84px + var(--sab));transform:translateX(-50%);
+#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
   z-index:60;padding:10px 18px;border-radius:999px;background:var(--surface-3);border:1px solid var(--line);
   color:var(--ink);font-family:var(--font-data);font-weight:600;font-size:13.5px;letter-spacing:.02em;
   box-shadow:0 8px 24px rgba(0,0,0,.45);max-width:88%;text-align:center;animation:toastin .18s ease}
@@ -353,9 +354,9 @@ textarea.input{min-height:120px;font-family:var(--font-data);font-size:12px;resi
       <p class="hero-sub">Ein Spieler. Zwanzig Jahre. Jede Entscheidung ist deine — vom Regionalliga-Kunstrasen bis zum Goldenen Ball.</p>
       <div class="hero-rule"></div>
       <div class="facts">
-        <div class="fact"><span class="fact-k">38</span><span class="fact-t">Ligaspiele pro Saison in den größten Ligen, dazu Pokal und Europapokal</span></div>
+        <div class="fact"><span class="fact-k">34</span><span class="fact-t">Ligaspiele pro Saison, dazu Pokal und Europapokal</span></div>
         <div class="fact"><span class="fact-k">1,0</span><span class="fact-t">Jede Partie endet mit einer Note von 1,0 bis 6,0</span></div>
-        <div class="fact"><span class="fact-k">10</span><span class="fact-t">Ligen, 182 echte Vereine, Transferfenster im Winter und Sommer</span></div>
+        <div class="fact"><span class="fact-k">7</span><span class="fact-t">Ligen, 140 Vereine, Transferfenster im Winter und Sommer</span></div>
         <div class="fact"><span class="fact-k">∞</span><span class="fact-t">Training, Presse, Sponsoren, Nationalelf, Verletzungen, Alterung</span></div>
       </div>
     </div>
@@ -3687,7 +3688,6 @@ function formChart(noten) {
     + '<line class="axis" x1="' + pl + '" y1="' + (H - pb) + '" x2="' + (W - pr) + '" y2="' + (H - pb) + '"/>'
     + '<path d="' + flaeche + '" fill="rgba(239,169,44,.14)"/>'
     + '<path class="line" d="' + linie + '"/>'
-    + punkte.map((q, i) => '<circle class="' + (i === punkte.length - 1 ? 'dot-last' : 'dot') + '" cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1) + '" r="' + (i === punkte.length - 1 ? 5 : 3.4) + '"><title>Spiel ' + (i + 1) + ': Note ' + note(n[i]) + '</title></circle>').join('')
     + '<text x="' + (x(n.length - 1) + 8) + '" y="' + (y(letzte) + 4).toFixed(1) + '" fill="var(--accent-2)">' + note(letzte) + '</text>'
     + '<text x="' + pl + '" y="' + (H - 6) + '">älter</text>'
     + '<text x="' + (W - pr) + '" y="' + (H - 6) + '" text-anchor="end">zuletzt</text>'
@@ -4379,3 +4379,5 @@ try {
 if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(boot);
 else boot({});
 </script>
+</body>
+</html>

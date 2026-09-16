@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#07100B">
+<meta name="theme-color" content="#0F1C15">
 <meta name="description" content="Flutlicht Karriere - ein deutschsprachiger Fussball-Karriere-Simulator fuers Handy.">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -56,7 +56,18 @@ img{max-width:100%}
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
+/* Hoehe des Spiels: 100% rechnet gegen das Wurzelelement und wird dadurch auf
+   iOS zu kurz, sobald dort ein Sicherheitsabstand als padding sitzt -- gemessen
+   fehlten unten 96 pt, genau die Summe beider Abstaende. 100dvh misst dagegen
+   immer den tatsaechlich sichtbaren Bereich. 100% bleibt als Rueckfall stehen. */
 html,body{height:100%}
+@supports (height:100dvh){ html,body{height:100dvh} }
+/* Der Hintergrund des Wurzelelements traegt die Farbe der Tableiste. Bleibt am
+   unteren Rand doch ein Streifen ausserhalb der Seite stehen -- etwa weil iOS
+   den Bereich selbst ausmalt --, sieht er wie eine Fortsetzung der Leiste aus
+   statt wie ein Loch. Der Farbverlauf der Seite liegt auf body und deckt den
+   sichtbaren Bereich vollstaendig ab. */
+html{background:var(--surface)}
 body{
   margin:0;
   font-family:var(--font-body);

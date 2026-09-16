@@ -13,7 +13,9 @@ cd "$(dirname "$0")"
   echo '<head>'
   echo '<meta charset="utf-8">'
   echo '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
-  echo '<meta name="theme-color" content="#07100B">'
+  # Farbe der Leisten, nicht des Seitenhintergrunds: iOS malt damit Bereiche
+  # aus, die ausserhalb der Seite liegen. So wirken sie wie deren Fortsetzung.
+  echo '<meta name="theme-color" content="#0F1C15">'
   echo '<meta name="description" content="Flutlicht Karriere - ein deutschsprachiger Fussball-Karriere-Simulator fuers Handy.">'
   echo '<meta name="mobile-web-app-capable" content="yes">'
   # Ohne diese vier Zeilen startet das Icon vom iOS-Homescreen nur in Safari
