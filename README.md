@@ -39,6 +39,12 @@ Nachwuchsleistungszentrum (2. Bundesliga) oder Wunderkind (Bundesliga, viel Erwa
 Attribut, Doppelschichten (schneller besser, höheres Verletzungsrisiko), Ausdauertraining,
 Athletik, Regeneration, Videoanalyse, Social Media oder Freizeit. Dann kommt der Spieltag.
 
+**Rhythmus** — Was früher „Fitness" hieß und nie etwas tat, ist jetzt deine Spielpraxis.
+Sie wächst nur durch echte Einsatzminuten und sinkt auf ein Grundniveau, wenn du nicht
+spielst. Unter 75 kostet sie Stärke und erhöht das Verletzungsrisiko. Damit wird Bankdrücken
+teuer: Wer nicht spielt, verliert Rhythmus und spielt dadurch noch weniger — dagegen hilft
+nur, sich zurückzukämpfen oder den Verein zu wechseln.
+
 **Ausdauer** — Ein eigener Langzeitwert neben den sieben Attributen. Sie zählt nicht in die
 Stärke, macht dich also nicht besser, sondern belastbarer: Sie senkt den Energieverbrauch
 und beschleunigt vor allem die Erholung zwischen den Spieltagen. Aufbauen kannst du sie nur
@@ -60,6 +66,17 @@ Tempoduell. Der Ausgang hängt am passenden Attribut, an der Schwierigkeit und a
 reicht vom Traumtor über Abseits und herausgeholten Elfmeter bis zur eigenen Verletzung, die
 dich vom Platz holt. Am Ende steht eine Note von 1,0 bis 6,0 nach deutscher
 Sportpresse-Skala.
+
+**Stab** — Du stellst Personal an und bezahlst es jede Woche, statt es einmal zu kaufen:
+sieben Trainer (je einer pro Attribut), drei medizinische Kräfte und drei fürs Umfeld, jeweils
+in drei Stufen von der Nachwuchskraft (250 € pro Woche) bis Weltklasse (9.000 € pro Woche).
+Ein vollständiger Weltklasse-Stab kostet 6,1 Mio € im Jahr — mehr, als die meisten Spieler
+verdienen. Reicht das Konto nicht, wird zurückgestuft und im Zweifel entlassen. Ein
+Spitzentrainer hebt außerdem die Trainingsdecke für sein Attribut deutlich an.
+
+**Besitz** — Einmalkäufe für das, was Gehalt sonst nicht verbraucht: Anlagen mit passivem
+Wocheneinkommen, Lifestyle für Moral und Reichweite, und Vermächtnis-Projekte (Kunstrasen,
+Akademie, Stiftung), die am Karriereende Legacy-Punkte bringen.
 
 **Drumherum** — Presse-Interviews nach Spielen, Follower und Ruf, Sponsorenverträge,
 zufällige Ereignisse (Kabinenstreit, Trainerbüro, Boulevard, Wettanfragen, der Junge aus
@@ -117,9 +134,10 @@ eine durchgespielte Karriere:
 - Gezielt trainiert und regeneriert: Stärke 80–86, Torschützenkönig, Goldener Ball möglich.
 - Ein Mittelstürmer landet bei etwa 0,6–0,7 Toren pro Spiel, ein Innenverteidiger bei 0,1.
 - Marktwert auf dem Höhepunkt: zweistellige Millionen, mit Weltklasse deutlich darüber.
-- Energie ohne Ausdauertraining: Ø 72, ein Viertel der Wochen unter 55.
-- Energie mit regelmäßigem Ausdauertraining: Ø 78–90, unter zehn Prozent der Wochen unter 55.
-- Wer dauerhaft Doppelschichten schiebt: Ø 57, jede zehnte Woche unter 35 — und dort greift
-  auch der Abzug auf die Aufstellung.
-- Einsatzzeiten über eine ganze Karriere: rund ein Drittel Startelf, ein Fünftel
-  Einwechslung, ein Drittel Bank, ein Zehntel verletzt.
+- Energie eines Stammspielers: Ø 48–60, je nach Umgang mit Regenerationswochen. Wer nicht
+  spielt, bleibt naturgemäß frisch — der Karriereschnitt über alle Wochen liegt deshalb höher.
+- Ausdauer wirkt sichtbar: Mit hohem Wert sinkt der Anteil der Wochen unter 55 Energie von
+  gut 40 % auf rund ein Viertel.
+- Ein Attribut erreicht ohne Trainer etwa Potenzial + 6, mit Weltklasse-Trainer rund
+  Potenzial + 15. Gemessen über 20 Durchläufe: 84 / 86 / 89 / 93 je Trainerstufe.
+- Verletzungen kosten rund ein Zehntel aller Wochen.

@@ -208,6 +208,23 @@ table.tbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-
 .zone-el td:first-child{box-shadow:inset 2px 0 0 var(--accent)}
 .zone-ab td:first-child{box-shadow:inset 2px 0 0 var(--bad)}
 
+/* ---------- Stab ---------- */
+.stab{display:flex;flex-direction:column;gap:2px;padding:11px 0;border-top:1px solid var(--line-soft)}
+.stab:first-child{border-top:0;padding-top:2px}
+.stab-kopf{display:flex;align-items:baseline;gap:8px}
+.stab-kopf b{font-size:14px;font-weight:600}
+.stab-kopf .lohn{margin-left:auto;font-family:var(--font-data);font-size:12px;color:var(--accent-2);white-space:nowrap}
+.pips{display:inline-flex;gap:3px;flex:none}
+.pips i{width:7px;height:7px;border-radius:99px;background:var(--surface-3);border:1px solid var(--line)}
+.pips i.an{background:var(--accent);border-color:var(--accent)}
+.stab-text{font-size:12px;color:var(--muted);line-height:1.35}
+.stab-knoepfe{display:flex;gap:7px;margin-top:7px}
+.stab-knoepfe .btn{min-height:36px;font-size:12.5px;padding:6px 11px;width:auto}
+.bilanz{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.bilanz div{display:flex;flex-direction:column;gap:2px}
+.bilanz .k{font-family:var(--font-data);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.bilanz .v{font-family:var(--font-data);font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
+
 /* ---------- Kader ---------- */
 .spieler{display:grid;grid-template-columns:22px 1fr auto auto;align-items:center;gap:9px;padding:8px 0;border-top:1px solid var(--line-soft)}
 .spieler:first-child{border-top:0}
@@ -430,9 +447,12 @@ const shuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0
 const de = n => n.toLocaleString('de-DE');
 const note = v => v.toFixed(1).replace('.', ',');
 function money(v) {
-  if (v >= 1e6) return (v / 1e6).toFixed(v >= 1e7 ? 0 : 1).replace('.', ',') + ' Mio €';
-  if (v >= 1e3) return Math.round(v / 1e3) + ' Tsd €';
-  return Math.round(v) + ' €';
+  const minus = v < 0, a = Math.abs(v);
+  let t;
+  if (a >= 1e6) t = (a / 1e6).toFixed(a >= 1e7 ? 0 : 1).replace('.', ',') + ' Mio €';
+  else if (a >= 1e4) t = Math.round(a / 1e3) + ' Tsd €';
+  else t = Math.round(a).toLocaleString('de-DE') + ' €';
+  return (minus ? '−' : '') + t;
 }
 function followers(v) {
   if (v >= 1e6) return (v / 1e6).toFixed(1).replace('.', ',') + ' Mio';
@@ -1168,7 +1188,8 @@ function formWert() {
   if (!n.length) return 0;
   const letzte = n.slice(-5);
   const schnitt = letzte.reduce((a, b) => a + b, 0) / letzte.length;
-  return clamp((3.4 - schnitt) * 2.2, -4, 4);   // Note 1,2 => +4,8 → gedeckelt
+  const roh = clamp((3.4 - schnitt) * 2.2, -4, 4);
+  return roh < 0 ? roh * stabWert('psycho', [.85, .7, .5]) : roh;
 }
 function formText() {
   const f = formWert();
@@ -1181,7 +1202,7 @@ function formText() {
 function effOvr() {
   const p = S.p;
   const energieMalus = p.energie < 55 ? (55 - p.energie) * 0.14 : 0;
-  const fitMalus = (100 - p.fitness) * 0.08;
+  const fitMalus = Math.max(0, 75 - p.fitness) * .10;
   const moralBonus = (p.moral - 60) * 0.035;
   return OVR() + formWert() * 0.9 + moralBonus - energieMalus - fitMalus;
 }
@@ -1191,15 +1212,15 @@ function effOvr() {
 function kondi() { return clamp(S.p.kondition || 0, 0, 100); }
 function energieFaktor() { return 1 - kondi() * .0015; }
 function erholung() {
-  const basis = 5.5 + kondi() * .12;
-  return basis * (.6 + (100 - S.p.energie) / 60);
+  const basis = (6.8 + kondi() * .04) * stabWert('ernaehrung', [1.08, 1.18, 1.32]);
+  return basis * (.55 + (100 - S.p.energie) / 55);
 }
 function konditionsGewinn(faktor) {
   const p = S.p;
   const alterF = p.alter <= 23 ? 1.2 : p.alter <= 28 ? 1 : p.alter <= 32 ? .6 : .3;
   const raum = 1 - kondi() / 105;
   const energieF = p.energie < 30 ? .5 : 1;
-  return clamp(1.7 * faktor * alterF * raum * energieF * (.55 + Math.random()), 0, 3);
+  return clamp(1.7 * faktor * alterF * raum * energieF * stabWert('schlaf', [1.2, 1.45, 1.8]) * (.55 + Math.random()), 0, 3);
 }
 function marktwert() {
   const p = S.p, o = OVR();
@@ -1249,7 +1270,7 @@ function wirke(eff) {
     }
     if (k === 'geld') { p.geld += v; out.push({ t: (v > 0 ? '+' : '−') + money(Math.abs(v)), gut: v > 0 }); continue; }
     if (k === 'follower') {
-      if (v > 0 && p.extras && p.extras.medien) v = Math.round(v * 1.3);
+      if (v > 0) v = Math.round(v * stabWert('pr', [1.15, 1.35, 1.7]));
       if (v > 0) v = Math.round(v * (1 - clamp(Math.pow(p.follower / 1.5e8, .8), 0, .93)));
       p.follower = clamp(Math.round(p.follower + v), 0, 4e8);
       out.push({ t: (v > 0 ? '+' : '−') + followers(Math.abs(v)) + ' Follower', gut: v > 0 }); continue;
@@ -1410,7 +1431,7 @@ function einsatzBestimmen(fx) {
   const bester = konk.length ? konk[0].ovr : club.staerke - 2;
   const diff = effOvr() - bester;
   let pStart = 0.55 + diff * 0.075 + (p.trainer - 50) * 0.012;
-  if (p.energie < 35) pStart -= 0.3;
+  if (p.energie < 35) pStart -= .3;
   if (p.alter < 19) pStart -= 0.08;
   if (fx.comp === 'pokal') pStart += 0.06;
   pStart = clamp(pStart, 0.02, 0.96);
@@ -1680,21 +1701,26 @@ function noteBerechnen(basis, tore, vorlagen, aktionen, fehler, ergebnis, minute
 const PLAENE = [
   { id: 'technik', name: 'Techniktraining', text: 'Ein Attribut gezielt schärfen', eff: { energie: -5 }, train: 1 },
   { id: 'doppel', name: 'Doppelschichten', text: 'Schneller besser — Verletzungsrisiko', eff: { energie: -13 }, train: 1.95, risiko: .1 },
-  { id: 'ausdauer', name: 'Ausdauertraining', text: 'Baut Ausdauer auf — dauerhaft mehr Energie', eff: { energie: -11, fitness: 4 }, ausdauer: 1 },
-  { id: 'athletik', name: 'Athletikblock', text: 'Physis, Tempo, etwas Ausdauer', eff: { energie: -8, fitness: 7 }, train: .5, athletik: true, ausdauer: .4 },
-  { id: 'regen', name: 'Regeneration', text: 'Energie und Fitness auffüllen', eff: { energie: 20, fitness: 10, moral: 2 } },
+  { id: 'ausdauer', name: 'Ausdauertraining', text: 'Baut Ausdauer auf — dauerhaft mehr Energie', eff: { energie: -11 }, ausdauer: 1 },
+  { id: 'athletik', name: 'Athletikblock', text: 'Physis, Tempo, etwas Rhythmus', eff: { energie: -8, fitness: 3 }, train: .5, athletik: true, ausdauer: .4 },
+  { id: 'regen', name: 'Regeneration', text: 'Energie auffüllen, Körper schonen', eff: { energie: 20, moral: 2 } },
   { id: 'video', name: 'Videoanalyse', text: 'Mentalität und Trainer-Vertrauen', eff: { energie: -3, mentalitaet: .4, trainer: 2.5 } },
   { id: 'social', name: 'Social Media', text: 'Reichweite aufbauen', eff: { energie: -3, moral: 3 }, social: true },
   { id: 'frei', name: 'Freizeit', text: 'Kopf frei — aber der Trainer sieht es', eff: { energie: -5, moral: 12 }, skandal: .12 }
 ];
 const PLAN = id => PLAENE.find(p => p.id === id);
 
-function trainingsGewinn(faktor) {
+function trainingsGewinn(faktor, attr) {
   const p = S.p, o = OVR();
   const alterF = p.alter <= 20 ? 1.4 : p.alter <= 23 ? 1.15 : p.alter <= 26 ? .85 : p.alter <= 29 ? .55 : p.alter <= 32 ? .25 : .08;
-  const raum = clamp((p.potenzial - o) / 20, .04, 1.5);
+  /* Spielraum pro Attribut, nicht gegen die Gesamtstärke: Sonst liesse sich ein
+     einzelnes Attribut beliebig weit über das eigene Potenzial hinaus trainieren.
+     Ein Spitzentrainer hebt die Decke für genau sein Attribut spürbar an. */
+  const decke = clamp(p.potenzial + 6 + (attr ? (trainerFaktor(attr) - 1) * 14 : 0), 40, 99);
+  const basis = attr ? p.attr[attr] : o;
+  const raum = clamp((decke - basis) / 18, 0, 1.5);
   const energieF = p.energie < 35 ? .45 : 1;
-  const extra = p.extras && p.extras.coach ? 1.22 : 1;
+  const extra = attr ? trainerFaktor(attr) : 1;
   return clamp(.7 * faktor * alterF * raum * energieF * extra * (.55 + Math.random()), 0, 3.2);
 }
 
@@ -1708,11 +1734,67 @@ function verletzen() {
   const r = Math.random();
   let acc = 0, v = VERLETZUNGEN[0];
   for (const x of VERLETZUNGEN) { acc += x.p; if (r <= acc) { v = x; break; } }
-  const wochen = ri(v.w[0], v.w[1]);
+  const wochen = Math.max(1, Math.round(ri(v.w[0], v.w[1]) * stabWert('physio', [.9, .8, .7])));
   S.p.verletzung = { name: v.n, wochen };
-  S.p.fitness = clamp(S.p.fitness - wochen * 2.5, 25, 100);
+  S.p.fitness = clamp(S.p.fitness - wochen * 2.5, 12, 100);
   log(v.n + ' — voraussichtlich ' + wochen + ' Wochen Pause.', 'bad');
   return { name: v.n, wochen };
+}
+
+/* ========================== STAB UND BESITZ ==========================
+   Der Stab wird angestellt, nicht gekauft: Jede Kraft kostet Wochengehalt,
+   solange sie dabei ist. Damit bleibt Geld die ganze Karriere über wichtig —
+   ein Weltklasse-Stab kostet mehr, als ein Drittligist überhaupt verdient. */
+const STAB_STUFEN = [
+  { name: 'Nachwuchskraft', kosten: 250 },
+  { name: 'Erfahren', kosten: 1400 },
+  { name: 'Weltklasse', kosten: 9000 }
+];
+const STAB = [
+  { id: 't_schuss', gruppe: 'Training', name: 'Abschlusstrainer', attr: 'schuss' },
+  { id: 't_pass', gruppe: 'Training', name: 'Passtrainer', attr: 'pass' },
+  { id: 't_tempo', gruppe: 'Training', name: 'Sprinttrainer', attr: 'tempo' },
+  { id: 't_dribbling', gruppe: 'Training', name: 'Techniktrainer', attr: 'dribbling' },
+  { id: 't_zweikampf', gruppe: 'Training', name: 'Zweikampftrainer', attr: 'zweikampf' },
+  { id: 't_physis', gruppe: 'Training', name: 'Athletiktrainer', attr: 'physis' },
+  { id: 't_mentalitaet', gruppe: 'Training', name: 'Konzentrationstrainer', attr: 'mentalitaet' },
+  { id: 'physio', gruppe: 'Medizin', name: 'Physiotherapeut', text: 'Weniger Verletzungen, kürzere Ausfälle' },
+  { id: 'ernaehrung', gruppe: 'Medizin', name: 'Ernährungsberater', text: 'Bessere Erholung zwischen den Spielen' },
+  { id: 'schlaf', gruppe: 'Medizin', name: 'Schlafcoach', text: 'Schnellerer Ausdaueraufbau' },
+  { id: 'berater', gruppe: 'Umfeld', name: 'Spielerberater', text: 'Mehr Angebote, bessere Verhandlungen' },
+  { id: 'psycho', gruppe: 'Umfeld', name: 'Sportpsychologe', text: 'Dämpft Formtiefs und Moraleinbrüche' },
+  { id: 'pr', gruppe: 'Umfeld', name: 'PR-Agentur', text: 'Mehr Reichweite, wertvollere Sponsoren' }
+];
+const STAB_DEF = id => STAB.find(x => x.id === id);
+function stabStufe(id) { return (S.p.stab && S.p.stab[id]) || 0; }
+function stabWert(id, werte) { const st = stabStufe(id); return st ? werte[st - 1] : 1; }
+function stabKosten() {
+  let summe = 0;
+  for (const x of STAB) summe += stabStufe(x.id) ? STAB_STUFEN[stabStufe(x.id) - 1].kosten : 0;
+  return summe;
+}
+function trainerFaktor(attr) {
+  const def = STAB.find(x => x.attr === attr);
+  return def ? stabWert(def.id, [1.15, 1.35, 1.65]) : 1;
+}
+
+const BESITZ = [
+  { id: 'immobilien', gruppe: 'Anlage', name: 'Immobilienportfolio', preis: 600000, text: 'Bringt dir 2.500 € pro Woche', pro: 2500 },
+  { id: 'fonds', gruppe: 'Anlage', name: 'Beteiligungsfonds', preis: 2200000, text: 'Bringt dir 9.000 € pro Woche', pro: 9000 },
+  { id: 'auto', gruppe: 'Lifestyle', name: 'Sportwagen', preis: 280000, text: 'Die Kabine feiert, das Netz auch', moral: 8, follower: .06 },
+  { id: 'villa', gruppe: 'Lifestyle', name: 'Villa vor der Stadt', preis: 1400000, text: 'Ruhe, Pool, Platz für die Familie', moral: 14, follower: .1 },
+  { id: 'jet', gruppe: 'Lifestyle', name: 'Anteil an einem Privatjet', preis: 4000000, text: 'Länderspielreisen kosten weniger Kraft', moral: 10, follower: .14 },
+  { id: 'kunstrasen', gruppe: 'Vermächtnis', name: 'Kunstrasen für deinen Jugendverein', preis: 150000, text: 'Der Platz trägt deinen Namen', legacy: 40, ruf: 5 },
+  { id: 'akademie', gruppe: 'Vermächtnis', name: 'Eigene Fußballakademie', preis: 2500000, text: 'Hundert Kinder, ein Trainerstab, dein Name', legacy: 180, ruf: 10 },
+  { id: 'stiftung', gruppe: 'Vermächtnis', name: 'Stiftung in deinem Namen', preis: 6000000, text: 'Was von dir bleibt, wenn die Tore vergessen sind', legacy: 400, ruf: 14 }
+];
+const BESITZ_DEF = id => BESITZ.find(x => x.id === id);
+function hatBesitz(id) { return !!(S.p.besitz && S.p.besitz[id]); }
+function passivesEinkommen() {
+  return BESITZ.filter(b => b.pro && hatBesitz(b.id)).reduce((a, b) => a + b.pro, 0);
+}
+function wochenEinnahmen() {
+  return S.p.vertrag.gehalt / 52 + S.p.sponsoren.reduce((a, x) => a + x.pro, 0) + passivesEinkommen();
 }
 
 /* ========================== ZUFALLSEREIGNISSE ========================== */
@@ -1836,7 +1918,7 @@ const EREIGNISSE = [
 function sponsorAngebot() {
   const firmen = ['Nordstern Sportswear', 'Kraftwerk Energy', 'Halbzeit Getränke', 'Rasenmeister', 'Volt Mobilfunk', 'Adler Automobile', 'Pixelpass Gaming', 'Sonntagsheld Mode'];
   const f = S.p.follower;
-  const pro = clamp(Math.round((Math.sqrt(f) * 18 + S.p.ruf * 120) / 100) * 100, 600, 150000);
+  const pro = clamp(Math.round((Math.sqrt(f) * 18 + S.p.ruf * 120) * stabWert('pr', [1.1, 1.25, 1.5]) / 100) * 100, 600, 220000);
   return { firma: pick(firmen), pro };
 }
 
@@ -1906,9 +1988,9 @@ async function planAnwenden() {
   if (plan.ausdauer) wirke({ kondition: konditionsGewinn(plan.ausdauer) });
   if (plan.train) {
     if (plan.athletik) {
-      wirke({ physis: trainingsGewinn(.6), tempo: trainingsGewinn(.45) });
+      wirke({ physis: trainingsGewinn(.6, 'physis'), tempo: trainingsGewinn(.45, 'tempo') });
     } else {
-      const g = trainingsGewinn(plan.train);
+      const g = trainingsGewinn(plan.train, S.trainFokus);
       const eff = {}; eff[S.trainFokus] = g;
       wirke(eff);
     }
@@ -1929,11 +2011,26 @@ async function planAnwenden() {
 
 function wochenAbschluss() {
   const p = S.p;
-  p.geld += p.vertrag.gehalt / 52;
-  p.sponsoren.forEach(s => p.geld += s.pro);
-  if (p.extras && p.extras.immobilie) p.geld += 2500;
+  p.geld += wochenEinnahmen();
+  p.geld -= stabKosten();
+  if (p.geld < 0) {
+    p.geld = 0;
+    let schutz = 0;
+    while (stabKosten() > wochenEinnahmen() * .9 && schutz++ < 40) {
+      const angestellt = STAB.filter(x => stabStufe(x.id))
+        .sort((a, b) => STAB_STUFEN[stabStufe(b.id) - 1].kosten - STAB_STUFEN[stabStufe(a.id) - 1].kosten);
+      if (!angestellt.length) break;
+      const x = angestellt[0], neu = stabStufe(x.id) - 1;
+      S.p.stab[x.id] = neu;
+      log(neu ? x.name + ' wurde auf ' + STAB_STUFEN[neu - 1].name + ' zurückgestuft — das Geld reichte nicht.'
+              : x.name + ' musste gehen — das Wochengehalt war nicht mehr gedeckt.', 'bad');
+    }
+  }
   p.energie = clamp(p.energie + (p.verletzung ? erholung() * .5 : erholung()), 0, p.verletzung ? 82 : 100);
-  p.fitness = clamp(p.fitness + (p.verletzung ? 1.5 : 1.2), 0, 100);
+  const minuten = Math.min(S.wochenMinuten || 0, 130);
+  p.minutenSchnitt = (p.minutenSchnitt || 0) * .72 + minuten * .28;
+  const rhythmusZiel = clamp(60 + p.minutenSchnitt * .45, 60, 100);
+  p.fitness = clamp(p.fitness + (rhythmusZiel - p.fitness) * .38 - (p.verletzung ? 3 : 0), 12, 100);
   p.moral += (62 - p.moral) * .06;
   p.trainer += (50 - p.trainer) * .03;
   const drift = Math.round(p.follower * .004 + p.ruf * rnd(2, 9));
@@ -1946,10 +2043,10 @@ async function wocheVor() {
   busy = true;
   try {
     const w = S.woche;
+    S.wochenMinuten = 0;
     if (S.p.verletzung) {
       S.p.verletzung.wochen--;
       S.p.energie = clamp(S.p.energie + 4, 0, 82);
-      S.p.fitness = clamp(S.p.fitness + 4, 0, 100);
       if (S.p.verletzung.wochen <= 0) {
         log('Nach ' + S.p.verletzung.name + ' zurück im Mannschaftstraining.', 'good');
         S.p.verletzung = null;
@@ -1969,7 +2066,7 @@ async function wocheVor() {
     if (S.p.nat.dabei && !S.p.verletzung && (w === Math.round(S.saisonWochen * .25) || w === Math.round(S.saisonWochen * .62))) {
       const b = natSpiele(2);
       const meine = b.filter(x => x.spielt);
-      wirke({ energie: -(meine.length ? 7 : 2) });
+      wirke({ energie: -(meine.length ? 7 : 2) * (hatBesitz('jet') ? .6 : 1) });
       if (meine.length) {
         const tore = meine.reduce((a, x) => a + x.tore, 0);
         log('Länderspielpause: ' + b.map(x => x.flag + ' ' + x.gegner + ' ' + x.th + ':' + x.tg).join(' · ') + (tore ? ' · ' + tore + ' Tor(e) von dir' : ''), 'gold');
@@ -2017,7 +2114,8 @@ function angeboteErzeugen(sommer) {
   const gewichtet = kandidaten.map(c => ({ c, score: c.staerke + rnd(-9, 9) + (c.staerke > aktuell.staerke ? 4 : 0) }))
     .sort((a, b) => b.score - a.score);
   let anzahl = 0;
-  const wahrsch = clamp(.18 + (o - aktuell.staerke) * .05 + formWert() * .05 + (p.wechselwunsch ? .3 : 0) + (p.vertrag.jahre <= 0 ? .5 : 0), 0, .95);
+  const wahrsch = clamp(.18 + (o - aktuell.staerke) * .05 + formWert() * .05 + (p.wechselwunsch ? .3 : 0) + (p.vertrag.jahre <= 0 ? .5 : 0)
+    + (stabWert('berater', [1.08, 1.16, 1.28]) - 1) * 1.4, 0, .95);
   if (chance(wahrsch)) anzahl = ri(1, 3);
   if (!sommer) anzahl = Math.min(anzahl, 2);
   const out = [];
@@ -2052,7 +2150,7 @@ async function vertragVerhandeln(angebot, clubName) {
   if (idx === 0) return angebot;
   const faktor = idx === 1 ? 1.35 : 1.8;
   const erfolg = idx === 1 ? .62 : .3;
-  if (chance(erfolg + (S.p.ruf - 40) * .003)) {
+  if (chance(erfolg + (S.p.ruf - 40) * .003 + (stabWert('berater', [1.05, 1.1, 1.18]) - 1) * 1.6)) {
     angebot.gehalt = Math.round(angebot.gehalt * faktor / 5000) * 5000;
     await sagen({ eyebrow: 'Verhandlung', titel: 'Sie zahlen', text: 'Der Sportdirektor braucht zwei Tage — dann liegt ein Vertrag über ' + money(angebot.gehalt) + ' pro Jahr auf dem Tisch.' });
     return angebot;
@@ -2330,8 +2428,8 @@ async function saisonEnde() {
   if (p.alter >= 31) p.kondition = clamp(kondi() - rnd(1.5, 4), 0, 100);
   p.potenzial = clamp(p.potenzial + ri(-1, 1), 40, 99);
   kaderAltern();
-  p.energie = clamp(p.energie + 25, 0, 100);
-  p.fitness = clamp(p.fitness + 12, 0, 100);
+  p.energie = clamp(p.energie + 10, 0, 100);
+  p.fitness = clamp(p.fitness - 8, 12, 100);
   p.formNoten = [];
 
   /* Vertrag */
@@ -2389,7 +2487,8 @@ function legacyPunkte() {
   const ges = S.karriere.reduce((a, k) => ({ s: a.s + k.spiele, t: a.t + k.tore, v: a.v + k.vorlagen }), { s: 0, t: 0, v: 0 });
   const titel = p.titel.length;
   const gross = p.titel.filter(t => /Goldener Ball|Weltmeister|Europapokal|Kontinentalmeister/.test(t.name)).length;
-  return Math.round(ges.t * 3 + ges.v * 1.6 + ges.s * .4 + titel * 22 + gross * 55 + p.nat.spiele * 1.2 + p.nat.tore * 3 + Math.max(...S.karriere.map(k => k.ovr), 40) * 3);
+  const vermaechtnis = BESITZ.filter(b => b.legacy && hatBesitz(b.id)).reduce((a, b) => a + b.legacy, 0);
+  return Math.round(ges.t * 3 + ges.v * 1.6 + ges.s * .4 + titel * 22 + gross * 55 + p.nat.spiele * 1.2 + p.nat.tore * 3 + vermaechtnis + Math.max(...S.karriere.map(k => k.ovr), 40) * 3);
 }
 async function karriereEnde(grund) {
   S.beendet = true;
@@ -2619,12 +2718,12 @@ async function spielAustragen(fx) {
     S.stats.tore += meineTore; S.stats.vorlagen += vorlagen;
     S.stats.gelb += gelb; S.stats.rot += rot;
     S.stats.minuten += minuten;
+    S.wochenMinuten = (S.wochenMinuten || 0) + minuten;
     S.stats.noten.push(noteWert);
     p.formNoten.push(noteWert);
     if (p.formNoten.length > 14) p.formNoten.shift();
     wirke({
-      energie: -(4.5 + minuten * .05 + (fx.comp !== 'liga' ? 1.5 : 0)) * energieFaktor(),
-      fitness: minuten > 60 ? 1.2 : .4,
+      energie: -(6 + minuten * .07 + (fx.comp !== 'liga' ? 2 : 0)) * energieFaktor(),
       trainer: clamp((3.3 - noteWert) * 5, -8, 9),
       moral: clamp((3.4 - noteWert) * 5 + (ergebnis === 'sieg' ? 4 : ergebnis === 'niederlage' ? -4 : 0), -12, 14),
       ruf: clamp(meineTore * 1.4 + vorlagen * .8 + (noteWert < 2 ? 1.6 : 0), 0, 8),
@@ -2632,16 +2731,16 @@ async function spielAustragen(fx) {
     });
     /* Wachstum durch Einsatzzeit */
     if (minuten > 25) {
-      const g = trainingsGewinn(.3);
       const key = pick(Object.keys(POS(p.pos).w).filter(k => POS(p.pos).w[k] > .12));
+      const g = trainingsGewinn(.3, key);
       const eff = {}; eff[key] = g; wirke(eff);
     }
     /* Verletzung im Spiel */
-    const risiko = clamp(.022 + (100 - p.fitness) * .0013 + (p.energie < 40 ? .03 : 0) + (p.alter > 31 ? .012 : 0), 0, .12)
-      * (p.extras && p.extras.physio ? .6 : 1);
+    const risiko = clamp(.022 + Math.max(0, 75 - p.fitness) * .0013 + (p.energie < 40 ? .03 : 0) + (p.alter > 31 ? .012 : 0), 0, .12)
+      * stabWert('physio', [.85, .7, .55]);
     if (!p.verletzung && chance(risiko)) verletzen();
   } else {
-    wirke({ energie: 4, moral: einsatz.status === 'bank' ? -3 : -1, trainer: -1 });
+    wirke({ energie: 1, moral: einsatz.status === 'bank' ? -3 : -1, trainer: -1 });
   }
 
   /* Wettbewerbe fortschreiben */
@@ -2781,7 +2880,7 @@ function renderHome() {
       + '<div class="cond-item"><span class="k">Energie</span><span class="v">' + Math.round(p.energie) + '</span>' + meter(p.energie, zustandsKlasse(p.energie)) + '</div>'
       + '<div class="cond-item"><span class="k">Ausdauer</span><span class="v">' + Math.round(kondi()) + '</span>' + meter(kondi(), kondi() >= 65 ? 'good' : '') + '</div>'
       + '<div class="cond-item"><span class="k">Moral</span><span class="v">' + Math.round(p.moral) + '</span>' + meter(p.moral, zustandsKlasse(p.moral)) + '</div>'
-      + '<div class="cond-item"><span class="k">Fitness</span><span class="v">' + Math.round(p.fitness) + '</span>' + meter(p.fitness, zustandsKlasse(p.fitness)) + '</div>'
+      + '<div class="cond-item"><span class="k">Rhythmus</span><span class="v">' + Math.round(p.fitness) + '</span>' + meter(p.fitness, zustandsKlasse(p.fitness)) + '</div>'
       + '</div></section>';
 
     if (p.verletzung) {
@@ -2900,20 +2999,55 @@ function renderMarkt() {
       : '<button class="btn btn-sm" data-act="berater" style="width:100%">Berater beauftragen</button>')
     + '</div></section>';
 
-  const investitionen = [
-    { id: 'coach', name: 'Privater Athletiktrainer', preis: 250000, text: 'Dein Training bringt dauerhaft rund 20 % mehr.' },
-    { id: 'physio', name: 'Eigenes Physio-Team', preis: 200000, text: 'Deutlich geringeres Verletzungsrisiko im Spiel.' },
-    { id: 'medien', name: 'Medientraining', preis: 120000, text: 'Jeder Auftritt bringt mehr Reichweite.' },
-    { id: 'immobilie', name: 'Immobilienportfolio', preis: 400000, text: 'Bringt dir jede Woche 2.500 € passiv.' }
-  ];
-  html += '<section><div class="sect-title"><h3>Investitionen</h3><span class="small muted">' + money(p.geld) + '</span></div><div class="stack-sm">'
-    + investitionen.map(i => {
-      const hat = p.extras && p.extras[i.id];
-      return '<div class="card row-between"><div class="grow"><div style="font-weight:600;font-size:14px">' + esc(i.name) + '</div>'
-        + '<div class="small muted">' + esc(i.text) + '</div></div>'
-        + (hat ? '<span class="pill pill-good">gekauft</span>'
-          : '<button class="btn btn-sm" data-act="kauf:' + i.id + ':' + i.preis + '"' + (p.geld < i.preis ? ' disabled' : '') + '>' + money(i.preis) + '</button>') + '</div>';
-    }).join('') + '</div></section>';
+  /* Wochenbilanz */
+  const ein = wochenEinnahmen(), aus = stabKosten();
+  html += '<section><div class="sect-title"><h3>Wochenbilanz</h3><span class="small muted">Kontostand ' + money(p.geld) + '</span></div>'
+    + '<div class="card bilanz">'
+    + '<div><span class="k">Einnahmen</span><span class="v" style="color:var(--good)">' + money(ein) + '</span></div>'
+    + '<div><span class="k">Stab</span><span class="v" style="color:' + (aus ? 'var(--bad)' : 'var(--muted)') + '">' + (aus ? '−' + money(aus) : '—') + '</span></div>'
+    + '<div><span class="k">Bleibt</span><span class="v" style="color:' + (ein - aus < 0 ? 'var(--bad)' : 'var(--ink)') + '">' + money(ein - aus) + '</span></div>'
+    + '</div>'
+    + (ein - aus < 0 ? '<p class="tiny" style="color:var(--bad);margin-top:8px">Du gibst mehr aus, als du verdienst. Sobald das Konto leer ist, musst du Leute entlassen.</p>' : '')
+    + '</section>';
+
+  /* Stab */
+  for (const gruppe of ['Training', 'Medizin', 'Umfeld']) {
+    const teil = STAB.filter(x => x.gruppe === gruppe);
+    html += '<section><div class="sect-title"><h3>' + gruppe + '</h3><span class="small muted">'
+      + teil.filter(x => stabStufe(x.id)).length + ' von ' + teil.length + ' besetzt</span></div><div class="card">'
+      + teil.map(x => {
+        const st = stabStufe(x.id);
+        const lohn = st ? STAB_STUFEN[st - 1].kosten : 0;
+        const naechste = st < 3 ? STAB_STUFEN[st] : null;
+        const wirkung = x.attr
+          ? 'Training auf ' + ATTR_LABEL[x.attr] + (st ? ' +' + Math.round((trainerFaktor(x.attr) - 1) * 100) + ' %' : ' — niemand da')
+          : x.text + (st ? ' · ' + STAB_STUFEN[st - 1].name : ' — niemand da');
+        return '<div class="stab"><div class="stab-kopf">'
+          + '<span class="pips">' + [0, 1, 2].map(i => '<i class="' + (i < st ? 'an' : '') + '"></i>').join('') + '</span>'
+          + '<b>' + esc(x.name) + '</b>'
+          + '<span class="lohn">' + (st ? money(lohn) + ' / Woche' : '—') + '</span></div>'
+          + '<div class="stab-text">' + esc(wirkung) + '</div>'
+          + '<div class="stab-knoepfe">'
+          + (naechste ? '<button class="btn btn-sm" data-act="stab:' + x.id + ':auf">'
+              + (st ? 'Aufwerten' : 'Anstellen') + ' · ' + money(naechste.kosten) + '/Wo</button>' : '')
+          + (st ? '<button class="btn btn-sm btn-quiet" data-act="stab:' + x.id + ':ab">Entlassen</button>' : '')
+          + '</div></div>';
+      }).join('') + '</div></section>';
+  }
+
+  /* Besitz */
+  for (const gruppe of ['Anlage', 'Lifestyle', 'Vermächtnis']) {
+    const teil = BESITZ.filter(x => x.gruppe === gruppe);
+    html += '<section><div class="sect-title"><h3>' + gruppe + '</h3></div><div class="stack-sm">'
+      + teil.map(b => {
+        const hat = hatBesitz(b.id);
+        return '<div class="card row-between"><div class="grow"><div style="font-weight:600;font-size:14px">' + esc(b.name) + '</div>'
+          + '<div class="small muted">' + esc(b.text) + (b.legacy ? ' · ' + b.legacy + ' Legacy-Punkte' : '') + '</div></div>'
+          + (hat ? '<span class="pill pill-good">gehört dir</span>'
+            : '<button class="btn btn-sm" data-act="kauf:' + b.id + '"' + (p.geld < b.preis ? ' disabled' : '') + '>' + money(b.preis) + '</button>')
+          + '</div>';
+      }).join('') + '</div></section>';
+  }
   el('view-market').innerHTML = html;
 }
 
@@ -3060,15 +3194,36 @@ async function aktion(name) {
     if (idx === 1) { await standLoeschen(); S = null; el('screen-game').hidden = true; el('screen-start').hidden = false; startseite(); }
     return;
   }
-  if (name.startsWith('kauf:')) {
-    const [, id, preis] = name.split(':');
-    const p = Number(preis);
-    if (S.p.geld < p) return;
-    S.p.geld -= p;
-    S.p.extras = S.p.extras || {};
-    S.p.extras[id] = true;
-    log('Investition getätigt: ' + id + '.', 'gold');
+  if (name.startsWith('stab:')) {
+    const [, id, richtung] = name.split(':');
+    S.p.stab = S.p.stab || {};
+    const st = stabStufe(id), def = STAB_DEF(id);
+    if (!def) return;
+    if (richtung === 'auf' && st < 3) {
+      S.p.stab[id] = st + 1;
+      toast(def.name + ' · ' + STAB_STUFEN[st].name);
+    } else if (richtung === 'ab' && st > 0) {
+      S.p.stab[id] = 0;
+      toast(def.name + ' entlassen');
+    }
     speichern(); render();
+    return;
+  }
+  if (name.startsWith('kauf:')) {
+    const b = BESITZ_DEF(name.split(':')[1]);
+    if (!b || hatBesitz(b.id) || S.p.geld < b.preis) return;
+    S.p.geld -= b.preis;
+    S.p.besitz = S.p.besitz || {};
+    S.p.besitz[b.id] = true;
+    const eff = {};
+    if (b.moral) eff.moral = b.moral;
+    if (b.ruf) eff.ruf = b.ruf;
+    if (b.follower) eff.follower = Math.round(S.p.follower * b.follower + 2000);
+    wirke(eff);
+    log(b.name + ' für ' + money(b.preis) + ' erworben.', 'gold');
+    toast(b.name + ' gehört dir');
+    speichern(); render();
+    return;
   }
 }
 
@@ -3202,7 +3357,7 @@ function karriereStarten() {
       alter: 17, attr, potenzial: clamp(o + ri(19, 35) + weg.potenzial, 62, 99), kondition: ri(10, 20),
       energie: 86, moral: clamp(70 + (weg.moral || 0), 0, 100), fitness: 92, ruf: clamp(5 + (weg.ruf || 0), 0, 100),
       follower: ri(300, 2400), geld: 0, verletzung: null, clubId: club.id, trainer: 46,
-      vertrag: { gehalt, jahre: 3 }, sponsoren: [], titel: [], formNoten: [], extras: {},
+      vertrag: { gehalt, jahre: 3 }, sponsoren: [], titel: [], formNoten: [], stab: {}, besitz: {}, minutenSchnitt: 0,
       nat: { dabei: false, spiele: 0, tore: 0 }, wechselwunsch: false, kapitaen: false
     }
   };
@@ -3220,8 +3375,18 @@ function migriere() {
   if (!S || !S.p) return;
   S.ligaTausch = S.ligaTausch || {};
   S.staerkeTausch = S.staerkeTausch || {};
-  S.p.extras = S.p.extras || {};
+  S.p.stab = S.p.stab || {};
+  S.p.besitz = S.p.besitz || {};
+  if (typeof S.p.minutenSchnitt !== 'number') S.p.minutenSchnitt = Math.max(0, (S.p.fitness - 60) / .45);
   if (typeof S.p.kondition !== 'number') S.p.kondition = ri(10, 20);
+  /* Frühere Einmalkäufe werden zu festangestelltem Personal */
+  if (S.p.extras) {
+    if (S.p.extras.coach && !S.p.stab.t_physis) S.p.stab.t_physis = 1;
+    if (S.p.extras.physio && !S.p.stab.physio) S.p.stab.physio = 1;
+    if (S.p.extras.medien && !S.p.stab.pr) S.p.stab.pr = 1;
+    if (S.p.extras.immobilie) S.p.besitz.immobilien = true;
+    delete S.p.extras;
+  }
   if (!PLAN(S.plan)) S.plan = 'technik';
   tauschAnwenden();
   /* Verein aus einem älteren Spielstand, den es so nicht mehr gibt */
