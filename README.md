@@ -47,7 +47,12 @@ ignoriert, verbringt rund ein Viertel der Saison unter 55 Energie und damit im
 Leistungsabfall; wer regelmäßig investiert, kommt auf unter zehn Prozent. Ab 31 baut sie
 wieder ab.
 
-**Spieltag** — 34 Ligaspieltage plus Pokal und Europapokal. Ob du spielst, entscheidet sich
+**Kader** — Jeder Verein hat einen Kader aus 26 Spielern mit Position, Alter, Nation und
+Stärke. Entscheidend ist die Rangfolge auf deiner Position: Du siehst, wer vor dir steht und
+wie weit. Daraus berechnet sich, ob du aufgestellt wirst — nicht aus einer abstrakten
+Vereinsstärke. Der Kader altert über die Jahre, Spieler gehen und kommen.
+
+**Spieltag** — 34 bis 38 Ligaspieltage plus Pokal und Europapokal. Ob du spielst, entscheidet sich
 aus deiner Stärke im Vergleich zum Kader, dem Trainer-Vertrauen, deiner Form und deiner
 Energie. Im Spiel bekommst du zwei bis drei **Schlüsselmomente** aus einem Vorrat von
 45 Situationen mit je drei Optionen — Kopfball, Volley oder ablegen; grätschen, leiten oder
@@ -67,7 +72,18 @@ Potenzial, ab 29 baut der Körper ab. Saisonbilanz mit Torschützenkönig, Spiel
 und Goldenem Ball, Weltrangliste, Titelvitrine, Karrieretabelle über alle Saisons.
 Am Schluss: Rücktritt und Legacy-Punkte.
 
-7 Ligen in 6 Ländern, rund 140 Vereine. Alle Vereins- und Spielernamen sind frei erfunden.
+## Vereine und Spieler
+
+9 Ligen in 7 Ländern, 170 Vereine mit ihren echten Namen, Trikotfarben und -mustern. Vereins-
+logos sind bewusst nicht enthalten: Die Wappen sind aus den Trikotfarben gezeichnet, nicht
+kopiert.
+
+Echte Kader liegen für 31 Vereine vor — die komplette Bundesliga sowie Real Madrid, Barcelona,
+Atlético, Liverpool, Arsenal, Manchester City, Chelsea, Manchester United, Inter, Neapel,
+Milan, Juventus und Paris Saint-Germain. Zusammen rund 430 Spieler, Stand der Saison 2025/26.
+Für alle übrigen Vereine erzeugt das Spiel Kader mit zur Liga passenden Nationalitäten;
+angefangene echte Kader werden nach demselben Verfahren aufgefüllt, statt unsichere Namen zu
+erfinden. Über die Jahre wächst der Anteil erzeugter Spieler, weil der Kader altert.
 
 ## Aufbau
 
@@ -92,3 +108,5 @@ eine durchgespielte Karriere:
 - Energie mit regelmäßigem Ausdauertraining: Ø 78–90, unter zehn Prozent der Wochen unter 55.
 - Wer dauerhaft Doppelschichten schiebt: Ø 57, jede zehnte Woche unter 35 — und dort greift
   auch der Abzug auf die Aufstellung.
+- Einsatzzeiten über eine ganze Karriere: rund ein Drittel Startelf, ein Fünftel
+  Einwechslung, ein Drittel Bank, ein Zehntel verletzt.
