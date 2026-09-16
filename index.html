@@ -1370,6 +1370,67 @@ function torschuetze() {
   return feld[0];
 }
 
+/* ========================== TRAINER UND SAISONZIEL ==========================
+   Das Trainer-Vertrauen war bisher eine nackte Zahl. Jetzt steht eine Person
+   dahinter, mit einer Spielidee, die beeinflusst, wen sie aufstellt — und mit
+   einem Saisonziel, an dem sie selbst gemessen wird. */
+const TRAINER_STILE = [
+  { id: 'offensiv', name: 'Offensivfußball', text: 'Er will Tore sehen, notfalls auf Kosten der Ordnung.',
+    bonus: () => (POS(S.p.pos).angriff - .5) * .24 },
+  { id: 'defensiv', name: 'Defensive Ordnung', text: 'Erst die Null, dann alles andere.',
+    bonus: () => (.5 - POS(S.p.pos).angriff) * .24 },
+  { id: 'talent', name: 'Talentförderer', text: 'Er gibt lieber einem Jungen eine Chance als einem Routinier.',
+    bonus: () => S.p.alter <= 22 ? .15 : S.p.alter >= 30 ? -.11 : 0 },
+  { id: 'ergebnis', name: 'Ergebnisorientiert', text: 'Ihn interessiert nur, wer heute der Beste ist.',
+    bonus: () => 0, diff: 1.3 },
+  { id: 'akribisch', name: 'Akribischer Arbeiter', text: 'Er stellt auf, wer im Rhythmus ist und im Training liefert.',
+    bonus: () => (S.p.fitness - 70) * .0035 + (S.p.trainer - 50) * .004 }
+];
+const STIL = id => TRAINER_STILE.find(x => x.id === id) || TRAINER_STILE[0];
+
+function trainerErzeugen(club) {
+  const nat = natFuerLiga(club.liga);
+  const nm = zufallsname(nat.pool);
+  return { name: nm.v + ' ' + nm.n, natId: nat.id, stil: pick(TRAINER_STILE).id, alter: ri(38, 63), jahre: 0 };
+}
+function trainerStilBonus() {
+  const st = STIL(S.trainer ? S.trainer.stil : 'ergebnis');
+  return st.bonus();
+}
+function trainerPasst() {
+  const b = trainerStilBonus();
+  return b > .06 ? 'Sein Stil kommt dir entgegen' : b < -.05 ? 'Sein Stil passt nicht zu dir' : 'Sein Stil ist für dich neutral';
+}
+function neuerTrainer(grund) {
+  const club = CL(S.p.clubId);
+  S.trainer = trainerErzeugen(club);
+  const st = STIL(S.trainer.stil);
+  S.p.trainer = clamp(48 + trainerStilBonus() * 60 + ri(-7, 7), 12, 85);
+  log(grund + ' ' + S.trainer.name + ' übernimmt — ' + st.name + '.', 'gold');
+  S.trainerNeu = true;
+}
+
+/* Das Ziel folgt aus der Stärke des Vereins im Ligavergleich. */
+function saisonZielSetzen() {
+  const club = CL(S.p.clubId);
+  const liga = ligaClubs(club.liga).slice().sort((a, b) => b.staerke - a.staerke);
+  const rang = liga.findIndex(c => c.id === club.id) + 1;
+  const n = liga.length;
+  let z;
+  if (rang <= 2) z = { platz: 1, text: 'Die Meisterschaft' };
+  else if (rang <= 5) z = { platz: 4, text: 'Ein Platz im Europapokal' };
+  else if (rang <= 9) z = { platz: Math.min(9, n - 5), text: 'Ein einstelliger Tabellenplatz' };
+  else if (rang <= n - 5) z = { platz: n - 6, text: 'Ein ruhiges Tabellenmittelfeld' };
+  else z = { platz: n - 3, text: 'Der Klassenerhalt' };
+  z.praemie = Math.max(20000, Math.round(S.p.vertrag.gehalt * .2 / 10000) * 10000);
+  S.saisonZiel = z;
+}
+function zielStand() {
+  if (!S.saisonZiel) return null;
+  const platz = tabellenPlatz(S.p.clubId);
+  return { platz, ziel: S.saisonZiel.platz, erreicht: platz <= S.saisonZiel.platz };
+}
+
 /* ========================== SAISON AUFBAUEN ========================== */
 function roundRobin(ids) {
   const n = ids.length, arr = ids.slice(), half = n / 2, hin = [];
@@ -1407,6 +1468,8 @@ function starteSaison(neueEuroQuali) {
   S.natStats = { spiele: 0, tore: 0 };
   S.woche = 1;
   S.winterWoche = Math.round(S.saisonWochen / 2);
+  saisonZielSetzen();
+  if (!S.trainer) S.trainer = trainerErzeugen(CL(S.p.clubId));
   S.spieleCache = null;
   S.titelDieseSaison = [];
   S.transferOffen = false;
@@ -1447,7 +1510,8 @@ function einsatzBestimmen(fx) {
   const konk = konkurrenten();
   const bester = konk.length ? konk[0].ovr : club.staerke - 2;
   const diff = effOvr() - bester;
-  let pStart = 0.55 + diff * 0.075 + (p.trainer - 50) * 0.012;
+  const stil = STIL(S.trainer ? S.trainer.stil : 'ergebnis');
+  let pStart = 0.55 + diff * 0.075 * (stil.diff || 1) + (p.trainer - 50) * 0.012 + trainerStilBonus();
   if (p.energie < 35) pStart -= .3;
   if (p.alter < 19) pStart -= 0.08;
   if (fx.comp === 'pokal') pStart += 0.06;
@@ -1886,11 +1950,14 @@ const EREIGNISSE = [
       { l: 'Dem Arzt sagen und pausieren', h: 'Vernünftig', run: () => ({ text: 'Zwei Tage Rad fahren statt Rasen. Der Trainer ist genervt, der Physio erleichtert.', eff: { energie: 14, fitness: 8, trainer: -3 } }) },
       { l: 'Durchbeißen', h: 'Riskant', run: () => chance(.45) ? (verletzen(), { text: 'Es reißt im nächsten Sprint. Du hättest es wissen müssen.', eff: { moral: -10 } }) : ({ text: 'Es hält. Diesmal.', eff: { mentalitaet: .4, energie: -6 } }) }
     ] },
-  { id: 'trainerwechsel', gewicht: 2, eyebrow: 'Verein', titel: 'Neuer Trainer',
-    text: () => 'Der Trainer wird entlassen. Der Nachfolger bringt eine neue Spielidee mit — und kennt dich nur von Videos.',
+  { id: 'trainerwechsel', gewicht: 2, wenn: () => S.p.trainer < 40, eyebrow: 'Verein', titel: 'Der Trainer wackelt',
+    text: () => (S.trainer ? S.trainer.name : 'Der Trainer') + ' steht in der Kritik. In der Kabine wird offen darüber geredet, wer als Nachfolger käme.',
     wahl: [
-      { l: 'Dich sofort vorstellen', h: 'Offensiv', run: () => ({ text: 'Ihr redet eine halbe Stunde über seine Spielidee. Er mag Spieler, die fragen.', eff: { trainer: 10 } }) },
-      { l: 'Abwarten und trainieren', h: 'Neutral', run: () => { S.p.trainer = clamp(50 + ri(-8, 8), 0, 100); return { text: 'Er trifft seine Entscheidung nach dem, was er sieht. Von vorn für alle.', eff: {} }; } }
+      { l: 'Dich öffentlich hinter ihn stellen', h: 'Loyal', run: () => ({ text: 'Dein Zitat steht am nächsten Tag in jeder Zeitung. Er vergisst das nicht.', eff: { trainer: 12, ruf: 2 } }) },
+      { l: 'Nichts sagen', h: 'Neutral', run: () => ({ text: 'Du hältst dich raus. Andere tun es nicht.', eff: {} }) },
+      { l: 'Auf den Wechsel hoffen', h: 'Riskant', run: () => chance(.5)
+          ? (neuerTrainer('Zwei Wochen später ist es so weit:'), { text: 'Er wird freigestellt. Der Neue kennt dich nur von Videos — für dich beginnt alles von vorn.', eff: {} })
+          : ({ text: 'Er bleibt. Und er hat gehört, wer im Mannschaftsrat gegen ihn geredet hat.', eff: { trainer: -14 } }) }
     ] },
   { id: 'fanaktion', gewicht: 2, eyebrow: 'Fans', titel: 'Kinderstation',
     text: () => 'Der Verein sucht Spieler für einen Besuch in der Kinderklinik. Termin: Mittwochnachmittag, dein freier Nachmittag.',
@@ -1929,6 +1996,201 @@ const EREIGNISSE = [
     wahl: [
       { l: 'Aussage zurücknehmen', h: 'Ruhe', run: () => ({ text: 'Geldstrafe im niedrigen Bereich, Sache erledigt.', eff: { geld: -15000, ruf: -1 } }) },
       { l: 'Dabei bleiben', h: 'Haltung', run: () => ({ text: 'Zwei Spiele Sperre-Androhung und eine saftige Strafe — aber die Kurve singt deinen Namen.', eff: { geld: -45000, ruf: 5, moral: 4, mentalitaet: .4 } }) }
+    ] }
+,
+  { id: 'formtief', gewicht: 4, wenn: () => formWert() < -1.4 && S.stats.spiele > 3, eyebrow: 'Krise', titel: 'Es läuft nicht',
+    text: () => 'Drei schwache Spiele hintereinander. ' + (S.trainer ? S.trainer.name : 'Der Trainer') + ' bittet dich zum Gespräch und legt dir deine Noten hin.',
+    wahl: [
+      { l: 'Um mehr Spielzeit bitten, um rauszukommen', h: 'Riskant', run: () => chance(.45)
+          ? ({ text: 'Er lässt dich durchspielen. Genau das brauchst du.', eff: { trainer: 6, moral: 7 } })
+          : ({ text: 'Er sieht es anders. Zwei Spiele auf der Bank, damit du den Kopf frei bekommst.', eff: { trainer: -4, moral: -6 } }) },
+      { l: 'Um eine Pause bitten', h: 'Ehrlich', run: () => ({ text: 'Eine Woche ohne Druck, dafür Extraschichten mit dem Videoanalysten.', eff: { energie: 16, moral: 6, mentalitaet: .5, trainer: -2 } }) },
+      { l: 'Sagen, dass du es alleine lösen wirst', h: 'Stolz', run: () => ({ text: 'Er nickt knapp. Jetzt musst du liefern.', eff: { mentalitaet: .7, trainer: 3, moral: -3 } }) }
+    ] },
+  { id: 'niederlagenserie', gewicht: 4, wenn: () => (S.serie || []).slice(-3).filter(x => x === 'niederlage').length >= 3, eyebrow: 'Kabine', titel: 'Krisensitzung',
+    text: () => 'Drei Niederlagen in Folge. Die Mannschaft trifft sich ohne Trainerstab, jeder soll sagen, was er denkt.',
+    wahl: [
+      { l: 'Klare Worte finden', h: 'Führung', run: () => chance(.6)
+          ? ({ text: 'Du sprichst zehn Minuten. Danach ist die Stimmung anders.', eff: { moral: 10, trainer: 6, mentalitaet: .6, ruf: 2 } })
+          : ({ text: 'Zwei Routiniers finden, du solltest erst mal selbst liefern.', eff: { moral: -6 } }) },
+      { l: 'Zuhören und mitarbeiten', h: 'Sicher', run: () => ({ text: 'Ihr einigt euch auf drei Dinge, die sich ändern. Schon mal ein Anfang.', eff: { moral: 4, trainer: 2 } }) },
+      { l: 'Auf den Trainer zeigen', h: 'Gefährlich', run: () => ({ text: 'Was in der Kabine gesagt wird, bleibt selten in der Kabine.', eff: { trainer: -12, moral: 3, ruf: 2 } }) }
+    ] },
+  { id: 'keinrhythmus', gewicht: 4, wenn: () => S.p.fitness < 62 && S.stats.spiele > 2, eyebrow: 'Spielpraxis', titel: 'Du brauchst Spiele',
+    text: () => 'Seit Wochen kaum Einsatzminuten. Der Co-Trainer bietet dir an, bei der zweiten Mannschaft Spielpraxis zu sammeln.',
+    wahl: [
+      { l: 'In der Zweiten spielen', h: 'Rhythmus', run: () => { S.p.minutenSchnitt = Math.max(S.p.minutenSchnitt, 55); return { text: 'Neunzig Minuten vor zweihundert Zuschauern. Unglamourös, aber es hilft.', eff: { fitness: 12, energie: -8, moral: -3 } }; } },
+      { l: 'Ablehnen, du bist Profi', h: 'Stolz', run: () => ({ text: 'Du trainierst weiter mit den Profis — und spielst weiter nicht.', eff: { moral: -4, trainer: -3 } }) },
+      { l: 'Den Berater einschalten', h: 'Ausweg', run: () => { S.p.wechselwunsch = true; return { text: 'Wenn du hier nicht spielst, sollst du woanders spielen. Er beginnt zu telefonieren.', eff: { trainer: -5 } }; } }
+    ] },
+  { id: 'verlaengerung', gewicht: 4, wenn: () => S.p.vertrag.jahre <= 1 && S.p.trainer > 45, eyebrow: 'Vertrag', titel: 'Der Verein will verlängern',
+    text: () => { const g = Math.round(jahresGehaltFuer(CL(S.p.clubId)) * .95 / 5000) * 5000; S._angebot = g; return CL(S.p.clubId).name + ' legt dir eine Verlängerung über ' + money(g) + ' pro Jahr vor. Dein Vertrag läuft sonst aus.'; },
+    wahl: [
+      { l: 'Sofort unterschreiben', h: 'Sicherheit', run: () => { S.p.vertrag = { gehalt: S._angebot, jahre: ri(3, 4) }; return { text: 'Unterschrieben. Der Verein lädt zum Fototermin mit Schal.', eff: { moral: 6, trainer: 5 } }; } },
+      { l: 'Nachverhandeln', h: 'Riskant', run: () => chance(.5)
+          ? (S.p.vertrag = { gehalt: Math.round(S._angebot * 1.3), jahre: ri(3, 4) }, { text: 'Sie legen drauf. Dein Berater hat sich sein Honorar verdient.', eff: { moral: 8 } })
+          : ({ text: 'Das Angebot liegt weiter auf dem Tisch, aber keinen Euro höher.', eff: { trainer: -3 } }) },
+      { l: 'Ablehnen und ablösefrei gehen', h: 'Frei', run: () => { S.p.wechselwunsch = true; return { text: 'Im Sommer bist du ablösefrei. Das macht dich für viele Vereine interessant — und hier zum Problemfall.', eff: { trainer: -10, moral: 2 } }; } }
+    ] },
+  { id: 'karriereende_planung', gewicht: 3, wenn: () => S.p.alter >= 32, eyebrow: 'Danach', titel: 'Die Zeit danach',
+    text: () => 'Ein ehemaliger Mitspieler ruft an. Er macht gerade den Trainerschein und fragt, ob du mitmachst.',
+    wahl: [
+      { l: 'Trainerschein anfangen', h: 'Zukunft', run: () => ({ text: 'Zwei Abende pro Woche Theorie. Du siehst das Spiel plötzlich anders.', eff: { mentalitaet: 1.2, energie: -6, moral: 3 } }) },
+      { l: 'Später', h: '—', run: () => ({ text: 'Erst mal spielen, solange es geht.', eff: { moral: 2 } }) }
+    ] },
+  { id: 'trainer_gespraech_neu', gewicht: 9, wenn: () => S.trainer && S.trainer.jahre === 0 && S.woche < 8, eyebrow: 'Trainerbüro', titel: 'Das erste Gespräch',
+    text: () => (S.trainer ? S.trainer.name : 'Der neue Trainer') + ' will jeden Spieler einmal einzeln sprechen. „Sagen Sie mir, wo Sie sich sehen."',
+    wahl: [
+      { l: 'Ehrlich: Stammplatz', h: 'Direkt', run: () => chance(.55)
+          ? ({ text: '„Gut. Dann zeigen Sie es mir." Ab jetzt schaut er genauer hin — im Guten.', eff: { trainer: 10, moral: 4 } })
+          : ({ text: 'Er hebt die Augenbrauen. „Erst mal sehen wir uns die nächsten Wochen an."', eff: { trainer: -3 } }) },
+      { l: 'Bescheiden: erst mal lernen', h: 'Sicher', run: () => ({ text: 'Er mag Spieler, die zuhören. Du bekommst Trainingsvideos mit nach Hause.', eff: { trainer: 6, mentalitaet: .5 } }) },
+      { l: 'Nach seiner Spielidee fragen', h: 'Klug', run: () => ({ text: 'Eine Stunde Taktik am Whiteboard. Danach weißt du genau, was er sehen will.', eff: { trainer: 8, mentalitaet: .8, pass: .3 } }) }
+    ] },
+  { id: 'derby', gewicht: 3, eyebrow: 'Spielwoche', titel: 'Derbywoche',
+    text: () => 'Am Wochenende steht das Derby an. Die Stadt redet über nichts anderes, an der Trainingsanlage stehen Fans mit Transparenten.',
+    wahl: [
+      { l: 'Zu den Fans rausgehen', h: 'Herz', run: () => ({ text: 'Eine Stunde Autogramme im Nieselregen. Die Kurve wird das am Samstag zurückgeben.', eff: { moral: 8, ruf: 3, follower: Math.round(S.p.follower * .04 + 1200), energie: -4 } }) },
+      { l: 'Konzentriert bleiben', h: 'Profi', run: () => ({ text: 'Du gehst direkt in die Kabine. Der Trainer nickt anerkennend.', eff: { trainer: 4, mentalitaet: .4 } }) },
+      { l: 'Eine Kampfansage posten', h: 'Laut', run: () => chance(.5)
+          ? ({ text: 'Dein Post geht durch die halbe Liga. Jetzt musst du abliefern.', eff: { follower: Math.round(S.p.follower * .12 + 4000), ruf: 4, mentalitaet: -.3 } })
+          : ({ text: 'Der Gegner pinnt deinen Post in seiner Kabine an die Wand.', eff: { follower: Math.round(S.p.follower * .08 + 2000), trainer: -5 } }) }
+    ] },
+  { id: 'stab_gehalt', gewicht: 3, wenn: () => stabKosten() > 0, eyebrow: 'Dein Stab', titel: 'Gehaltsforderung',
+    text: () => { const da = STAB.filter(x => stabStufe(x.id)); S._kraft = pick(da); return S._kraft.name + ' arbeitet seit Monaten für dich und will mehr Geld — oder geht.'; },
+    wahl: [
+      { l: 'Aufwerten', h: 'Teuer', run: () => { const k = S._kraft, st = stabStufe(k.id); if (st < 3) { S.p.stab[k.id] = st + 1; return { text: k.name + ' bleibt und arbeitet ab sofort auf höherer Stufe.', eff: { moral: 3 } }; } return { text: 'Du legst eine einmalige Prämie drauf. Er bleibt.', eff: { geld: -40000 } }; } },
+      { l: 'Ablehnen', h: 'Hart', run: () => { const k = S._kraft; if (chance(.5)) { S.p.stab[k.id] = 0; return { text: k.name + ' kündigt noch am selben Tag.', eff: { moral: -4 } }; } return { text: 'Er bleibt trotzdem. Begeistert ist er nicht.', eff: {} }; } }
+    ] },
+  { id: 'physiowarnung', gewicht: 3, wenn: () => stabStufe('physio') > 0 && S.p.energie < 60, eyebrow: 'Medizin', titel: 'Der Physio warnt',
+    text: () => 'Deine Werte gefallen ihm nicht. „Wenn du so weitermachst, reißt in vier Wochen was."',
+    wahl: [
+      { l: 'Auf ihn hören', h: 'Vernünftig', run: () => ({ text: 'Eine Woche reduziertes Programm. Der Trainer ist genervt, dein Körper dankbar.', eff: { energie: 20, fitness: -4, trainer: -3 } }) },
+      { l: 'Weitermachen', h: 'Riskant', run: () => chance(.4) ? (verletzen(), { text: 'Er hatte recht. Es reißt schon in der nächsten Einheit.', eff: { moral: -10 } }) : ({ text: 'Diesmal geht es gut.', eff: { mentalitaet: .3 } }) }
+    ] },
+  { id: 'steuer', gewicht: 2, wenn: () => S.p.geld > 3000000, eyebrow: 'Unangenehm', titel: 'Post vom Finanzamt',
+    text: () => 'Eine Betriebsprüfung. Dein Steuerberater sagt, es werde „nicht billig, aber auch nicht dramatisch".',
+    wahl: [
+      { l: 'Sauber nachzahlen', h: 'Richtig', run: () => ({ text: 'Teuer, aber erledigt. Keine Schlagzeile.', eff: { geld: -Math.round(S.p.geld * .08) } }) },
+      { l: 'Den Berater streiten lassen', h: 'Riskant', run: () => chance(.5)
+          ? ({ text: 'Er handelt die Summe deutlich herunter.', eff: { geld: -Math.round(S.p.geld * .03) } })
+          : ({ text: 'Es zieht sich, wird teurer und landet in der Zeitung.', eff: { geld: -Math.round(S.p.geld * .12), ruf: -5 } }) }
+    ] },
+  { id: 'rekordjagd', gewicht: 5, wenn: () => S.stats.tore >= 6, eyebrow: 'Statistik', titel: 'Die Rekordjagd',
+    text: () => 'Mit ' + S.stats.tore + ' Saisontoren schreiben die Zeitungen über den Vereinsrekord. Jeder Reporter fragt danach.',
+    wahl: [
+      { l: 'Den Rekord zum Ziel erklären', h: 'Druck', run: () => chance(.55)
+          ? ({ text: 'Der Druck beflügelt dich. Im Training triffst du alles.', eff: { schuss: .8, moral: 6, ruf: 4 } })
+          : ({ text: 'Plötzlich denkst du bei jedem Abschluss an die Zahl.', eff: { mentalitaet: -.5, moral: -4 } }) },
+      { l: 'Abwiegeln', h: 'Ruhig', run: () => ({ text: '„Erst mal die nächsten drei Punkte." Der Trainer zitiert dich in der Sitzung.', eff: { trainer: 6, mentalitaet: .4 } }) }
+    ] },
+  { id: 'ultras', gewicht: 3, wenn: () => S.p.ruf > 20, eyebrow: 'Fans', titel: 'Einladung der Ultras',
+    text: () => 'Die aktive Fanszene lädt zwei Spieler in ihren Raum unter der Kurve ein. Ohne Presse, ohne Vereinsvertreter.',
+    wahl: [
+      { l: 'Hingehen', h: 'Nähe', run: () => ({ text: 'Drei Stunden, viel Rauch, ehrliche Worte. Ab jetzt hängt dein Name auf einem Banner.', eff: { moral: 9, ruf: 5, energie: -5 } }) },
+      { l: 'Höflich absagen', h: 'Distanz', run: () => ({ text: 'Der Pressechef atmet auf, die Kurve merkt es sich.', eff: { ruf: -2 } }) }
+    ] },
+  { id: 'legende', gewicht: 2, eyebrow: 'Besuch', titel: 'Eine Legende im Training',
+    text: () => 'Ein früherer Nationalspieler des Vereins schaut beim Training vorbei und beobachtet vor allem dich.',
+    wahl: [
+      { l: 'Ihn um Rat fragen', h: 'Klug', run: () => ({ text: 'Er zeigt dir eine Kleinigkeit in der Körperstellung, die alles verändert.', eff: { mentalitaet: .6, dribbling: .5, pass: .4, moral: 5 } }) },
+      { l: 'Trainieren wie immer', h: 'Fokus', run: () => ({ text: 'Er sagt nachher zum Trainer, du hättest den richtigen Kopf. Das spricht sich herum.', eff: { trainer: 5, ruf: 2 } }) }
+    ] },
+  { id: 'trainingslager', gewicht: 3, eyebrow: 'Verein', titel: 'Trainingslager',
+    text: () => 'Zehn Tage Trainingslager. Zwei Einheiten am Tag, abends Videoanalyse, kein Handy am Tisch.',
+    wahl: [
+      { l: 'Vollgas geben', h: 'Körper', run: () => ({ text: 'Du gehst als Fittester raus und als Erster in jede Einheit.', eff: { physis: .8, kondition: 3, energie: -18, trainer: 7 } }) },
+      { l: 'Dosiert arbeiten', h: 'Klug', run: () => ({ text: 'Du machst alles mit, aber nichts darüber hinaus.', eff: { kondition: 1.5, energie: -9, fitness: 3 } }) },
+      { l: 'Die Gruppe zusammenbringen', h: 'Kabine', run: () => ({ text: 'Du organisierst die Abende. Am Ende reden Spieler miteinander, die vorher nur nebeneinander saßen.', eff: { moral: 12, trainer: 4, energie: -10 } }) }
+    ] },
+  { id: 'mitspielerwechsel', gewicht: 3, wenn: () => (S.kader || []).length > 5, eyebrow: 'Kabine', titel: 'Ein Abschied',
+    text: () => { const k = pick(S.kader); S._weg = k; return k.name + ' wechselt überraschend den Verein. Ihr habt zwei Jahre nebeneinander gespielt.'; },
+    wahl: [
+      { l: 'Abschiedsessen organisieren', h: 'Kabine', run: () => ({ text: 'Die halbe Mannschaft kommt. Solche Abende halten eine Kabine zusammen.', eff: { moral: 6, geld: -8000 } }) },
+      { l: 'Seinen Platz ins Auge fassen', h: 'Nüchtern', run: () => ({ text: 'Ein Konkurrent weniger. So funktioniert das Geschäft.', eff: { mentalitaet: .4, moral: -2 } }) }
+    ] },
+  { id: 'ausruester', gewicht: 3, wenn: () => S.p.follower > 12000, eyebrow: 'Ausrüstung', titel: 'Der neue Schuh',
+    text: () => 'Dein Ausrüster will, dass du ab sofort ein neues Modell spielst. Es sieht gut aus. Es fühlt sich fremd an.',
+    wahl: [
+      { l: 'Umsteigen', h: 'Geld', run: () => chance(.6)
+          ? ({ text: 'Nach zwei Wochen ist der Schuh wie angegossen — und der Vertrag ist unterschrieben.', eff: { geld: 120000, follower: Math.round(S.p.follower * .05 + 1500) } })
+          : ({ text: 'Du bekommst Blasen und triffst den Ball anders. Das Geld ist trotzdem da.', eff: { geld: 120000, schuss: -.5, moral: -4 } }) },
+      { l: 'Beim alten Modell bleiben', h: 'Sicher', run: () => ({ text: 'Der Ausrüster ist sauer, deine Füße sind es nicht.', eff: { geld: -20000, mentalitaet: .2 } }) }
+    ] },
+  { id: 'doku', gewicht: 2, wenn: () => S.p.ruf > 45, eyebrow: 'Medien', titel: 'Eine Dokumentation über dich',
+    text: () => 'Ein Streamingdienst will ein halbes Jahr lang mit der Kamera neben dir herlaufen — Training, Zuhause, Kabine.',
+    wahl: [
+      { l: 'Zusagen', h: 'Reichweite', run: () => ({ text: 'Die Kamera ist überall. Manches davon hättest du lieber privat gelassen.', eff: { geld: 450000, follower: Math.round(S.p.follower * .3 + 20000), ruf: 8, energie: -8, moral: -3 } }) },
+      { l: 'Nur Trainings- und Spielszenen erlauben', h: 'Mittelweg', run: () => ({ text: 'Weniger Geld, weniger Ärger, ein solider Film.', eff: { geld: 180000, follower: Math.round(S.p.follower * .14 + 8000), ruf: 4 } }) },
+      { l: 'Ablehnen', h: 'Ruhe', run: () => ({ text: 'Dein Privatleben bleibt privat. Der Trainer findet das gut.', eff: { trainer: 4, moral: 3 } }) }
+    ] },
+  { id: 'aberglaube', gewicht: 2, eyebrow: 'Kopfsache', titel: 'Das Ritual',
+    text: () => 'Seit drei Siegen ziehst du im selben Ablauf dieselben Socken an. Heute sind sie nicht in der Kabine.',
+    wahl: [
+      { l: 'Die halbe Stadt danach absuchen', h: 'Verrückt', run: () => ({ text: 'Der Zeugwart findet sie im Wäschekorb. Du bist erleichtert — und weißt, wie albern das ist.', eff: { moral: 5, energie: -3 } }) },
+      { l: 'Ohne spielen', h: 'Nüchtern', run: () => chance(.6)
+          ? ({ text: 'Es läuft trotzdem. Ein Ritual weniger im Kopf.', eff: { mentalitaet: .8 } })
+          : ({ text: 'Du denkst das ganze Spiel an die Socken.', eff: { mentalitaet: -.4, moral: -4 } }) }
+    ] },
+  { id: 'journalist', gewicht: 2, wenn: () => S.p.ruf > 35, eyebrow: 'Medien', titel: 'Ein Journalist recherchiert',
+    text: () => 'Ein Reporter ruft bei alten Trainern, Lehrern und Jugendfreunden an. Er schreibt ein großes Porträt über dich.',
+    wahl: [
+      { l: 'Mitarbeiten und offen reden', h: 'Offen', run: () => ({ text: 'Das Porträt wird lang, ehrlich und gut. Viele lesen dich danach anders.', eff: { ruf: 7, follower: Math.round(S.p.follower * .08 + 3000), moral: 4 } }) },
+      { l: 'Jeden Kontakt verweigern', h: 'Zu', run: () => ({ text: 'Er schreibt es trotzdem. Ohne dich klingt es kühler.', eff: { ruf: -2 } }) }
+    ] },
+  { id: 'gehaltsverzicht', gewicht: 2, wenn: () => CL(S.p.clubId).staerke < 68, eyebrow: 'Verein', titel: 'Der Verein bittet',
+    text: () => CL(S.p.clubId).name + ' steckt finanziell in der Klemme. Die Mannschaft wird um einen freiwilligen Gehaltsverzicht gebeten.',
+    wahl: [
+      { l: 'Verzichten', h: 'Solidarisch', run: () => ({ text: 'Drei Monate weniger Gehalt. Im Verein vergisst das niemand.', eff: { geld: -Math.round(S.p.vertrag.gehalt / 4), trainer: 10, moral: 5, ruf: 4 } }) },
+      { l: 'Nur teilweise', h: 'Mittelweg', run: () => ({ text: 'Du gibst die Hälfte dessen, was gefordert war.', eff: { geld: -Math.round(S.p.vertrag.gehalt / 8), trainer: 4 } }) },
+      { l: 'Auf dem Vertrag bestehen', h: 'Hart', run: () => ({ text: 'Dein Recht — und ab morgen weiß es die ganze Stadt.', eff: { ruf: -6, trainer: -6, moral: -3 } }) }
+    ] },
+  { id: 'jungerkonkurrent', gewicht: 3, wenn: () => S.p.alter > 27 && (S.kader || []).some(k => k.pos === S.p.pos && k.alter < 21), eyebrow: 'Kader', titel: 'Der Junge holt auf',
+    text: () => { const j = (S.kader || []).filter(k => k.pos === S.p.pos && k.alter < 21)[0]; S._junge = j; return j.name + ', ' + j.alter + ', trainiert seit Wochen überragend. Die Zeitungen haben ihn entdeckt.'; },
+    wahl: [
+      { l: 'Ihm helfen', h: 'Größe', run: () => ({ text: 'Du erklärst ihm Laufwege und Abschlüsse. Die Kabine sieht, wer hier der Erwachsene ist.', eff: { trainer: 8, moral: 4, mentalitaet: .5 } }) },
+      { l: 'Ihn im Training auflaufen lassen', h: 'Konkurrenz', run: () => chance(.6)
+          ? ({ text: 'Du zeigst ihm zwei Wochen lang den Unterschied. Der Trainer stellt wieder dich auf.', eff: { trainer: 7, mentalitaet: .6, energie: -8 } })
+          : ({ text: 'Er hält mit. Die Kabine merkt, dass du nervös wirst.', eff: { moral: -6, trainer: -3 } }) }
+    ] },
+  { id: 'kapitaensrat', gewicht: 3, wenn: () => S.p.kapitaen, eyebrow: 'Verantwortung', titel: 'Der Mannschaftsrat',
+    text: () => 'Als Kapitän musst du entscheiden, wie die Mannschaft mit einem Mitspieler umgeht, der dreimal zu spät kam.',
+    wahl: [
+      { l: 'Intern regeln', h: 'Kabine', run: () => ({ text: 'Er zahlt in die Mannschaftskasse und entschuldigt sich vor allen. Danach ist es erledigt.', eff: { moral: 6, mentalitaet: .5 } }) },
+      { l: 'Dem Trainer melden', h: 'Konsequent', run: () => ({ text: 'Der Trainer schätzt die Offenheit. Die Kabine ist geteilter Meinung.', eff: { trainer: 8, moral: -4 } }) },
+      { l: 'Laufen lassen', h: 'Bequem', run: () => ({ text: 'Nächste Woche kommen zwei zu spät.', eff: { moral: -6, trainer: -5 } }) }
+    ] },
+  { id: 'verbandssponsor', gewicht: 2, wenn: () => S.p.nat.dabei, eyebrow: 'Nationalelf', titel: 'Werbetermin des Verbands',
+    text: () => 'Der Verband will dich für eine Kampagne. Der Termin liegt mitten in der englischen Woche.',
+    wahl: [
+      { l: 'Hinfahren', h: 'Verband', run: () => ({ text: 'Ein langer Tag im Studio. Der Bundestrainer registriert, wer sich zeigt.', eff: { geld: 60000, ruf: 4, energie: -10 } }) },
+      { l: 'Absagen', h: 'Verein', run: () => ({ text: 'Du bleibst beim Training. Dein Trainer freut sich, der Verband weniger.', eff: { trainer: 5, ruf: -2 } }) }
+    ] },
+  { id: 'schiedsrichterhilfe', gewicht: 2, eyebrow: 'Fairplay', titel: 'Die ehrliche Entscheidung',
+    text: () => 'Der Schiedsrichter gibt euch einen Elfmeter, den es nicht gab — du weißt genau, dass du den Kontakt gesucht hast.',
+    wahl: [
+      { l: 'Ihn aufklären', h: 'Fair', run: () => ({ text: 'Er nimmt die Entscheidung zurück. Die Kurve pfeift, der Verband schickt einen Fairplay-Preis.', eff: { ruf: 9, moral: 4, trainer: -4 } }) },
+      { l: 'Nichts sagen', h: 'Nüchtern', run: () => ({ text: 'Der Elfmeter sitzt. In der Zeitlupe sieht es später schlecht aus.', eff: { ruf: -3, moral: 3 } }) }
+    ] },
+  { id: 'winterpause', gewicht: 14, wenn: () => Math.abs(S.woche - S.winterWoche) <= 1, eyebrow: 'Winterpause', titel: 'Zwei Wochen frei',
+    text: () => 'Die Liga pausiert. Zwei Wochen ohne Pflichtspiel — und die Frage, was du damit anfängst.',
+    wahl: [
+      { l: 'Sonne, Strand, abschalten', h: 'Erholung', run: () => ({ text: 'Du kommst braun und ausgeruht zurück, aber nicht in Form.', eff: { energie: 30, moral: 10, fitness: -6 } }) },
+      { l: 'Individuelles Programm', h: 'Arbeit', run: () => ({ text: 'Laufen, Kraft, Technik. Der Athletiktrainer schickt dir jeden Tag den Plan.', eff: { kondition: 3.5, physis: .6, energie: 8 } }) },
+      { l: 'Familie und Heimatverein', h: 'Wurzeln', run: () => ({ text: 'Du trainierst eine Woche lang die E-Jugend deines alten Vereins. Kein Fotograf weit und breit.', eff: { moral: 12, energie: 18, ruf: 2 } }) }
+    ] },
+  { id: 'kabinendj', gewicht: 2, eyebrow: 'Kabine', titel: 'Die Musikfrage',
+    text: () => 'Der Kabinen-DJ ist gewechselt und spielt etwas, das die halbe Mannschaft nicht erträgt. Alle schauen zu dir.',
+    wahl: [
+      { l: 'Übernehmen', h: 'Stimmung', run: () => ({ text: 'Deine Playlist einigt die Kabine. Kleine Dinge, große Wirkung.', eff: { moral: 7 } }) },
+      { l: 'Kopfhörer aufsetzen', h: 'Egal', run: () => ({ text: 'Nicht dein Problem.', eff: {} }) }
+    ] },
+  { id: 'saisonziel_druck', gewicht: 3, wenn: () => S.saisonZiel && S.woche > 8 && zielStand() && !zielStand().erreicht, eyebrow: 'Verein', titel: 'Die Erwartung',
+    text: () => 'Der Sportdirektor erinnert die Mannschaft daran, was ausgegeben wurde: ' + S.saisonZiel.text.toLowerCase() + '. Aktuell steht ihr auf Platz ' + tabellenPlatz(S.p.clubId) + '.',
+    wahl: [
+      { l: 'Verantwortung übernehmen', h: 'Führung', run: () => ({ text: 'Du sagst vor allen, dass du lieferst. Jetzt schauen alle hin.', eff: { trainer: 7, moral: 4, mentalitaet: .5 } }) },
+      { l: 'Auf die Umstände verweisen', h: 'Ehrlich', run: () => ({ text: 'Verletzte, ein neuer Trainer, ein harter Spielplan. Alles richtig, hilft nur niemandem.', eff: { trainer: -4 } }) },
+      { l: 'Schweigen und arbeiten', h: 'Ruhig', run: () => ({ text: 'Du sagst nichts und bist am nächsten Morgen als Erster auf dem Platz.', eff: { trainer: 4, energie: -5, mentalitaet: .3 } }) }
     ] }
 ];
 
@@ -2084,6 +2346,21 @@ async function wocheVor() {
     simLigaSpieltag(w);
     wochenAbschluss();
     if (w === S.winterWoche) await transferfenster(false);
+    if (w === Math.round(S.saisonWochen * .65) && S.saisonZiel) {
+      const st = zielStand();
+      if (st && st.platz > st.ziel + 4 && chance(.55)) {
+        const alt = S.trainer ? S.trainer.name : 'Der Trainer';
+        await sagen({
+          eyebrow: 'Verein', titel: 'Der Trainer ist weg',
+          text: alt + ' wird freigestellt. Als ' + st.platz + '. liegt ihr deutlich hinter dem Saisonziel (' + S.saisonZiel.text.toLowerCase() + ').'
+        });
+        neuerTrainer('Nach der Freistellung:');
+        await sagen({
+          eyebrow: 'Neuer Trainer', titel: S.trainer.name,
+          text: STIL(S.trainer.stil).name + '. ' + STIL(S.trainer.stil).text + '\n\n' + trainerPasst() + '. Dein Stand bei ihm: ' + Math.round(S.p.trainer) + ' von 100 — alles beginnt von vorn.'
+        });
+      }
+    }
     if (S.p.nat.dabei && !S.p.verletzung && (w === Math.round(S.saisonWochen * .25) || w === Math.round(S.saisonWochen * .62))) {
       const b = natSpiele(2);
       const meine = b.filter(x => x.spielt);
@@ -2193,6 +2470,8 @@ function wechselVerein(clubId, vertrag) {
   S.p.wechselwunsch = false;
   S.p.kapitaen = false;
   S.kader = kaderErzeugen(clubId);
+  S.trainer = trainerErzeugen(neu);
+  S.p.trainer = clamp(48 + trainerStilBonus() * 60 + ri(-5, 5), 12, 85);
   log('Wechsel zu ' + neu.name + ' — ' + money(vertrag.gehalt) + ' pro Jahr bis ' + (S.jahr + vertrag.jahre) + '.', 'gold');
   if (ligaWechsel && S.woche <= S.saisonWochen) starteSaisonTeilweise(S.euro.drin);
 }
@@ -2412,6 +2691,37 @@ async function saisonEnde() {
   ];
   if (S.natStats.spiele) zeilen.push('Länderspiele: ' + S.natStats.spiele + ' (' + S.natStats.tore + ' Tore)');
   await sagen({ eyebrow: 'Saison ' + saisonLabel(S.jahr) + ' beendet', titel: club.name, text: zeilen.join('\n') });
+
+  /* Saisonziel */
+  if (S.saisonZiel) {
+    const erreicht = platz <= S.saisonZiel.platz;
+    const trainerName = S.trainer ? S.trainer.name : 'Der Trainer';
+    if (erreicht) {
+      const eff = wirke({ geld: S.saisonZiel.praemie, moral: 8, trainer: 5 });
+      await sagen({
+        eyebrow: 'Saisonziel erreicht', titel: S.saisonZiel.text,
+        text: 'Ausgegeben war Platz ' + S.saisonZiel.platz + ' oder besser, geworden ist es Platz ' + platz
+          + '. ' + trainerName + ' bleibt, der Verein zahlt die vereinbarte Prämie.',
+        effekte: eff
+      });
+      if (S.trainer) S.trainer.jahre++;
+    } else {
+      wirke({ moral: -8, trainer: -4 });
+      await sagen({
+        eyebrow: 'Saisonziel verfehlt', titel: S.saisonZiel.text,
+        text: 'Ausgegeben war Platz ' + S.saisonZiel.platz + ' oder besser, geworden ist es nur Platz ' + platz
+          + '. In der Kabine ist es still, im Präsidium laut.'
+      });
+      if (chance(.6)) {
+        neuerTrainer('Der Verein zieht die Konsequenz:');
+        await sagen({
+          eyebrow: 'Neuer Trainer', titel: S.trainer.name,
+          text: STIL(S.trainer.stil).name + '. ' + STIL(S.trainer.stil).text + '\n\n' + trainerPasst()
+            + '. Dein Stand bei ihm: ' + Math.round(S.p.trainer) + ' von 100.'
+        });
+      } else if (S.trainer) S.trainer.jahre++;
+    }
+  }
 
   /* Auszeichnungen */
   const ehrungen = [];
@@ -2764,6 +3074,8 @@ async function spielAustragen(fx) {
     wirke({ energie: 1, moral: einsatz.status === 'bank' ? -3 : -1, trainer: -1 });
   }
 
+  S.serie = (S.serie || []).concat(ergebnis).slice(-6);
+
   /* Wettbewerbe fortschreiben */
   if (fx.comp === 'liga') {
     const th = fx.heim ? toreMein : toreGegner, tg = fx.heim ? toreGegner : toreMein;
@@ -2947,10 +3259,35 @@ function renderClub() {
     + '<div style="font-family:var(--font-data);font-weight:700;font-size:17px">' + esc(club.name) + '</div>'
     + '<div class="small muted">' + lg.flag + ' ' + esc(lg.name) + ' · Platz ' + platz + ' · Teamstärke ' + club.staerke + '</div></div></div>'
     + '<div class="attrs" style="margin-top:14px">'
-    + '<div class="attr"><span class="k">Trainer-Vertrauen</span>' + meter(p.trainer, zustandsKlasse(p.trainer)) + '<span class="v">' + Math.round(p.trainer) + '</span></div>'
     + '<div class="attr"><span class="k">Deine Rolle</span><span class="small ink2">' + rolleNachStaerke() + '</span><span class="v"></span></div>'
     + (p.kapitaen ? '<div class="attr"><span class="k">Kapitän</span><span class="small ink2">Du trägst die Binde</span><span class="v"></span></div>' : '')
     + '</div></div>';
+
+  /* Trainer und Saisonziel */
+  if (S.trainer) {
+    const st = STIL(S.trainer.stil), nat = NAT(S.trainer.natId);
+    html += '<section><div class="sect-title"><h3>Trainer</h3><span class="small muted">'
+      + (S.trainer.jahre ? S.trainer.jahre + '. Jahr im Amt' : 'erste Saison') + '</span></div>'
+      + '<div class="card"><div class="row-between" style="align-items:flex-start">'
+      + '<div class="grow"><div style="font-family:var(--font-data);font-weight:700;font-size:15px">'
+      + (nat ? nat.flag + ' ' : '') + esc(S.trainer.name) + '</div>'
+      + '<div class="small muted">' + esc(st.name) + ' · ' + S.trainer.alter + ' Jahre</div></div>'
+      + '<span class="pill ' + (trainerStilBonus() > .06 ? 'pill-good' : trainerStilBonus() < -.05 ? 'pill-bad' : '') + '">'
+      + (trainerStilBonus() > .06 ? 'passt zu dir' : trainerStilBonus() < -.05 ? 'passt nicht' : 'neutral') + '</span></div>'
+      + '<p class="small ink2" style="margin-top:9px">' + esc(st.text) + '</p>'
+      + '<div class="attr" style="margin-top:11px"><span class="k">Vertrauen</span>'
+      + meter(p.trainer, zustandsKlasse(p.trainer)) + '<span class="v">' + Math.round(p.trainer) + '</span></div>'
+      + '</div></section>';
+  }
+  if (S.saisonZiel) {
+    const st = zielStand();
+    html += '<section><div class="sect-title"><h3>Saisonziel</h3><span class="small muted">Prämie ' + money(S.saisonZiel.praemie) + '</span></div>'
+      + '<div class="card"><div class="row-between">'
+      + '<div class="grow"><div style="font-weight:600;font-size:14.5px">' + esc(S.saisonZiel.text) + '</div>'
+      + '<div class="small muted">Verlangt ist Platz ' + S.saisonZiel.platz + ' oder besser · aktuell Platz ' + st.platz + '</div></div>'
+      + '<span class="pill ' + (st.erreicht ? 'pill-good' : 'pill-warn') + '">' + (st.erreicht ? 'auf Kurs' : 'im Rückstand') + '</span>'
+      + '</div></div></section>';
+  }
 
   html += '<section><div class="sect-title"><h3>Wettbewerbe</h3></div><div class="card stack-sm">'
     + '<div class="row-between"><span class="small">' + esc(S.pokal.name) + '</span><span class="pill ' + (S.pokal.drin ? 'pill-good' : 'pill-bad') + '">'
@@ -3417,6 +3754,9 @@ function migriere() {
     S.kader = null;
   }
   if (!Array.isArray(S.kader) || !S.kader.length) S.kader = kaderErzeugen(S.p.clubId);
+  if (!S.trainer) S.trainer = trainerErzeugen(CL(S.p.clubId));
+  if (!S.saisonZiel) saisonZielSetzen();
+  S.serie = S.serie || [];
   /* Ligagröße hat sich geändert: laufende Saison neu aufsetzen, Karriere bleibt */
   const anzahl = ligaClubs(CL(S.p.clubId).liga).length;
   if (!S.liga || !S.liga.tabelle || Object.keys(S.liga.tabelle).length !== anzahl) {

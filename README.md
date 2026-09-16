@@ -53,6 +53,19 @@ ignoriert, verbringt rund ein Viertel der Saison unter 55 Energie und damit im
 Leistungsabfall; wer regelmäßig investiert, kommt auf unter zehn Prozent. Ab 31 baut sie
 wieder ab.
 
+**Trainer** — Jeder Verein hat einen Trainer mit Namen, Herkunft, Alter und einer Spielidee:
+Offensivfußball, defensive Ordnung, Talentförderer, ergebnisorientiert oder akribischer
+Arbeiter. Die Spielidee beeinflusst, wen er aufstellt — ein Talentförderer bevorzugt junge
+Spieler, ein Defensivtrainer die hinteren Reihen. Das Vertrauen, das du bei ihm hast, ist
+damit an eine Person gebunden statt an eine Zahl.
+
+**Saisonziel** — Vor jeder Saison gibt der Verein ein Ziel aus, das sich aus seiner Stärke im
+Ligavergleich ergibt: Klassenerhalt, ruhiges Mittelfeld, einstelliger Platz, Europapokal oder
+Meisterschaft. Wird es erreicht, zahlt der Verein eine Prämie und der Trainer bleibt. Wird es
+verfehlt, fliegt er mit hoher Wahrscheinlichkeit — und der Nachfolger bewertet dich neu, was
+deine Chance oder dein Problem sein kann. Liegt der Verein bei zwei Dritteln der Saison weit
+zurück, kommt die Freistellung schon mittendrin.
+
 **Kader** — Jeder Verein hat einen Kader aus 26 Spielern mit Position, Alter, Nation und
 Stärke. Entscheidend ist die Rangfolge auf deiner Position: Du siehst, wer vor dir steht und
 wie weit. Daraus berechnet sich, ob du aufgestellt wirst — nicht aus einer abstrakten
@@ -79,8 +92,10 @@ Wocheneinkommen, Lifestyle für Moral und Reichweite, und Vermächtnis-Projekte 
 Akademie, Stiftung), die am Karriereende Legacy-Punkte bringen.
 
 **Drumherum** — Presse-Interviews nach Spielen, Follower und Ruf, Sponsorenverträge,
-zufällige Ereignisse (Kabinenstreit, Trainerbüro, Boulevard, Wettanfragen, der Junge aus
-der U19), Transferfenster im Winter und Sommer mit Vertragsverhandlung, Nationalmannschaft
+44 zufällige Wochenereignisse, viele davon an deine Lage gekoppelt: ein Formtief, drei
+Niederlagen in Folge, ein auslaufender Vertrag, fehlende Spielpraxis, ein junger Konkurrent
+im eigenen Kader, eine Gehaltsforderung aus deinem Stab, die Winterpause. Dazu
+Transferfenster im Winter und Sommer mit Vertragsverhandlung, Nationalmannschaft
 mit Länderspielpausen und Turnieren, Auf- und Abstieg mit dem eigenen Verein,
 Investitionen vom verdienten Geld.
 
@@ -141,3 +156,4 @@ eine durchgespielte Karriere:
 - Ein Attribut erreicht ohne Trainer etwa Potenzial + 6, mit Weltklasse-Trainer rund
   Potenzial + 15. Gemessen über 20 Durchläufe: 84 / 86 / 89 / 93 je Trainerstufe.
 - Verletzungen kosten rund ein Zehntel aller Wochen.
+- Trainerwechsel: rund alle drei Saisons einer, gleichmäßig über die fünf Spielideen verteilt.
