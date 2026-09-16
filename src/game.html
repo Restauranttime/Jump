@@ -1970,11 +1970,15 @@ function wettbewerbName(fx) {
   return 'Länderspiel';
 }
 
-function simLigaSpieltag(w, eigenes) {
+/* Im Normalbetrieb wird die eigene Partie separat in spielAustragen gebucht und
+   hier übersprungen. Bei der Rückrechnung nach einem Ligawechsel mitten in der
+   Saison muss sie dagegen mitsimuliert werden — sonst startet der neue Verein
+   mit null Spielen in einer Tabelle, in der alle anderen schon 17 absolviert haben. */
+function simLigaSpieltag(w, auchEigenes) {
   const tag = S.liga.spieltage[w - 1];
   if (!tag) return;
   for (const [h, a] of tag) {
-    if (h === S.p.clubId || a === S.p.clubId) continue;
+    if (!auchEigenes && (h === S.p.clubId || a === S.p.clubId)) continue;
     const [th, tg] = simErgebnis(CL(h).staerke, CL(a).staerke);
     buchen(h, a, th, tg);
   }
@@ -2183,7 +2187,7 @@ function starteSaisonTeilweise(euroDrin) {
   S.woche = Math.min(woche, S.saisonWochen);
   S.pokal.drin = pokalAlt.drin; S.pokal.runde = pokalAlt.runde;
   S.euro.phase = euroAlt.phase; S.euro.punkte = euroAlt.punkte;
-  for (let w = 1; w < S.woche; w++) simLigaSpieltag(w);
+  for (let w = 1; w < S.woche; w++) simLigaSpieltag(w, true);
 }
 
 async function transferfenster(sommer) {
