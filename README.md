@@ -146,7 +146,13 @@ Eintrag in der Nationenliste sind auf die jeweils nächstliegende abgebildet.
 |---|---|
 | `src/game.html` | Die Quelle: Titel, Stile, Markup und die komplette Spiellogik. Enthält bewusst kein `<head>`/`<body>`, damit die Datei direkt als Artifact veröffentlicht werden kann. |
 | `index.html` | Erzeugt aus `src/game.html`. Vollständiges HTML-Dokument zum Öffnen im Browser oder Ausliefern über GitHub Pages. |
-| `build.sh` | Baut `index.html` aus `src/game.html`. Nach jeder Änderung an der Quelle einmal ausführen. |
+| `build.sh` | Baut `index.html` aus `src/game.html` und legt zusätzlich `Flutlicht-Karriere.html` an — dieselbe Datei mit sprechendem Namen zum Weitergeben. Nach jeder Änderung an der Quelle einmal ausführen. |
+
+Zum Weitergeben: `./build.sh` ausführen und `Flutlicht-Karriere.html` verschicken. Die Datei ist
+eigenständig, läuft offline und speichert im Browser des Empfängers. Auf Android und am Rechner
+genügt ein Doppelklick; auf dem iPhone muss sie erst in der Dateien-App gesichert werden und
+öffnet dann nur in einer Vorschau — ob der Spielstand dort erhalten bleibt, ist ungeprüft. Für
+diesen Fall gibt es im Profil den Sicherungscode.
 
 Bearbeitet wird immer `src/game.html`, danach `./build.sh`.
 

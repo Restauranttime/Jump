@@ -29,4 +29,6 @@ cd "$(dirname "$0")"
   echo '</body>'
   echo '</html>'
 } > index.html
+cp index.html "Flutlicht-Karriere.html"
 echo "index.html gebaut: $(wc -c < index.html) Bytes"
+echo "Flutlicht-Karriere.html zum Weitergeben erzeugt (gleiche Datei, sprechender Name)"

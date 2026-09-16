@@ -1,0 +1,7 @@
+# Weitergabe-Kopie: identisch zu index.html, nur mit sprechendem Dateinamen.
+# Wird von build.sh erzeugt, gehoert nicht ins Repo.
+Flutlicht-Karriere.html
+
+# Arbeitsdateien
+.shots/
+node_modules/
