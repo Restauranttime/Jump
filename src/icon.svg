@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0.1" y1="0" x2="0.6" y2="1">
+      <stop offset="0" stop-color="#16341F"/>
+      <stop offset="0.5" stop-color="#0C1E14"/>
+      <stop offset="1" stop-color="#060E0A"/>
+    </linearGradient>
+    <linearGradient id="kegel" x1="0.3" y1="0" x2="0.6" y2="1">
+      <stop offset="0" stop-color="#FFE3A8" stop-opacity="0.85"/>
+      <stop offset="0.3" stop-color="#F6B53E" stop-opacity="0.38"/>
+      <stop offset="0.85" stop-color="#EFA92C" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#EFA92C" stop-opacity="0.04"/>
+    </linearGradient>
+    <radialGradient id="glanz" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FFF3D4" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#FFC963" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="boden" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FFD27E" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#FFC963" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="kopf" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE0A0"/>
+      <stop offset="0.55" stop-color="#F2B23C"/>
+      <stop offset="1" stop-color="#D98D0C"/>
+    </linearGradient>
+    <linearGradient id="mast" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1E3226"/>
+      <stop offset="0.45" stop-color="#3E5C48"/>
+      <stop offset="1" stop-color="#18281E"/>
+    </linearGradient>
+    <linearGradient id="ball" x1="0.2" y1="0.05" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#BCCCC1"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#bg)"/>
+
+  <!-- Mast und Lichtkegel laufen bis y=700, also weit ueber den Rand hinaus.
+       Dadurch bleibt beim verkleinerten Maskable-Icon keine Schnittkante stehen. -->
+  <g id="motiv">
+    <!-- Licht: additiv ueberlagert, damit es leuchtet statt zu decken -->
+    <g style="mix-blend-mode:screen">
+      <path d="M286 176 L330 214 L622 700 L5 700 Z" fill="url(#kegel)"/>
+      <ellipse cx="300" cy="452" rx="196" ry="58" fill="url(#boden)"/>
+      <ellipse cx="300" cy="196" rx="108" ry="88" fill="url(#glanz)"/>
+    </g>
+
+    <!-- Mast -->
+    <path d="M76 700 L133 700 L186 228 L154 222 Z" fill="url(#mast)"/>
+    <path d="M124 404 L172 412 L170 386 L126 378 Z" fill="#16261C"/>
+
+    <!-- Flutlichtkopf -->
+    <g transform="rotate(20 206 170)">
+      <rect x="112" y="128" width="204" height="88" rx="16" fill="url(#kopf)"/>
+      <g fill="#6E4606" opacity="0.42">
+        <rect x="130" y="146" width="40" height="24" rx="7"/>
+        <rect x="178" y="146" width="40" height="24" rx="7"/>
+        <rect x="226" y="146" width="40" height="24" rx="7"/>
+        <rect x="274" y="146" width="26" height="24" rx="7"/>
+        <rect x="130" y="176" width="40" height="24" rx="7"/>
+        <rect x="178" y="176" width="40" height="24" rx="7"/>
+        <rect x="226" y="176" width="40" height="24" rx="7"/>
+        <rect x="274" y="176" width="26" height="24" rx="7"/>
+      </g>
+    </g>
+
+    <!-- Ball im Lichtkegel -->
+    <g transform="translate(322 396)">
+      <ellipse cx="6" cy="62" rx="62" ry="13" fill="#040A07" opacity="0.45"/>
+      <circle r="58" fill="url(#ball)"/>
+      <g fill="#10231A">
+        <path d="M0 -31 L27 -11 L17 21 L-17 21 L-27 -11 Z"/>
+        <path d="M-4 -58 L-32 -38 L-45 -52 A58 58 0 0 1 -4 -58 Z"/>
+        <path d="M35 -44 A58 58 0 0 1 56 -13 L35 -6 L27 -35 Z"/>
+        <path d="M-31 48 A58 58 0 0 1 -52 21 L-31 13 L-13 35 Z"/>
+        <path d="M33 46 A58 58 0 0 1 4 58 L8 35 L35 27 Z"/>
+      </g>
+    </g>
+  </g>
+</svg>

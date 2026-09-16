@@ -7,9 +7,39 @@ Verletzungen, Alterung — bis zum Rücktritt und der Legacy-Wertung.
 ## Spielen
 
 `index.html` im Browser öffnen. Sonst nichts — keine Installation, kein Server, keine
-Abhängigkeiten. Die Datei ist eigenständig und funktioniert offline.
+Abhängigkeiten. Die Datei ist eigenständig; die einzige externe Referenz sind die Google
+Fonts, ohne die das Spiel schlicht in einer Standardschrift läuft.
 
-Auf dem Handy: Seite öffnen, „Zum Home-Bildschirm hinzufügen" — läuft dann wie eine App.
+Auf dem Handy nicht als Datei verschicken: iOS zeigt eine HTML-Datei in der Vorschau nur an
+und führt kein JavaScript aus — das Titelbild erscheint, reagiert aber auf nichts. Über
+GitHub Pages ausliefern und die Adresse weitergeben.
+
+## Offline und als App installieren
+
+`sw.js` ist ein Service Worker, der das Spiel beim ersten Aufruf dauerhaft auf dem Gerät
+ablegt. Der normale Browser-Cache reicht dafür nicht: den räumt Safari weg, sobald Platz
+knapp wird. Gespeichert werden `index.html`, das Manifest, die Icons und die Google Fonts.
+
+Auf dem iPhone: Seite einmal mit Netz öffnen, dann Teilen → „Zum Home-Bildschirm". Das Icon
+startet das Spiel ohne Internet und im Vollbild ohne Safari-Leisten. Auf Android macht Chrome
+dasselbe über „App installieren".
+
+**Strategie:** Der Seitenaufruf geht zuerst ans Netz und fällt offline auf die gespeicherte
+Fassung zurück — so kommt ein neuer Stand an, ohne dass Offline-Spielen daran hängt. Alles
+Übrige kommt zuerst aus dem Cache, weil es sich innerhalb einer Version nicht ändert.
+
+**Versionierung:** `build.sh` stempelt einen Hash von `index.html` in den Service Worker.
+Ändert sich das Spiel, ändert sich der Cache-Name, der neue Stand wird installiert und der
+alte Cache beim Aktivieren gelöscht. Ohne diesen Stempel würden Geräte ewig die erste
+Fassung behalten. `src/sw.js` ist die Vorlage mit dem Platzhalter, `sw.js` das Ergebnis —
+letzteres nicht von Hand bearbeiten.
+
+Der Service Worker braucht `https` oder `localhost`. Wird `index.html` direkt von der Platte
+geöffnet, meldet er sich still ab und das Spiel läuft wie zuvor.
+
+**Icons:** `src/icon.svg` ist die Quelle, `icons/*.png` sind die daraus gerenderten Größen
+(180 für iOS, 192 und 512 für das Manifest, dazu eine Maskable-Fassung, bei der das Motiv
+auf 80 % geschrumpft in der Sicherheitszone der Android-Maske liegt).
 
 ## Speichern
 
