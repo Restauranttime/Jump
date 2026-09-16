@@ -20,15 +20,25 @@ Herkunftsweg: Straßenkicker (3. Liga, härtester Weg, höchstes Potenzial),
 Nachwuchsleistungszentrum (2. Bundesliga) oder Wunderkind (Bundesliga, viel Erwartungsdruck).
 
 **Wochenrhythmus** — Jede Woche wählst du einen Plan: gezieltes Techniktraining auf ein
-Attribut, Doppelschichten (schneller besser, höheres Verletzungsrisiko), Athletik,
-Regeneration, Videoanalyse, Social Media oder Freizeit. Dann kommt der Spieltag.
+Attribut, Doppelschichten (schneller besser, höheres Verletzungsrisiko), Ausdauertraining,
+Athletik, Regeneration, Videoanalyse, Social Media oder Freizeit. Dann kommt der Spieltag.
+
+**Ausdauer** — Ein eigener Langzeitwert neben den sieben Attributen. Sie zählt nicht in die
+Stärke, macht dich also nicht besser, sondern belastbarer: Sie senkt den Energieverbrauch
+und beschleunigt vor allem die Erholung zwischen den Spieltagen. Aufbauen kannst du sie nur
+über Ausdauertraining — eine Woche, in der du technisch nicht besser wirst. Wer sie
+ignoriert, verbringt rund ein Viertel der Saison unter 55 Energie und damit im
+Leistungsabfall; wer regelmäßig investiert, kommt auf unter zehn Prozent. Ab 31 baut sie
+wieder ab.
 
 **Spieltag** — 34 Ligaspieltage plus Pokal und Europapokal. Ob du spielst, entscheidet sich
 aus deiner Stärke im Vergleich zum Kader, dem Trainer-Vertrauen, deiner Form und deiner
-Energie. Im Spiel bekommst du zwei bis drei Schlüsselmomente mit je drei Optionen —
-Kopfball, Volley oder ablegen; grätschen, leiten oder Tempoduell. Der Ausgang hängt am
-passenden Attribut, an der Schwierigkeit und am Zufall. Am Ende steht eine Note von
-1,0 bis 6,0 nach deutscher Sportpresse-Skala.
+Energie. Im Spiel bekommst du zwei bis drei **Schlüsselmomente** aus einem Vorrat von
+45 Situationen mit je drei Optionen — Kopfball, Volley oder ablegen; grätschen, leiten oder
+Tempoduell. Der Ausgang hängt am passenden Attribut, an der Schwierigkeit und am Zufall und
+reicht vom Traumtor über Abseits und herausgeholten Elfmeter bis zur eigenen Verletzung, die
+dich vom Platz holt. Am Ende steht eine Note von 1,0 bis 6,0 nach deutscher
+Sportpresse-Skala.
 
 **Drumherum** — Presse-Interviews nach Spielen, Follower und Ruf, Sponsorenverträge,
 zufällige Ereignisse (Kabinenstreit, Trainerbüro, Boulevard, Wettanfragen, der Junge aus
@@ -62,3 +72,7 @@ eine durchgespielte Karriere:
 - Gezielt trainiert und regeneriert: Stärke 80–86, Torschützenkönig, Goldener Ball möglich.
 - Ein Mittelstürmer landet bei etwa 0,6–0,7 Toren pro Spiel, ein Innenverteidiger bei 0,1.
 - Marktwert auf dem Höhepunkt: zweistellige Millionen, mit Weltklasse deutlich darüber.
+- Energie ohne Ausdauertraining: Ø 72, ein Viertel der Wochen unter 55.
+- Energie mit regelmäßigem Ausdauertraining: Ø 78–90, unter zehn Prozent der Wochen unter 55.
+- Wer dauerhaft Doppelschichten schiebt: Ø 57, jede zehnte Woche unter 35 — und dort greift
+  auch der Abzug auf die Aufstellung.
