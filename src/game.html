@@ -179,6 +179,7 @@ a{color:var(--accent)}
 .plan b{font-size:13.5px;font-weight:600}
 .plan span{font-size:11px;color:var(--muted);line-height:1.3}
 .cond{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.cond-2{grid-template-columns:repeat(2,1fr);gap:12px 14px}
 .cond-item{display:flex;flex-direction:column;gap:5px}
 .cond-item .k{font-family:var(--font-data);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .cond-item .v{font-family:var(--font-display);font-size:19px;letter-spacing:.02em}
@@ -621,6 +622,22 @@ function effOvr() {
   const moralBonus = (p.moral - 60) * 0.035;
   return OVR() + formWert() * 0.9 + moralBonus - energieMalus - fitMalus;
 }
+/* Ausdauer: wächst nur über Training, senkt jeden Energieverbrauch und
+   beschleunigt die Erholung. Anders als die sieben Attribute zählt sie
+   nicht in die Stärke — sie macht dich nicht besser, sondern belastbarer. */
+function kondi() { return clamp(S.p.kondition || 0, 0, 100); }
+function energieFaktor() { return 1 - kondi() * .0015; }
+function erholung() {
+  const basis = 5.5 + kondi() * .12;
+  return basis * (.6 + (100 - S.p.energie) / 60);
+}
+function konditionsGewinn(faktor) {
+  const p = S.p;
+  const alterF = p.alter <= 23 ? 1.2 : p.alter <= 28 ? 1 : p.alter <= 32 ? .6 : .3;
+  const raum = 1 - kondi() / 105;
+  const energieF = p.energie < 30 ? .5 : 1;
+  return clamp(1.7 * faktor * alterF * raum * energieF * (.55 + Math.random()), 0, 3);
+}
 function marktwert() {
   const p = S.p, o = OVR();
   let basis = Math.pow(Math.max(o - 38, 1), 3.05) * 420;
@@ -653,7 +670,8 @@ function log(text, typ) {
 const EFFEKT_LABEL = {
   energie: 'Energie', moral: 'Moral', fitness: 'Fitness', ruf: 'Ruf', trainer: 'Trainer-Vertrauen',
   follower: 'Follower', geld: 'Konto', tempo: 'Tempo', schuss: 'Abschluss', pass: 'Passspiel',
-  dribbling: 'Dribbling', zweikampf: 'Zweikampf', physis: 'Physis', mentalitaet: 'Mentalität'
+  dribbling: 'Dribbling', zweikampf: 'Zweikampf', physis: 'Physis', mentalitaet: 'Mentalität',
+  kondition: 'Ausdauer'
 };
 function wirke(eff) {
   const p = S.p, out = [];
@@ -679,6 +697,7 @@ function wirke(eff) {
     else if (k === 'moral') { p.moral = clamp(p.moral + v, 0, 100); }
     else if (k === 'fitness') { p.fitness = clamp(p.fitness + v, 0, 100); }
     else if (k === 'ruf') { p.ruf = clamp(p.ruf + v, 0, 100); }
+    else if (k === 'kondition') { p.kondition = clamp((p.kondition || 0) + v, 0, 100); }
     else continue;
     out.push({ t: EFFEKT_LABEL[k] + ' ' + (v > 0 ? '+' : '') + Math.round(v), gut: v > 0 });
   }
@@ -761,7 +780,7 @@ function einsatzBestimmen(fx) {
   const club = CL(p.clubId);
   const diff = effOvr() - (club.staerke - 2);
   let pStart = 0.55 + diff * 0.075 + (p.trainer - 50) * 0.012;
-  if (p.energie < 42) pStart -= 0.3;
+  if (p.energie < 35) pStart -= 0.3;
   if (p.alter < 19) pStart -= 0.08;
   if (fx.comp === 'pokal') pStart += 0.06;
   pStart = clamp(pStart, 0.02, 0.96);
@@ -780,7 +799,7 @@ const MOMENTE = {
     { t: 'Langer Ball in den Rücken der Abwehr. Nur noch der Torwart steht zwischen dir und dem Tor.', w: [
       { l: 'Flach ins lange Eck schieben', h: 'Abschluss', a: 'schuss', s: 58, gut: 'tor', schlecht: 'vergeben' },
       { l: 'Torwart ausspielen', h: 'Dribbling · riskant', a: 'dribbling', s: 70, gut: 'traumtor', schlecht: 'vergeben' },
-      { l: 'Lupfen', h: 'Abschluss · Nervensache', a: 'mentalitaet', s: 66, gut: 'traumtor', schlecht: 'vergeben' } ] },
+      { l: 'Lupfen', h: 'Mentalität · Nervensache', a: 'mentalitaet', s: 66, gut: 'traumtor', schlecht: 'vergeben' } ] },
     { t: 'Du bekommst den Ball mit dem Rücken zum Tor, der Innenverteidiger klebt an dir.', w: [
       { l: 'Abschirmen und drehen', h: 'Physis', a: 'physis', s: 55, gut: 'aktion', schlecht: 'ballverlust' },
       { l: 'Klatschen lassen und in die Tiefe starten', h: 'Passspiel', a: 'pass', s: 50, gut: 'assist', schlecht: 'ballverlust' },
@@ -797,6 +816,42 @@ const MOMENTE = {
       { l: 'Den Innenverteidiger anlaufen', h: 'Physis', a: 'physis', s: 56, gut: 'aktion', schlecht: 'ballverlust' },
       { l: 'Passweg zum Sechser zustellen', h: 'Mentalität', a: 'mentalitaet', s: 48, gut: 'aktion', schlecht: 'ballverlust' },
       { l: 'Torwart unter Druck setzen und auf den Fehler lauern', h: 'Tempo · riskant', a: 'tempo', s: 72, gut: 'tor', schlecht: 'ballverlust' } ] },
+    { t: 'Der Steilpass ist unterwegs, du stehst auf der Abseitskante. Der Linienrichter hebt die Fahne noch nicht.', w: [
+      { l: 'Den Start perfekt timen', h: 'Mentalität', a: 'mentalitaet', s: 62, gut: 'tor', schlecht: 'abseits' },
+      { l: 'Auf Tempo setzen und einfach loslaufen', h: 'Tempo · riskant', a: 'tempo', s: 68, gut: 'tor', schlecht: 'abseits' },
+      { l: 'Zurückfallen lassen und den Ball fordern', h: 'Passspiel · sicher', a: 'pass', s: 40, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Ecke von links. Du postierst dich am ersten Pfosten, dein Bewacher ist einen Kopf größer.', w: [
+      { l: 'Kurz abkippen und den Ball verlängern', h: 'Mentalität', a: 'mentalitaet', s: 56, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'Ins Kopfballduell gehen', h: 'Physis · schwer', a: 'physis', s: 70, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'An den Fünfer laufen und den Torwart stören', h: 'Zweikampf', a: 'zweikampf', s: 48, gut: 'assist', schlecht: 'vergeben' } ] },
+    { t: 'Der gegnerische Torwart steht 25 Meter vor seinem Kasten, der Ball liegt dir vor dem Fuß.', w: [
+      { l: 'Aus der eigenen Hälfte abziehen', h: 'Abschluss · Wahnsinn', a: 'schuss', s: 80, gut: 'traumtor', schlecht: 'vergeben' },
+      { l: 'Andribbeln und dann entscheiden', h: 'Dribbling', a: 'dribbling', s: 58, gut: 'tor', schlecht: 'ballverlust' },
+      { l: 'Den Mitspieler schicken, der freier steht', h: 'Passspiel · sicher', a: 'pass', s: 44, gut: 'assist', schlecht: 'ballverlust' } ] },
+    { t: 'Dein Bewacher zieht seit zwanzig Minuten am Trikot und redet ununterbrochen auf dich ein.', w: [
+      { l: 'Ignorieren und weiterarbeiten', h: 'Mentalität', a: 'mentalitaet', s: 42, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Ihn provozieren, bis er die Nerven verliert', h: 'Mentalität · riskant', a: 'mentalitaet', s: 66, gut: 'aktion', schlecht: 'karte' },
+      { l: 'Ihn körperlich fordern und tief stehen lassen', h: 'Physis', a: 'physis', s: 58, gut: 'aktion', schlecht: 'karte' } ] },
+    { t: 'Gewühl im Strafraum, der Ball springt unkontrolliert vor deine Füße. Alles geht sehr schnell.', w: [
+      { l: 'Draufhalten, egal wie', h: 'Abschluss', a: 'schuss', s: 60, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'Erst mitnehmen, dann abschließen', h: 'Dribbling · Zeit fehlt', a: 'dribbling', s: 72, gut: 'traumtor', schlecht: 'ballverlust' },
+      { l: 'Quer auf den freien Mitspieler', h: 'Passspiel', a: 'pass', s: 50, gut: 'assist', schlecht: 'ballverlust' } ] },
+    { t: 'Du ziehst in den Sechzehner, der Verteidiger hält dich am Arm fest. Der Schiedsrichter ist nah dran.', w: [
+      { l: 'Weiter Richtung Tor kämpfen', h: 'Physis', a: 'physis', s: 64, gut: 'strafstoss', schlecht: 'ballverlust' },
+      { l: 'Nachhelfen und fallen', h: 'Mentalität · Schwalbe', a: 'mentalitaet', s: 70, gut: 'strafstoss', schlecht: 'karte' },
+      { l: 'Den Ball abschirmen und auf Hilfe warten', h: 'Zweikampf · sicher', a: 'zweikampf', s: 46, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Nachspielzeit, ihr liegt zurück. Letzte Ecke, der Torwart rennt mit nach vorn.', w: [
+      { l: 'In den Fünfer stürmen', h: 'Physis', a: 'physis', s: 64, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'An der Strafraumkante lauern', h: 'Abschluss · Volley', a: 'schuss', s: 74, gut: 'traumtor', schlecht: 'vergeben' },
+      { l: 'Kurz anbieten und flanken', h: 'Passspiel', a: 'pass', s: 52, gut: 'assist', schlecht: 'vergeben' } ] },
+    { t: 'Doppelpass an der Strafraumkante. Der Rückpass kommt scharf in deinen Lauf.', w: [
+      { l: 'Direkt abschließen', h: 'Abschluss', a: 'schuss', s: 64, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'Noch einmal querlegen', h: 'Passspiel', a: 'pass', s: 48, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Den letzten Mann aussteigen lassen', h: 'Dribbling', a: 'dribbling', s: 66, gut: 'traumtor', schlecht: 'ballverlust' } ] },
+    { t: 'Du hast den Ball im Laufduell, hinter dir kommt der Verteidiger mit gestrecktem Bein.', w: [
+      { l: 'Ball mitnehmen und dagegenhalten', h: 'Physis · Verletzungsgefahr', a: 'physis', s: 62, gut: 'aktion', schlecht: 'eigenverletzung' },
+      { l: 'Abspringen und Foul ziehen', h: 'Mentalität', a: 'mentalitaet', s: 48, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Blind quer in die Mitte', h: 'Passspiel · Notlösung', a: 'pass', s: 58, gut: 'assist', schlecht: 'ballverlust' } ] },
     { t: 'Elfmeter! Das Stadion hält den Atem an. Du legst dir den Ball zurecht.', elfer: true, w: [
       { l: 'Volle Wucht ins Eck', h: 'Abschluss', a: 'schuss', s: 46, gut: 'tor', schlecht: 'elferfehl' },
       { l: 'Ruhig flach in die Ecke', h: 'Mentalität', a: 'mentalitaet', s: 44, gut: 'tor', schlecht: 'elferfehl' },
@@ -826,7 +881,43 @@ const MOMENTE = {
     { t: 'Du hast Raum vor dir, der Gegner steht tief und wartet ab.', w: [
       { l: 'Mit Tempo auf die Kette zulaufen', h: 'Dribbling', a: 'dribbling', s: 60, gut: 'assist', schlecht: 'ballverlust' },
       { l: 'Verlagern auf die andere Seite', h: 'Passspiel', a: 'pass', s: 46, gut: 'aktion', schlecht: 'ballverlust' },
-      { l: 'Selbst in den Sechzehner ziehen', h: 'Tempo · riskant', a: 'tempo', s: 66, gut: 'tor', schlecht: 'vergeben' } ] }
+      { l: 'Selbst in den Sechzehner ziehen', h: 'Tempo · riskant', a: 'tempo', s: 66, gut: 'tor', schlecht: 'vergeben' } ] },
+    { t: 'Ballgewinn im Zentrum! Die gegnerische Ordnung ist für drei Sekunden offen.', w: [
+      { l: 'Sofort den ersten Pass nach vorn', h: 'Passspiel', a: 'pass', s: 60, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Selbst andribbeln und Tempo aufnehmen', h: 'Dribbling', a: 'dribbling', s: 58, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Beruhigen und sichern', h: 'Sicher', a: 'mentalitaet', s: 34, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Euer Torwart spielt dich an — mit dem Rücken zum Spielfeld und einem Gegner im Nacken.', w: [
+      { l: 'Andrehen und aufdrehen', h: 'Dribbling · riskant', a: 'dribbling', s: 68, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Direkt zurücklegen', h: 'Passspiel', a: 'pass', s: 46, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Ins Seitenaus klären', h: 'Sicher', a: 'mentalitaet', s: 28, gut: 'aktion', schlecht: 'aktion' } ] },
+    { t: 'Du kommst einen Schritt zu spät in den Zweikampf. Der Fuß ist schon unterwegs.', w: [
+      { l: 'Abbremsen und abziehen', h: 'Mentalität', a: 'mentalitaet', s: 44, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Durchziehen', h: 'Zweikampf · Rot möglich', a: 'zweikampf', s: 70, gut: 'aktion', schlecht: 'karte' },
+      { l: 'Ihn laufen lassen und nachsetzen', h: 'Tempo', a: 'tempo', s: 58, gut: 'aktion', schlecht: 'gegentor' } ] },
+    { t: 'Der Trainer stellt um: Du sollst ab jetzt eine Position höher spielen.', w: [
+      { l: 'Sofort in die Halbräume stoßen', h: 'Tempo', a: 'tempo', s: 60, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Zwischen den Linien anbieten', h: 'Mentalität', a: 'mentalitaet', s: 54, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Erst einmal absichern, bis es passt', h: 'Sicher', a: 'pass', s: 36, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Ecke für euch, du bist der Schütze. Der Trainer zeigt an: kurz oder lang?', w: [
+      { l: 'Scharf an den Elfmeterpunkt', h: 'Passspiel', a: 'pass', s: 58, gut: 'assist', schlecht: 'vergeben' },
+      { l: 'Kurz ausführen und flanken', h: 'Dribbling', a: 'dribbling', s: 50, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Direkt aufs Tor ziehen', h: 'Abschluss · Wahnsinn', a: 'schuss', s: 82, gut: 'traumtor', schlecht: 'vergeben' } ] },
+    { t: 'Der Gegner will den Freistoß schnell ausführen, du stehst im Weg.', w: [
+      { l: 'Ball wegschlagen und Zeit nehmen', h: 'Karte droht', a: 'mentalitaet', s: 66, gut: 'foulok', schlecht: 'karte' },
+      { l: 'Zurückweichen und die Ordnung stellen', h: 'Mentalität', a: 'mentalitaet', s: 42, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Sofort den Gegenspieler aufnehmen', h: 'Zweikampf', a: 'zweikampf', s: 56, gut: 'aktion', schlecht: 'gegentor' } ] },
+    { t: 'Neunzigste Minute, es steht unentschieden. Du hast den Ball an der Mittellinie.', w: [
+      { l: 'Alles auf eine Karte: Steilpass', h: 'Passspiel · schwer', a: 'pass', s: 68, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Ecke herausholen und Zeit gewinnen', h: 'Dribbling', a: 'dribbling', s: 52, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Den Punkt verwalten', h: 'Sicher', a: 'mentalitaet', s: 32, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Seitenlinie, zwei Gegenspieler stellen dich. Der Raum wird immer enger.', w: [
+      { l: 'Übersteiger und durch', h: 'Dribbling · schwer', a: 'dribbling', s: 70, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Den Einwurf herausarbeiten', h: 'Zweikampf', a: 'zweikampf', s: 46, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Zurück zum Außenverteidiger', h: 'Sicher', a: 'pass', s: 34, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Hoher Ball ins Zentrum, du und der gegnerische Sechser steigen gleichzeitig hoch.', w: [
+      { l: 'Kopfball nach vorn verlängern', h: 'Physis', a: 'physis', s: 56, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Ihn am Absprung hindern', h: 'Zweikampf · Karte droht', a: 'zweikampf', s: 60, gut: 'aktion', schlecht: 'karte' },
+      { l: 'Auf den zweiten Ball lauern', h: 'Mentalität', a: 'mentalitaet', s: 48, gut: 'aktion', schlecht: 'ballverlust' } ] }
   ],
   Abwehr: [
     { t: 'Der Stürmer wird steil geschickt und zieht an dir vorbei Richtung Strafraum.', w: [
@@ -844,7 +935,47 @@ const MOMENTE = {
     { t: 'Aufbau von hinten. Der Gegner stellt die kurzen Wege zu.', w: [
       { l: 'Diagonalball auf den Flügel', h: 'Passspiel · schwer', a: 'pass', s: 66, gut: 'assist', schlecht: 'ballverlust' },
       { l: 'Ball nach vorn treiben', h: 'Dribbling', a: 'dribbling', s: 58, gut: 'aktion', schlecht: 'ballverlust' },
-      { l: 'Weit klären', h: 'Sicher', a: 'physis', s: 30, gut: 'aktion', schlecht: 'ballverlust' } ] }
+      { l: 'Weit klären', h: 'Sicher', a: 'physis', s: 30, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Konter gegen euch: zwei Angreifer, du bist allein der letzte Mann.', w: [
+      { l: 'Verzögern, bis Hilfe kommt', h: 'Mentalität', a: 'mentalitaet', s: 56, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Den Ballführenden sofort stellen', h: 'Zweikampf · riskant', a: 'zweikampf', s: 68, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Notbremse ziehen', h: 'Rote Karte droht', a: 'tempo', s: 72, gut: 'foulok', schlecht: 'karte' } ] },
+    { t: 'Der Mittelstürmer nimmt den Ball an und schirmt ihn mit dem Körper ab. Du stehst in seinem Rücken.', w: [
+      { l: 'Von hinten den Fuß dazwischen', h: 'Zweikampf · Karte droht', a: 'zweikampf', s: 64, gut: 'rettung', schlecht: 'karte' },
+      { l: 'Abstand halten und zustellen', h: 'Mentalität', a: 'mentalitaet', s: 46, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Ihn mit dem Körper abdrängen', h: 'Physis', a: 'physis', s: 58, gut: 'rettung', schlecht: 'gegentor' } ] },
+    { t: 'Freistoß knapp außerhalb eures Strafraums. Der Schütze ist dafür bekannt.', w: [
+      { l: 'In die Mauer stellen und nicht wegdrehen', h: 'Mentalität', a: 'mentalitaet', s: 52, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Den langen Pfosten decken', h: 'Zweikampf', a: 'zweikampf', s: 50, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Vor der Mauer auf den Boden werfen', h: 'Physis · unangenehm', a: 'physis', s: 66, gut: 'rettung', schlecht: 'gegentor' } ] },
+    { t: 'Hoher Ball in den Fünfer, euer Torwart kommt heraus — und ihr lauft aufeinander zu.', w: [
+      { l: 'Ihm das Kommando überlassen', h: 'Mentalität', a: 'mentalitaet', s: 44, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Selbst köpfen', h: 'Physis · Kollisionsgefahr', a: 'physis', s: 66, gut: 'rettung', schlecht: 'eigenverletzung' },
+      { l: 'Den Stürmer blocken', h: 'Zweikampf', a: 'zweikampf', s: 54, gut: 'aktion', schlecht: 'gegentor' } ] },
+    { t: 'Die Kette steht hoch, der Steilpass kommt. Abseitsfalle oder nicht?', w: [
+      { l: 'Kollektiv aufrücken', h: 'Mentalität · Timing', a: 'mentalitaet', s: 62, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Fallen lassen und den Raum schließen', h: 'Tempo', a: 'tempo', s: 54, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Den Stürmer manndecken', h: 'Zweikampf', a: 'zweikampf', s: 58, gut: 'rettung', schlecht: 'gegentor' } ] },
+    { t: 'Die Flanke springt dir im eigenen Strafraum an den Oberarm. Alle schreien nach Elfmeter.', w: [
+      { l: 'Ruhig weiterspielen, als wäre nichts', h: 'Mentalität', a: 'mentalitaet', s: 50, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Sofort den Schiedsrichter ansprechen', h: 'Mentalität · riskant', a: 'mentalitaet', s: 64, gut: 'aktion', schlecht: 'karte' },
+      { l: 'Den Ball ins Aus dreschen', h: 'Sicher', a: 'physis', s: 30, gut: 'aktion', schlecht: 'aktion' } ] },
+    { t: 'Du hast schon Gelb. Jetzt läuft dir derselbe Stürmer wieder davon.', w: [
+      { l: 'Sauber und ohne Kontakt verteidigen', h: 'Mentalität · schwer', a: 'mentalitaet', s: 66, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Ihn ziehen lassen und den Torwart rufen', h: 'Sicher', a: 'pass', s: 38, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Trotzdem reingehen', h: 'Gelb-Rot droht', a: 'zweikampf', s: 74, gut: 'rettung', schlecht: 'karte' } ] },
+    { t: 'Der Ball springt im eigenen Sechzehner frei herum, drei Spieler stochern danach.', w: [
+      { l: 'Blind ins Seitenaus schlagen', h: 'Sicher', a: 'physis', s: 32, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Ball erobern und sauber herausspielen', h: 'Passspiel · schwer', a: 'pass', s: 68, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'In den Schuss werfen', h: 'Mentalität', a: 'mentalitaet', s: 56, gut: 'rettung', schlecht: 'gegentor' } ] },
+    { t: 'Einwurf in eurer Hälfte, der Gegner presst sofort. Du hast zwei Sekunden.', w: [
+      { l: 'Kurz und schnell zum Sechser', h: 'Passspiel', a: 'pass', s: 52, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Lang auf den Stürmer', h: 'Physis', a: 'physis', s: 48, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Zum Torwart zurück', h: 'Sicher · riskant bei Pressing', a: 'mentalitaet', s: 44, gut: 'aktion', schlecht: 'gegentor' } ] },
+    { t: 'Standard für euch, du darfst mit nach vorn. Der Trainer hat es ausdrücklich erlaubt.', w: [
+      { l: 'In den Rückraum laufen', h: 'Abschluss', a: 'schuss', s: 66, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'Den Block für den Mitspieler stellen', h: 'Physis', a: 'physis', s: 48, gut: 'assist', schlecht: 'vergeben' },
+      { l: 'An der Mittellinie absichern', h: 'Kein Risiko', a: 'mentalitaet', s: 26, gut: 'aktion', schlecht: 'aktion' } ] }
   ]
 };
 
@@ -855,17 +986,20 @@ const TICKER_TEXTE = {
   gefahr: [' kommt gefährlich vor das Tor.', ' prüft euren Torwart aus der Distanz.', ' zielt aus spitzem Winkel knapp vorbei.', ' trifft nur das Außennetz.']
 };
 const ERGEBNIS_TEXT = {
-  tor: ['Du triffst! Der Ball zappelt im Netz.', 'Drin! Das Stadion explodiert.', 'Eiskalt abgeschlossen — Tor!'],
-  traumtor: ['Ein Traumtor! Die Bank springt auf, die Kurve rastet aus.', 'Was für ein Ding! Das läuft heute Abend in jeder Zusammenfassung.', 'Unhaltbar. Ein Tor für die Saison-Highlights.'],
-  assist: ['Perfekt aufgelegt — dein Mitspieler muss nur noch einschieben. Vorlage!', 'Der Pass sitzt, der Rest ist Formsache. Assist für dich.'],
-  aktion: ['Saubere Aktion, die Bank nickt anerkennend.', 'Genau richtig gelöst. Unspektakulär, aber goldrichtig.'],
-  rettung: ['In letzter Sekunde geklärt! Die Kurve feiert dich wie einen Torschützen.', 'Du bist da, wo du sein musst. Gefahr gebannt.'],
-  foulok: ['Kluges taktisches Foul — der Konter ist gestoppt, der Schiri lässt die Karte stecken.'],
-  vergeben: ['Vorbei. Du greifst dir an den Kopf.', 'Der Torwart ist dran. Vergeben.', 'Knapp daneben — das musst du machen.'],
-  ballverlust: ['Ballverlust. Der Trainer an der Seitenlinie wird laut.', 'Zu ungenau, der Gegner schaltet um.'],
-  gegentor: ['Der Gegner nutzt es eiskalt aus. Gegentor — und alle schauen auf dich.', 'Das geht auf deine Kappe. Gegentor.'],
-  elferfehl: ['Verschossen. Stille im Stadion, dann Pfiffe.', 'Der Torwart hält! Du starrst auf den Rasen.'],
-  karte: ['Der Schiedsrichter zückt Gelb. Du diskutierst nicht mal.']
+  tor: ['Du triffst! Der Ball zappelt im Netz.', 'Drin! Das Stadion explodiert.', 'Eiskalt abgeschlossen — Tor!', 'Der Torwart ist chancenlos. Tor für dich.', 'Flach, hart, drin. Dein Tor.'],
+  traumtor: ['Ein Traumtor! Die Bank springt auf, die Kurve rastet aus.', 'Was für ein Ding! Das läuft heute Abend in jeder Zusammenfassung.', 'Unhaltbar. Ein Tor für die Saison-Highlights.', 'Der Ball schlägt im Winkel ein. So eines macht man nicht alle Tage.', 'Das Stadion steht sekundenlang still — dann bricht es los.'],
+  assist: ['Perfekt aufgelegt — dein Mitspieler muss nur noch einschieben. Vorlage!', 'Der Pass sitzt, der Rest ist Formsache. Assist für dich.', 'Du siehst ihn früher als die Abwehr. Vorlage.', 'Aufgelegt wie auf dem Silbertablett — er sagt danke und trifft.'],
+  aktion: ['Saubere Aktion, die Bank nickt anerkennend.', 'Genau richtig gelöst. Unspektakulär, aber goldrichtig.', 'Der Trainer klatscht an der Seitenlinie. Genau so war es gedacht.', 'Kein Applaus von den Rängen, aber im Videostudium wird das gelobt.'],
+  rettung: ['In letzter Sekunde geklärt! Die Kurve feiert dich wie einen Torschützen.', 'Du bist da, wo du sein musst. Gefahr gebannt.', 'Rettung in höchster Not — dein Torwart hebt beide Daumen.', 'Der Ball wird kurz vor der Linie weggespitzelt. Von dir.'],
+  foulok: ['Kluges taktisches Foul — der Konter ist gestoppt, der Schiri lässt die Karte stecken.', 'Nicht schön, aber notwendig. Der Schiedsrichter ermahnt dich nur.'],
+  strafstoss: ['Der Schiedsrichter zeigt auf den Punkt! Dein Mitspieler verwandelt sicher.', 'Elfmeter — und der sitzt. Du hast ihn herausgeholt.'],
+  abseits: ['Die Fahne oben. Abseits, das Tor zählt nicht.', 'Eine Schuhspitze zu früh — der Treffer wird zurückgenommen.'],
+  vergeben: ['Vorbei. Du greifst dir an den Kopf.', 'Der Torwart ist dran. Vergeben.', 'Knapp daneben — das musst du machen.', 'Der Ball klatscht an die Latte und springt zurück ins Feld.', 'Drübergejagt. Auf der Tribüne stöhnt es.'],
+  ballverlust: ['Ballverlust. Der Trainer an der Seitenlinie wird laut.', 'Zu ungenau, der Gegner schaltet um.', 'Der Gegenspieler ist einen Schritt schneller. Ball weg.', 'Technischer Fehler im falschen Moment.'],
+  gegentor: ['Der Gegner nutzt es eiskalt aus. Gegentor — und alle schauen auf dich.', 'Das geht auf deine Kappe. Gegentor.', 'Aus deinem Fehler wird ein Tor. Die Kurve pfeift.'],
+  elferfehl: ['Verschossen. Stille im Stadion, dann Pfiffe.', 'Der Torwart hält! Du starrst auf den Rasen.', 'Latte. Du willst im Boden versinken.'],
+  karte: ['Der Schiedsrichter zückt Gelb. Du diskutierst nicht mal.', 'Gelb. Verdient, und das weißt du.'],
+  eigenverletzung: ['Du bleibst liegen. Die Betreuer winken sofort, für dich ist Schluss.', 'Es reißt im Oberschenkel. Du gehst gestützt vom Platz.', 'Der Zusammenprall war zu heftig. Du kannst nicht weitermachen.']
 };
 
 function baueSpielverlauf(fx, einsatz) {
@@ -914,13 +1048,14 @@ function noteBerechnen(basis, tore, vorlagen, aktionen, fehler, ergebnis, minute
 
 /* ========================== WOCHENPLÄNE ========================== */
 const PLAENE = [
-  { id: 'technik', name: 'Techniktraining', text: 'Ein Attribut gezielt schärfen', eff: { energie: -9 }, train: 1 },
-  { id: 'doppel', name: 'Doppelschichten', text: 'Schneller besser — Verletzungsrisiko', eff: { energie: -21 }, train: 1.95, risiko: .1 },
-  { id: 'athletik', name: 'Athletikblock', text: 'Physis, Tempo und Robustheit', eff: { energie: -12, fitness: 7 }, train: .5, athletik: true },
-  { id: 'regen', name: 'Regeneration', text: 'Energie und Fitness auffüllen', eff: { energie: 27, fitness: 10, moral: 2 } },
-  { id: 'video', name: 'Videoanalyse', text: 'Mentalität und Trainer-Vertrauen', eff: { energie: -4, mentalitaet: .4, trainer: 2.5 } },
+  { id: 'technik', name: 'Techniktraining', text: 'Ein Attribut gezielt schärfen', eff: { energie: -5 }, train: 1 },
+  { id: 'doppel', name: 'Doppelschichten', text: 'Schneller besser — Verletzungsrisiko', eff: { energie: -13 }, train: 1.95, risiko: .1 },
+  { id: 'ausdauer', name: 'Ausdauertraining', text: 'Baut Ausdauer auf — dauerhaft mehr Energie', eff: { energie: -11, fitness: 4 }, ausdauer: 1 },
+  { id: 'athletik', name: 'Athletikblock', text: 'Physis, Tempo, etwas Ausdauer', eff: { energie: -8, fitness: 7 }, train: .5, athletik: true, ausdauer: .4 },
+  { id: 'regen', name: 'Regeneration', text: 'Energie und Fitness auffüllen', eff: { energie: 20, fitness: 10, moral: 2 } },
+  { id: 'video', name: 'Videoanalyse', text: 'Mentalität und Trainer-Vertrauen', eff: { energie: -3, mentalitaet: .4, trainer: 2.5 } },
   { id: 'social', name: 'Social Media', text: 'Reichweite aufbauen', eff: { energie: -3, moral: 3 }, social: true },
-  { id: 'frei', name: 'Freizeit', text: 'Kopf frei — aber der Trainer sieht es', eff: { energie: -6, moral: 12 }, skandal: .12 }
+  { id: 'frei', name: 'Freizeit', text: 'Kopf frei — aber der Trainer sieht es', eff: { energie: -5, moral: 12 }, skandal: .12 }
 ];
 const PLAN = id => PLAENE.find(p => p.id === id);
 
@@ -1135,7 +1270,10 @@ function simLigaSpieltag(w, eigenes) {
 
 async function planAnwenden() {
   const plan = PLAN(S.plan) || PLAENE[0];
-  wirke(plan.eff);
+  const eff = Object.assign({}, plan.eff);
+  if (eff.energie < 0) eff.energie = eff.energie * energieFaktor();
+  wirke(eff);
+  if (plan.ausdauer) wirke({ kondition: konditionsGewinn(plan.ausdauer) });
   if (plan.train) {
     if (plan.athletik) {
       wirke({ physis: trainingsGewinn(.6), tempo: trainingsGewinn(.45) });
@@ -1164,7 +1302,7 @@ function wochenAbschluss() {
   p.geld += p.vertrag.gehalt / 52;
   p.sponsoren.forEach(s => p.geld += s.pro);
   if (p.extras && p.extras.immobilie) p.geld += 2500;
-  p.energie = clamp(p.energie + (p.verletzung ? 9 : 6), 0, 100);
+  p.energie = clamp(p.energie + (p.verletzung ? erholung() * .5 : erholung()), 0, p.verletzung ? 82 : 100);
   p.fitness = clamp(p.fitness + (p.verletzung ? 1.5 : 1.2), 0, 100);
   p.moral += (62 - p.moral) * .06;
   p.trainer += (50 - p.trainer) * .03;
@@ -1180,7 +1318,7 @@ async function wocheVor() {
     const w = S.woche;
     if (S.p.verletzung) {
       S.p.verletzung.wochen--;
-      S.p.energie = clamp(S.p.energie + 8, 0, 100);
+      S.p.energie = clamp(S.p.energie + 4, 0, 82);
       S.p.fitness = clamp(S.p.fitness + 4, 0, 100);
       if (S.p.verletzung.wochen <= 0) {
         log('Nach ' + S.p.verletzung.name + ' zurück im Mannschaftstraining.', 'good');
@@ -1554,6 +1692,7 @@ async function saisonEnde() {
     wirke({ tempo: -rnd(v * .5, v), physis: -rnd(v * .3, v * .9), dribbling: -rnd(0, v * .6), zweikampf: -rnd(0, v * .4) });
   }
   if (p.alter <= 33) wirke({ mentalitaet: rnd(.25, .9), pass: p.alter > 27 ? rnd(0, .4) : 0 });
+  if (p.alter >= 31) p.kondition = clamp(kondi() - rnd(1.5, 4), 0, 100);
   p.potenzial = clamp(p.potenzial + ri(-1, 1), 40, 99);
   p.energie = clamp(p.energie + 25, 0, 100);
   p.fitness = clamp(p.fitness + 12, 0, 100);
@@ -1733,7 +1872,7 @@ async function spielAustragen(fx) {
   stand(0, 0, fx.heim);
   el('match').hidden = false;
 
-  let toreMein = 0, toreGegner = 0, meineTore = 0, vorlagen = 0, aktionen = 0, fehler = 0, gelb = 0, rot = 0;
+  let toreMein = 0, toreGegner = 0, meineTore = 0, vorlagen = 0, aktionen = 0, fehler = 0, gelb = 0, rot = 0, ausgewechselt = false;
   let minuten = spielt ? (einsatz.status === 'startelf' ? 90 : 90 - einsatz.ab) : 0;
 
   tickerEintrag(0, 'Anpfiff', heimClub.name + ' gegen ' + gastClub.name + ' — ' + wettbewerbName(fx) + '.', '');
@@ -1767,6 +1906,7 @@ async function spielAustragen(fx) {
       continue;
     }
     /* Schlüsselmoment */
+    if (ausgewechselt) continue;
     const m = e.vorlage;
     tickerEintrag(e.min, 'Dein Moment', m.t, 'ev-you');
     const idx = await warteWahl(m.t, m.w);
@@ -1783,9 +1923,17 @@ async function spielAustragen(fx) {
     if (art === 'vergeben' || art === 'ballverlust') fehler++;
     if (art === 'elferfehl') fehler += 2;
     if (art === 'gegentor') { toreGegner++; fehler += 1.6; stand(toreMein, toreGegner, fx.heim); }
-    if (art === 'karte') { gelb++; fehler += .6; if (chance(.08)) { rot++; minuten = Math.min(minuten, e.min); } }
-    const kl = (art === 'tor' || art === 'traumtor' || art === 'assist') ? 'ev-goal'
-      : (art === 'gegentor' || art === 'elferfehl' || art === 'karte') ? 'ev-bad' : 'ev-you';
+    if (art === 'karte') { gelb++; fehler += .6; if (chance(.08)) { rot++; minuten = Math.min(minuten, e.min); ausgewechselt = true; } }
+    if (art === 'strafstoss') { toreMein++; vorlagen++; stand(toreMein, toreGegner, fx.heim); }
+    if (art === 'abseits') fehler += .7;
+    if (art === 'eigenverletzung') {
+      if (!p.verletzung) verletzen();
+      ausgewechselt = true;
+      minuten = Math.min(minuten, e.min);
+      fehler += .3;
+    }
+    const kl = (art === 'tor' || art === 'traumtor' || art === 'assist' || art === 'strafstoss') ? 'ev-goal'
+      : (art === 'gegentor' || art === 'elferfehl' || art === 'karte' || art === 'eigenverletzung') ? 'ev-bad' : 'ev-you';
     tickerEintrag(e.min, gut ? 'Gelungen' : 'Daneben', txt, kl);
     await warteKnopf('Weiter');
   }
@@ -1818,7 +1966,7 @@ async function spielAustragen(fx) {
     p.formNoten.push(noteWert);
     if (p.formNoten.length > 14) p.formNoten.shift();
     wirke({
-      energie: -(10 + minuten * .09 + (fx.comp !== 'liga' ? 2 : 0)),
+      energie: -(4.5 + minuten * .05 + (fx.comp !== 'liga' ? 1.5 : 0)) * energieFaktor(),
       fitness: minuten > 60 ? 1.2 : .4,
       trainer: clamp((3.3 - noteWert) * 5, -8, 9),
       moral: clamp((3.4 - noteWert) * 5 + (ergebnis === 'sieg' ? 4 : ergebnis === 'niederlage' ? -4 : 0), -12, 14),
@@ -1834,7 +1982,7 @@ async function spielAustragen(fx) {
     /* Verletzung im Spiel */
     const risiko = clamp(.022 + (100 - p.fitness) * .0013 + (p.energie < 40 ? .03 : 0) + (p.alter > 31 ? .012 : 0), 0, .12)
       * (p.extras && p.extras.physio ? .6 : 1);
-    if (chance(risiko)) verletzen();
+    if (!p.verletzung && chance(risiko)) verletzen();
   } else {
     wirke({ energie: 4, moral: einsatz.status === 'bank' ? -3 : -1, trainer: -1 });
   }
@@ -1972,8 +2120,9 @@ function renderHome() {
     html += '</div>';
 
     html += '<section><div class="sect-title"><h3>Zustand</h3><span class="small muted">' + rolleNachStaerke() + '</span></div>'
-      + '<div class="card cond">'
+      + '<div class="card cond cond-2">'
       + '<div class="cond-item"><span class="k">Energie</span><span class="v">' + Math.round(p.energie) + '</span>' + meter(p.energie, zustandsKlasse(p.energie)) + '</div>'
+      + '<div class="cond-item"><span class="k">Ausdauer</span><span class="v">' + Math.round(kondi()) + '</span>' + meter(kondi(), kondi() >= 65 ? 'good' : '') + '</div>'
       + '<div class="cond-item"><span class="k">Moral</span><span class="v">' + Math.round(p.moral) + '</span>' + meter(p.moral, zustandsKlasse(p.moral)) + '</div>'
       + '<div class="cond-item"><span class="k">Fitness</span><span class="v">' + Math.round(p.fitness) + '</span>' + meter(p.fitness, zustandsKlasse(p.fitness)) + '</div>'
       + '</div></section>';
@@ -2151,6 +2300,10 @@ function renderProfil() {
   html += '<section><div class="sect-title"><h3>Attribute</h3></div><div class="card attrs">'
     + ATTR_KEYS.map(k => '<div class="attr"><span class="k">' + ATTR_LABEL[k] + '</span>' + meter(p.attr[k], p.attr[k] >= 78 ? 'good' : p.attr[k] >= 40 ? '' : 'warn')
       + '<span class="v">' + Math.round(p.attr[k]) + '</span></div>').join('')
+    + '<div class="attr" style="margin-top:4px;padding-top:9px;border-top:1px solid var(--line-soft)">'
+    + '<span class="k">Ausdauer</span>' + meter(kondi(), kondi() >= 65 ? 'good' : kondi() >= 30 ? '' : 'warn')
+    + '<span class="v">' + Math.round(kondi()) + '</span></div>'
+    + '<p class="tiny muted" style="margin-top:2px">Zählt nicht in die Stärke. Senkt jeden Energieverbrauch und beschleunigt die Erholung — nur über Ausdauertraining aufzubauen.</p>'
     + '</div></section>';
 
   html += '<section><div class="sect-title"><h3>Formkurve</h3><span class="small muted">Note 1,0 ist die beste</span></div>'
@@ -2295,7 +2448,7 @@ function karriereStarten() {
     beendet: false, ligaTausch: {}, staerkeTausch: {}, verlauf: [], karriere: [], stars: [],
     p: {
       vorname: NEU.vorname, nachname: NEU.nachname, natId: NEU.natId, pos: NEU.pos, fuss: NEU.fuss, archetyp: NEU.archetyp,
-      alter: 17, attr, potenzial: clamp(o + ri(19, 35) + weg.potenzial, 62, 99),
+      alter: 17, attr, potenzial: clamp(o + ri(19, 35) + weg.potenzial, 62, 99), kondition: ri(10, 20),
       energie: 86, moral: clamp(70 + (weg.moral || 0), 0, 100), fitness: 92, ruf: clamp(5 + (weg.ruf || 0), 0, 100),
       follower: ri(300, 2400), geld: 0, verletzung: null, clubId: club.id, trainer: 46,
       vertrag: { gehalt, jahre: 3 }, sponsoren: [], titel: [], formNoten: [], extras: {},
@@ -2311,6 +2464,15 @@ function karriereStarten() {
 }
 
 /* ========================== SPEICHERN ========================== */
+function migriere() {
+  if (!S || !S.p) return;
+  S.ligaTausch = S.ligaTausch || {};
+  S.staerkeTausch = S.staerkeTausch || {};
+  S.p.extras = S.p.extras || {};
+  if (typeof S.p.kondition !== 'number') S.p.kondition = ri(10, 20);
+  if (!PLAN(S.plan)) S.plan = 'technik';
+  tauschAnwenden();
+}
 function speichern() { try { if (S) localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
 function laden() { try { const r = localStorage.getItem(SAVE_KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
 
@@ -2356,8 +2518,7 @@ function verdrahten() {
     const g = laden();
     if (!g) return;
     S = g;
-    S.ligaTausch = S.ligaTausch || {}; S.staerkeTausch = S.staerkeTausch || {};
-    tauschAnwenden();
+    migriere();
     spielAnzeigen();
   });
   el('btn-delete').addEventListener('click', async () => {
@@ -2407,8 +2568,7 @@ function boot(daten) {
   if (daten && daten.stand) {
     try {
       S = JSON.parse(daten.stand);
-      S.ligaTausch = S.ligaTausch || {}; S.staerkeTausch = S.staerkeTausch || {};
-      tauschAnwenden();
+      migriere();
       spielAnzeigen();
       return;
     } catch (e) { S = null; }
