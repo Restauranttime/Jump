@@ -283,10 +283,11 @@ table.tbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-
 .stab-text{font-size:12px;color:var(--muted);line-height:1.35}
 .stab-knoepfe{display:flex;gap:7px;margin-top:7px}
 .stab-knoepfe .btn{min-height:36px;font-size:12.5px;padding:6px 11px;width:auto}
-.bilanz{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.bilanz div{display:flex;flex-direction:column;gap:2px}
+.bilanz{display:flex;flex-direction:column;gap:7px}
+.bilanz div{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.bilanz .summe{border-top:1px solid var(--line);padding-top:8px;margin-top:1px}
 .bilanz .k{font-family:var(--font-data);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
-.bilanz .v{font-family:var(--font-data);font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
+.bilanz .v{font-family:var(--font-data);font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
 
 /* ---------- Kader ---------- */
 .spieler{display:grid;grid-template-columns:22px 1fr auto auto;align-items:center;gap:9px;padding:8px 0;border-top:1px solid var(--line-soft)}
@@ -1785,7 +1786,7 @@ function saisonZielSetzen() {
   else if (rang <= 9) z = { platz: Math.min(9, n - 5), text: 'Ein einstelliger Tabellenplatz' };
   else if (rang <= n - 5) z = { platz: n - 6, text: 'Ein ruhiges Tabellenmittelfeld' };
   else z = { platz: n - 3, text: 'Der Klassenerhalt' };
-  z.praemie = Math.max(20000, Math.round(S.p.vertrag.gehalt * .2 / 10000) * 10000);
+  z.praemie = Math.max(20000, Math.round(S.p.vertrag.gehalt * .12 / 10000) * 10000);
   S.saisonZiel = z;
 }
 function zielStand() {
@@ -2503,24 +2504,60 @@ function trainerFaktor(attr) {
   return def ? stabWert(def.id, [1.15, 1.35, 1.65]) : 1;
 }
 
+/* Anlagen werfen etwas ab, Lifestyle kostet jede Woche Unterhalt, und das
+   Vermächtnis ist das Teuerste — wer eine Akademie trägt, trägt sie fuer immer.
+   Die Renditen liegen bei gut zehn Prozent im Jahr: Eine Anlage mit 22 hat sich
+   mit Mitte dreißig bezahlt gemacht, eine mit 33 nicht mehr. */
 const BESITZ = [
-  { id: 'immobilien', gruppe: 'Anlage', name: 'Immobilienportfolio', preis: 600000, text: 'Bringt dir 2.500 € pro Woche', pro: 2500 },
-  { id: 'fonds', gruppe: 'Anlage', name: 'Beteiligungsfonds', preis: 2200000, text: 'Bringt dir 9.000 € pro Woche', pro: 9000 },
-  { id: 'auto', gruppe: 'Lifestyle', name: 'Sportwagen', preis: 280000, text: 'Die Kabine feiert, das Netz auch', moral: 8, follower: .06 },
-  { id: 'villa', gruppe: 'Lifestyle', name: 'Villa vor der Stadt', preis: 1400000, text: 'Ruhe, Pool, Platz für die Familie', moral: 14, follower: .1 },
-  { id: 'jet', gruppe: 'Lifestyle', name: 'Anteil an einem Privatjet', preis: 4000000, text: 'Länderspielreisen kosten weniger Kraft', moral: 10, follower: .14 },
+  { id: 'immobilien', gruppe: 'Anlage', name: 'Immobilienportfolio', preis: 600000, text: 'Drei vermietete Häuser in guter Lage', pro: 1400 },
+  { id: 'fonds', gruppe: 'Anlage', name: 'Beteiligungsfonds', preis: 2200000, text: 'Dein Berater nennt es „breit aufgestellt“', pro: 5000 },
+  { id: 'hotel', gruppe: 'Anlage', name: 'Hotel in deiner Heimatstadt', preis: 5000000, text: 'Vierzig Zimmer, dein Name über dem Eingang', pro: 11500 },
+  { id: 'auto', gruppe: 'Lifestyle', name: 'Sportwagen', preis: 280000, text: 'Die Kabine feiert, das Netz auch', moral: 8, follower: .06, unterhalt: 400 },
+  { id: 'villa', gruppe: 'Lifestyle', name: 'Villa vor der Stadt', preis: 1400000, text: 'Ruhe, Pool, Platz für die Familie', moral: 14, follower: .1, unterhalt: 1600 },
+  { id: 'jet', gruppe: 'Lifestyle', name: 'Anteil an einem Privatjet', preis: 4000000, text: 'Länderspielreisen kosten weniger Kraft', moral: 10, follower: .14, unterhalt: 7000 },
   { id: 'kunstrasen', gruppe: 'Vermächtnis', name: 'Kunstrasen für deinen Jugendverein', preis: 150000, text: 'Der Platz trägt deinen Namen', legacy: 40, ruf: 5 },
-  { id: 'akademie', gruppe: 'Vermächtnis', name: 'Eigene Fußballakademie', preis: 2500000, text: 'Hundert Kinder, ein Trainerstab, dein Name', legacy: 180, ruf: 10 },
-  { id: 'stiftung', gruppe: 'Vermächtnis', name: 'Stiftung in deinem Namen', preis: 6000000, text: 'Was von dir bleibt, wenn die Tore vergessen sind', legacy: 400, ruf: 14 }
+  { id: 'akademie', gruppe: 'Vermächtnis', name: 'Eigene Fußballakademie', preis: 2500000, text: 'Hundert Kinder, ein Trainerstab, dein Name', legacy: 180, ruf: 10, unterhalt: 2400 },
+  { id: 'stiftung', gruppe: 'Vermächtnis', name: 'Stiftung in deinem Namen', preis: 4500000, text: 'Was von dir bleibt, wenn die Tore vergessen sind', legacy: 400, ruf: 14, unterhalt: 4000 },
+  { id: 'verein', gruppe: 'Vermächtnis', name: 'Anteile an deinem Jugendverein', preis: 9000000, text: 'Der Verein, der dich großgezogen hat, gehört jetzt auch dir', legacy: 320, ruf: 18, unterhalt: 6000 }
 ];
 const BESITZ_DEF = id => BESITZ.find(x => x.id === id);
 function hatBesitz(id) { return !!(S.p.besitz && S.p.besitz[id]); }
 function passivesEinkommen() {
   return BESITZ.filter(b => b.pro && hatBesitz(b.id)).reduce((a, b) => a + b.pro, 0);
 }
-function wochenEinnahmen() {
-  return S.p.vertrag.gehalt / 52 + S.p.sponsoren.reduce((a, x) => a + x.pro, 0) + passivesEinkommen();
+function unterhaltKosten() {
+  return BESITZ.filter(b => b.unterhalt && hatBesitz(b.id)).reduce((a, b) => a + b.unterhalt, 0);
 }
+
+/* ---------- Steuern ----------
+   Aus einem Millionenvertrag wird keine Million. Wie viel hängengeblieben,
+   entscheidet das Land, in dem du spielst — das ist der Grund, warum am Ende
+   einer Karriere plötzlich Saudi-Arabien anruft. Kapitalerträge werden
+   überall gleich besteuert. */
+const STEUER_LAND = {
+  'Deutschland': .45, 'England': .45, 'Spanien': .47, 'Italien': .43,
+  'Frankreich': .45, 'Österreich': .50, 'Niederlande': .49, 'Saudi-Arabien': 0
+};
+const STEUER_KAPITAL = .26;
+function steuerLand() {
+  const c = CL(S.p.clubId), lg = c && LG(c.liga);
+  return lg && lg.land ? lg.land : 'Deutschland';
+}
+function steuerSatz() {
+  const s = STEUER_LAND[steuerLand()];
+  return s === undefined ? .45 : s;
+}
+function wochenBrutto() {
+  return S.p.vertrag.gehalt / 52 + S.p.sponsoren.reduce((a, x) => a + x.pro, 0);
+}
+function wochenSteuer() {
+  return wochenBrutto() * steuerSatz() + passivesEinkommen() * STEUER_KAPITAL;
+}
+/* Was tatsächlich auf dem Konto ankommt — alles Weitere rechnet damit. */
+function wochenEinnahmen() {
+  return wochenBrutto() + passivesEinkommen() - wochenSteuer();
+}
+function wochenKosten() { return stabKosten() + unterhaltKosten(); }
 
 /* ========================== ZUFALLSEREIGNISSE ========================== */
 const EREIGNISSE = [
@@ -2840,8 +2877,11 @@ const EREIGNISSE = [
 
 function sponsorAngebot() {
   const firmen = ['Nordstern Sportswear', 'Kraftwerk Energy', 'Halbzeit Getränke', 'Rasenmeister', 'Volt Mobilfunk', 'Adler Automobile', 'Pixelpass Gaming', 'Sonntagsheld Mode'];
-  const f = S.p.follower;
-  const pro = clamp(Math.round((Math.sqrt(f) * 18 + S.p.ruf * 120) * stabWert('pr', [1.1, 1.25, 1.5]) / 100) * 100, 600, 220000);
+  /* Werbung ist ein Zubrot, kein zweites Gehalt: Selbst drei Verträge eines
+     Weltstars bleiben unter dem, was ihm sein Verein zahlt. */
+  const f = Math.max(1000, S.p.follower);
+  const pro = clamp(Math.round(Math.pow(f, .7) * .42 * (.6 + S.p.ruf / 100)
+    * stabWert('pr', [1.1, 1.25, 1.5]) / 100) * 100, 200, 26000);
   return { firma: pick(firmen), pro };
 }
 
@@ -2959,21 +2999,36 @@ async function planAnwenden() {
   }
 }
 
+/* Wenn selbst ohne Stab nichts mehr zusammengeht, geht das Teuerste weg —
+   unter Wert, so wie im echten Leben. */
+function notverkauf() {
+  const lux = BESITZ.filter(b => b.unterhalt && hatBesitz(b.id))
+    .sort((a, b) => b.unterhalt - a.unterhalt)[0];
+  if (!lux) return false;
+  delete S.p.besitz[lux.id];
+  S.p.geld += Math.round(lux.preis * .55);
+  log(lux.name + ' musste verkauft werden — der Unterhalt war nicht mehr gedeckt.', 'bad');
+  merken('geld', lux.name + ' verkauft — das Geld reichte nicht.', 0);
+  return true;
+}
+
 function wochenAbschluss() {
   const p = S.p;
-  p.geld += wochenEinnahmen();
-  p.geld -= stabKosten();
+  p.geld += wochenEinnahmen() - wochenKosten();
   if (p.geld < 0) {
     p.geld = 0;
     let schutz = 0;
-    while (stabKosten() > wochenEinnahmen() * .9 && schutz++ < 40) {
+    while (wochenKosten() > wochenEinnahmen() * .9 && schutz++ < 40) {
       const angestellt = STAB.filter(x => stabStufe(x.id))
         .sort((a, b) => STAB_STUFEN[stabStufe(b.id) - 1].kosten - STAB_STUFEN[stabStufe(a.id) - 1].kosten);
-      if (!angestellt.length) break;
-      const x = angestellt[0], neu = stabStufe(x.id) - 1;
-      S.p.stab[x.id] = neu;
-      log(neu ? x.name + ' wurde auf ' + STAB_STUFEN[neu - 1].name + ' zurückgestuft — das Geld reichte nicht.'
-              : x.name + ' musste gehen — das Wochengehalt war nicht mehr gedeckt.', 'bad');
+      if (angestellt.length) {
+        const x = angestellt[0], neu = stabStufe(x.id) - 1;
+        S.p.stab[x.id] = neu;
+        log(neu ? x.name + ' wurde auf ' + STAB_STUFEN[neu - 1].name + ' zurückgestuft — das Geld reichte nicht.'
+                : x.name + ' musste gehen — das Wochengehalt war nicht mehr gedeckt.', 'bad');
+        continue;
+      }
+      if (!notverkauf()) break;
     }
   }
   p.energie = clamp(p.energie + (p.verletzung ? erholung() * .5 : erholung()), 0, p.verletzung ? 82 : 100);
@@ -3060,9 +3115,18 @@ async function ereignisSpielen(e) {
 }
 
 /* ========================== TRANSFERS ========================== */
+/* ---------- Gehalt ----------
+   Die Kurve ist an echten Gehältern geeicht: League Two rund 60.000 € im Jahr,
+   3. Liga 85.000, zweite Ligen ein Viertel bis eine halbe Million, Bundesliga
+   ein bis drei Millionen, die größten Vereine Europas zweistellig. Wer über dem
+   Niveau seines Vereins steht, verdient mehr als der Rest der Mannschaft; wer
+   darunter liegt, sitzt auf der Bank und wird auch so bezahlt. */
 function jahresGehaltFuer(club) {
-  const basis = Math.pow(club.staerke / 10, 5.2) * 45;
-  const f = clamp(.45 + (OVR() - club.staerke) * .07, .3, 2.4);
+  const basis = Math.exp(club.staerke * .11) * 530;
+  const d = OVR() - club.staerke;
+  let f = clamp(1 + d * (d < 0 ? .045 : .06), .25, 2);
+  /* Saudi-Arabien zahlt drauf — dafür geht man am Ende der Karriere dorthin. */
+  if (club.liga === 'sa1') f *= 2.2;
   return Math.round(basis * f / 5000) * 5000;
 }
 function angeboteErzeugen(sommer) {
@@ -5003,15 +5067,24 @@ function renderMarkt() {
           : ''))
     + '</div></section>';
 
-  /* Wochenbilanz */
-  const ein = wochenEinnahmen(), aus = stabKosten();
+  /* Wochenbilanz — brutto, Steuer, laufende Kosten, und was wirklich bleibt. */
+  const brutto = wochenBrutto(), passiv = passivesEinkommen(), steuer = wochenSteuer();
+  const stab = stabKosten(), unterhalt = unterhaltKosten();
+  const bleibt = wochenEinnahmen() - wochenKosten();
+  const zeile = (k, v, farbe, summe) => '<div' + (summe ? ' class="summe"' : '') + '><span class="k">' + k + '</span><span class="v"'
+    + (farbe ? ' style="color:' + farbe + '"' : '') + '>' + v + '</span></div>';
   html += '<section><div class="sect-title"><h3>Wochenbilanz</h3><span class="small muted">Kontostand ' + money(p.geld) + '</span></div>'
     + '<div class="card bilanz">'
-    + '<div><span class="k">Einnahmen</span><span class="v" style="color:var(--good)">' + money(ein) + '</span></div>'
-    + '<div><span class="k">Stab</span><span class="v" style="color:' + (aus ? 'var(--bad)' : 'var(--muted)') + '">' + (aus ? '−' + money(aus) : '—') + '</span></div>'
-    + '<div><span class="k">Bleibt</span><span class="v" style="color:' + (ein - aus < 0 ? 'var(--bad)' : 'var(--ink)') + '">' + money(ein - aus) + '</span></div>'
+    + zeile('Gehalt & Werbung', money(brutto), 'var(--good)')
+    + (passiv ? zeile('Anlagen', money(passiv), 'var(--good)') : '')
+    + zeile('Steuer & Abgaben', '−' + money(steuer), 'var(--bad)')
+    + zeile('Stab', stab ? '−' + money(stab) : '—', stab ? 'var(--bad)' : 'var(--muted)')
+    + (unterhalt ? zeile('Unterhalt', '−' + money(unterhalt), 'var(--bad)') : '')
+    + zeile('Bleibt', money(bleibt), bleibt < 0 ? 'var(--bad)' : 'var(--ink)', true)
     + '</div>'
-    + (ein - aus < 0 ? '<p class="tiny" style="color:var(--bad);margin-top:8px">Du gibst mehr aus, als du verdienst. Sobald das Konto leer ist, musst du Leute entlassen.</p>' : '')
+    + '<p class="tiny muted" style="margin-top:8px">' + Math.round(steuerSatz() * 100) + ' % Steuer in '
+    + esc(steuerLand()) + ' auf Gehalt und Werbung, ' + Math.round(STEUER_KAPITAL * 100) + ' % auf Kapitalerträge.</p>'
+    + (bleibt < 0 ? '<p class="tiny" style="color:var(--bad);margin-top:6px">Du gibst mehr aus, als du verdienst. Sobald das Konto leer ist, wird entlassen — und danach verkauft.</p>' : '')
     + '</section>';
 
   /* Stab */
@@ -5045,8 +5118,11 @@ function renderMarkt() {
     html += '<section><div class="sect-title"><h3>' + gruppe + '</h3></div><div class="stack-sm">'
       + teil.map(b => {
         const hat = hatBesitz(b.id);
+        const zahlen = [b.pro ? '+' + money(b.pro) + ' / Woche' : '', b.unterhalt ? '−' + money(b.unterhalt) + ' / Woche' : '',
+          b.legacy ? b.legacy + ' Legacy-Punkte' : ''].filter(Boolean).join(' · ');
         return '<div class="card row-between"><div class="grow"><div style="font-weight:600;font-size:14px">' + esc(b.name) + '</div>'
-          + '<div class="small muted">' + esc(b.text) + (b.legacy ? ' · ' + b.legacy + ' Legacy-Punkte' : '') + '</div></div>'
+          + '<div class="small muted">' + esc(b.text) + '</div>'
+          + '<div class="tiny ink2" style="margin-top:2px">' + zahlen + '</div></div>'
           + (hat ? '<span class="pill pill-good">gehört dir</span>'
             : '<button class="btn btn-sm" data-act="kauf:' + b.id + '"' + (p.geld < b.preis ? ' disabled' : '') + '>' + money(b.preis) + '</button>')
           + '</div>';
@@ -5635,9 +5711,9 @@ function karriereStarten() {
   const attr = {};
   ATTR_KEYS.forEach(k => attr[k] = clamp(Math.round(basis + ri(-4, 4) + (arch.boni[k] || 0) + (top2.includes(k) ? 5 : 0)), 24, 74));
   const o = ovrVon(attr, NEU.pos);
-  const gehalt = Math.max(24000, Math.round(Math.pow(club.staerke / 10, 5.2) * 45 * .35 / 1000) * 1000);
+  const gehalt = Math.max(24000, Math.round(Math.exp(club.staerke * .11) * 530 * .35 / 1000) * 1000);
   S = {
-    v: 1, jahr: 2026, woche: 1, plan: 'technik', trainFokus: top2[0],
+    v: 2, jahr: 2026, woche: 1, plan: 'technik', trainFokus: top2[0],
     beendet: false, leihe: null, ligaTausch: {}, staerkeTausch: {}, transfers: {}, verlauf: [], karriere: [], stars: [], hoehepunkte: [],
     p: {
       vorname: NEU.vorname, nachname: NEU.nachname, natId: NEU.natId, pos: NEU.pos, fuss: NEU.fuss, archetyp: NEU.archetyp,
@@ -5703,6 +5779,16 @@ function migriere() {
     const pool = ligaClubs(LG(liga) ? liga : 'de2');
     S.p.clubId = (pool.length ? pool[pool.length - 1] : CLUBS[0]).id;
     S.kader = null;
+  }
+  /* Die Wirtschaft ist umgestellt: echte Gehälter, Steuern, kleinere
+     Werbeverträge. Ein alter Spielstand hätte sonst ein Zehntel dessen im
+     Vertrag stehen, was sein Verein heute zahlt — und Sponsoren, die mehr
+     bringen als der Verein. Beides wird einmalig geradegezogen. */
+  if (!(S.v >= 2)) {
+    const club = CL(p.clubId);
+    if (club) p.vertrag.gehalt = Math.max(p.vertrag.gehalt, jahresGehaltFuer(club));
+    p.sponsoren.forEach(x => { x.pro = Math.min(x.pro, 26000); });
+    S.v = 2;
   }
   if (!Array.isArray(S.kader) || !S.kader.length) S.kader = kaderErzeugen(S.p.clubId);
   if (!S.trainer) S.trainer = trainerErzeugen(CL(S.p.clubId));

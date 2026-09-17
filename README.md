@@ -155,9 +155,12 @@ Ein vollständiger Weltklasse-Stab kostet 6,1 Mio € im Jahr — mehr, als die 
 verdienen. Reicht das Konto nicht, wird zurückgestuft und im Zweifel entlassen. Ein
 Spitzentrainer hebt außerdem die Trainingsdecke für sein Attribut deutlich an.
 
-**Besitz** — Einmalkäufe für das, was Gehalt sonst nicht verbraucht: Anlagen mit passivem
-Wocheneinkommen, Lifestyle für Moral und Reichweite, und Vermächtnis-Projekte (Kunstrasen,
-Akademie, Stiftung), die am Karriereende Legacy-Punkte bringen.
+**Besitz** — Zehn Anschaffungen in drei Gruppen: Anlagen mit passivem Wocheneinkommen,
+Lifestyle für Moral und Reichweite, und Vermächtnis-Projekte, die am Karriereende
+Legacy-Punkte bringen. Fast alles kostet danach jede Woche Unterhalt. Eigener Abschnitt
+weiter unten.
+
+**Geld** — Gehalt, Steuern, Werbung, laufende Kosten. Eigener Abschnitt weiter unten.
 
 **Drumherum** — Presse-Interviews nach Spielen, Follower und Ruf, Sponsorenverträge,
 44 zufällige Wochenereignisse, viele davon an deine Lage gekoppelt: ein Formtief, drei
@@ -181,6 +184,49 @@ Länderspieldebüt, Rekordtransfer, schwere Verletzung, jedes 50. Karrieretor un
 Potenzial, ab 29 baut der Körper ab. Saisonbilanz mit Torschützenkönig, Spieler der Saison
 und Goldenem Ball, Weltrangliste, Titelvitrine, Karrieretabelle über alle Saisons.
 Am Schluss: Rücktritt und Legacy-Punkte.
+
+## Geld
+
+Geld war lange eine Zahl, die nur nach oben ging: Gemessen lagen am Karriereende im Median
+29 Mio € auf dem Konto, während alles Kaufbare zusammen 17 Mio € kostete. Ab der Mitte der
+Karriere war jede Entscheidung schon getroffen. Das ist umgestellt.
+
+**Das Gehalt ist die Haupteinnahme** und an echten Zahlen geeicht. Es hängt an der Stärke
+deines Vereins und daran, wie du im Verhältnis dazu stehst — wer über dem Niveau seiner
+Mannschaft spielt, verdient mehr als der Rest, wer darunter liegt, wird wie ein Bankspieler
+bezahlt:
+
+| Verein | Beispiel | Gehalt auf Vereinsniveau |
+|---|---|---|
+| Stärke 43 | League Two | rund 60.000 € im Jahr |
+| Stärke 46 | 3. Liga | rund 85.000 € |
+| Stärke 55 | Championship, Serie B | rund 230.000 € |
+| Stärke 60 | 2. Bundesliga | rund 390.000 € |
+| Stärke 71 | Bundesliga-Mittelfeld | rund 1,3 Mio € |
+| Stärke 85 | Spitzenverein | rund 6 Mio € |
+| Stärke 93 | Bayern, Real | rund 15 Mio € |
+
+**Werbung ist ein Zubrot, kein zweites Gehalt.** Vorher brachten drei Sponsorenverträge das
+Sechsfache dessen, was der Verein zahlte — sie trugen die ganze Wirtschaft allein. Jetzt
+bleiben selbst die Verträge eines Weltstars unter seinem Vereinsgehalt.
+
+**Steuern.** Auf Gehalt und Werbung gehen 43 bis 50 % weg, je nach Land, in dem du spielst,
+auf Kapitalerträge 26 %. Die Wochenbilanz zeigt jede Zeile einzeln. Saudi-Arabien zahlt
+keine Steuer und obendrein mehr als das Doppelte — der Grund, warum am Ende einer Karriere
+dort das Telefon klingelt.
+
+**Laufende Kosten.** Der Stab kostet Wochengehalt, fast jede Anschaffung danach Unterhalt:
+Der Sportwagen 400 € pro Woche, die Villa 1.600 €, der Privatjet 7.000 €, die Stiftung
+4.000 €. Reicht das Konto nicht, wird erst der Stab zurückgestuft und entlassen — und wenn
+niemand mehr da ist, unter Wert verkauft.
+
+**Anlagen** werfen gut zehn Prozent im Jahr ab statt der früheren zwanzig. Eine Anlage mit
+22 hat sich Mitte dreißig bezahlt gemacht, eine mit 33 nicht mehr — damit ist auch der
+Zeitpunkt eine Entscheidung.
+
+Gemessen über 30 Karrieren kauft sich eine durchschnittliche Karriere davon drei bis fünf
+der zehn Anschaffungen und hält zwischen 17 und 33 der 39 Stabstufen; nur eine einzige
+Karriere kam auf alles. Der Kontostand am Ende liegt im Median bei 1,5 Mio € statt bei 29.
 
 ## Wunschverein
 
@@ -498,6 +544,11 @@ eine durchgespielte Karriere:
   Der harte Weg hat den höchsten Deckel, das Wunderkind die meisten Tore (früher Start). Der
   Deckel zahlt sich aber nur bei gezieltem Training aus: Wer ohne Plan spielt, fährt mit dem
   Wunderkind besser (Höchststärke 70,0 gegen 67,6).
+- Geld ist wieder eine Entscheidung. Über 30 Karrieren mit bestmöglichem Wirtschaften
+  gemessen: Spitzengehalt 0,96 bis 9,7 Mio € im Jahr, drei bis fünf der zehn Anschaffungen
+  gekauft, 17 bis 33 der 39 Stabstufen besetzt, Kontostand am Ende im Median 1,5 Mio €.
+  Genau eine der 30 Karrieren konnte sich alles leisten. Vorher: 29 Mio € Rest auf dem
+  Konto, alles gekauft, kompletter Weltklasse-Stab — in jeder einzelnen Karriere.
 - Verletzungen kosten rund ein Zehntel aller Wochen (bei riskanter Trainingswahl ein Siebtel).
 - Alle 44 Zufallsereignisse sind erreichbar — geprüft wird das über einen Lauf, der zählt, wie
   oft die Bedingung jedes Ereignisses überhaupt zutrifft, nicht nur, welches gezogen wurde.
