@@ -58,6 +58,28 @@ Der Spielstand wird nach jeder Woche automatisch gesichert, über drei Stufen:
 
 Das Profil zeigt jederzeit an, wo der Stand liegt, und erlaubt manuelles Speichern.
 
+## Gestaltung
+
+Ein dunkles Grün-Schwarz mit Bernstein als einziger Akzentfarbe, Anton für Zahlen und
+Überschriften, IBM Plex Sans für Fließtext und IBM Plex Sans Condensed für Daten und Tabellen.
+Semantische Farben (gut / Warnung / schlecht) sind vom Akzent getrennt.
+
+Drei Entscheidungen, die mehr als Geschmack sind:
+
+- **Wappen** tragen die Trikotfarben als Grund und das Kürzel auf einem Band quer darüber. Ohne
+  das Band verschwanden die Buchstaben bei Längsstreifen — BVB, BO4 und BMG waren schlicht nicht
+  zu lesen. Das Band ist zugleich ein echtes Trikotmotiv.
+- **Der Spieltag** füllt sich von unten wie ein Liveticker, und darunter liegt sehr blass der
+  Rasen unter dem Flutlicht. Beim Anpfiff stand dort vorher ein schwarzes Loch über die halbe
+  Seite; jetzt ist der leere Platz gewollt statt übrig. Zum Text hin wird der Rasen ausgeblendet,
+  damit die Meldungen auf sauberem Grund stehen.
+- **Querleisten** laufen am rechten Rand weich aus. Die harte Schnittkante sah aus wie
+  abgeschnittener Text statt wie etwas zum Weiterschieben.
+
+Tiefe wird nach Rolle vergeben, nicht überall gleich: Karten bekommen oben einen Hauch Licht und
+darunter einen weichen Schatten, die Kante wird dafür zurückgenommen. Das Flutlicht selbst ist
+nur auf der Anzeigetafel sichtbar — dem Bildschirm mit der meisten Spielzeit.
+
 ## Was drin ist
 
 **Karriere anlegen** — Name, Nation, Position (7 Positionen von Innenverteidiger bis

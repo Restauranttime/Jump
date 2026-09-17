@@ -71,7 +71,12 @@ a{color:var(--accent)}
 
 /* ---------- Bausteine ---------- */
 .eyebrow{font-family:var(--font-data);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+/* Karten liegen als Flaechen unter dem Flutlicht: oben ein Hauch heller,
+   darunter ein weicher Schatten. Die Kante wird dafuer zurueckgenommen — Rahmen
+   und Schatten sollen nicht beide dasselbe sagen. */
+.card{background:linear-gradient(180deg,var(--surface-2),var(--surface) 52%);
+  border:1px solid var(--line-soft);border-radius:var(--r);padding:14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045), 0 6px 16px rgba(0,0,0,.26)}
 .stack{display:flex;flex-direction:column;gap:12px}
 .stack-sm{display:flex;flex-direction:column;gap:8px}
 .row{display:flex;align-items:center;gap:10px}
@@ -102,9 +107,15 @@ a{color:var(--accent)}
 .pill-bad{background:rgba(226,97,91,.13);border-color:rgba(226,97,91,.35);color:var(--bad)}
 .pill-warn{background:rgba(229,132,74,.13);border-color:rgba(229,132,74,.35);color:var(--warn)}
 
-.badge{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;flex:none;
+/* Wappen: Trikotfarben und -muster als Grund, das Kuerzel auf einem Band quer
+   darueber. Ohne das Band verschwanden die Buchstaben bei Laengsstreifen — BVB,
+   BO4 und BMG waren schlicht nicht zu lesen. Das Band ist zugleich ein echtes
+   Trikotmotiv, wirkt also nicht wie eine Notloesung. */
+.badge{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;flex:none;overflow:hidden;
   font-family:var(--font-display);font-size:15px;letter-spacing:.02em;color:#0B0F0C;
   box-shadow:inset 0 -12px 18px rgba(0,0,0,.28), 0 1px 0 rgba(255,255,255,.08)}
+.badge i{font-style:normal;display:block;width:100%;text-align:center;padding:2px 0;
+  background:var(--scrim,rgba(8,14,10,.55));line-height:1.12}
 .badge-sm{width:26px;height:26px;border-radius:8px;font-size:11px}
 .badge-lg{width:54px;height:54px;border-radius:15px;font-size:20px}
 
@@ -167,8 +178,13 @@ a{color:var(--accent)}
 .hud-ovr{margin-left:auto;text-align:right;line-height:1}
 .hud-ovr b{font-family:var(--font-display);font-size:26px;color:var(--accent);letter-spacing:.02em}
 .hud-ovr span{display:block;font-family:var(--font-data);font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
-.hud-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
-.hud-chips::-webkit-scrollbar{display:none}
+/* Beide Querleisten laufen am rechten Rand weich aus. Die harte Schnittkante
+   sah aus wie abgeschnittener Text, nicht wie etwas zum Weiterschieben. */
+.hud-chips,.chips-quer{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 26px),transparent);
+  mask-image:linear-gradient(90deg,#000 calc(100% - 26px),transparent)}
+.hud-chips::-webkit-scrollbar,.chips-quer::-webkit-scrollbar{display:none}
+.chips-quer{flex-wrap:nowrap;padding-bottom:4px}
 #main{flex:1;min-height:0;overflow-y:auto;padding:14px 16px 22px}
 .view{display:flex;flex-direction:column;gap:14px}
 #tabbar{display:grid;grid-template-columns:repeat(6,1fr);border-top:1px solid var(--line-soft);background:var(--surface);padding-bottom:var(--sab)}
@@ -303,17 +319,35 @@ table.tbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-
 .fx{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 
 /* ---------- Spieltag ---------- */
-#match{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none;justify-content:flex-start}
+/* Beim Anpfiff steht im Ticker fast nichts — vorher war das ein schwarzes
+   Loch ueber die halbe Seite. Jetzt liegt darunter der Rasen unter dem
+   Flutlicht: Der leere Platz ist dadurch gewollt statt uebrig. Bewusst sehr
+   blass gehalten, die Meldungen muessen darueber lesbar bleiben. */
+#match{-webkit-backdrop-filter:none;backdrop-filter:none;justify-content:flex-start;
+  background:
+    linear-gradient(180deg,rgba(7,16,11,0) 38%,rgba(7,16,11,.9) 74%,var(--bg) 88%),
+    url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20150'%3E%3Cg%20fill='none'%20stroke='%232E8A5F'%20stroke-opacity='.3'%20stroke-width='.5'%3E%3Crect%20x='4'%20y='4'%20width='92'%20height='142'%20rx='1'/%3E%3Cline%20x1='4'%20y1='75'%20x2='96'%20y2='75'/%3E%3Ccircle%20cx='50'%20cy='75'%20r='13'/%3E%3Crect%20x='27'%20y='4'%20width='46'%20height='21'/%3E%3Crect%20x='27'%20y='125'%20width='46'%20height='21'/%3E%3Crect%20x='40'%20y='4'%20width='20'%20height='8'/%3E%3Crect%20x='40'%20y='138'%20width='20'%20height='8'/%3E%3C/g%3E%3C/svg%3E") center 40% / auto 58% no-repeat,
+    repeating-linear-gradient(90deg,rgba(30,122,79,.04) 0 12.5%,rgba(30,122,79,.012) 12.5% 25%),
+    radial-gradient(120% 52% at 50% 0%,rgba(239,169,44,.09),rgba(239,169,44,0) 62%),
+    var(--bg)}
 .match-wrap{flex:1;min-height:0;width:100%;max-width:600px;margin-inline:auto;display:flex;flex-direction:column}
-.scoreboard{padding:calc(14px + var(--sat)) 16px 12px;border-bottom:1px solid var(--line);
-  background:linear-gradient(180deg,rgba(30,122,79,.2),transparent),var(--surface)}
+/* Die Anzeigetafel ist der Bildschirm mit der meisten Spielzeit — hier darf
+   das Flutlicht sichtbar sein, ueberall sonst bleibt es zurueckhaltend. */
+.scoreboard{padding:calc(14px + var(--sat)) 16px 14px;border-bottom:1px solid var(--line);
+  background:radial-gradient(130% 150% at 50% -30%,rgba(239,169,44,.17),rgba(239,169,44,0) 56%),
+    linear-gradient(180deg,var(--surface-3),var(--surface) 72%)}
 .sb-comp{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px}
 .sb-main{display:flex;align-items:center;gap:10px}
 .sb-team{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
 .sb-team span{font-family:var(--font-data);font-size:12px;color:var(--ink-2);text-align:center;line-height:1.15}
-.sb-score{font-family:var(--font-display);font-size:40px;letter-spacing:.04em;line-height:1;font-variant-numeric:tabular-nums}
+.sb-score{font-family:var(--font-display);font-size:40px;letter-spacing:.04em;line-height:1;font-variant-numeric:tabular-nums;
+  text-shadow:0 0 24px rgba(239,169,44,.3)}
 .sb-min{font-family:var(--font-data);font-size:11px;color:var(--accent);letter-spacing:.1em;text-align:center;margin-top:4px}
+/* Der Ticker fuellt sich von unten wie ein Liveticker — beim Anpfiff stand
+   sonst eine fast leere Seite. Der Abstandshalter statt justify-content:flex-end,
+   weil sonst der obere Teil beim Ueberlaufen nicht mehr erreichbar ist. */
 .ticker{flex:1;min-height:0;overflow-y:auto;padding:14px 16px 8px;display:flex;flex-direction:column;gap:11px}
+.ticker::before{content:"";margin-top:auto}
 .ev{display:flex;gap:11px;animation:evin .2s ease}
 @keyframes evin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .ev-min{font-family:var(--font-display);font-size:14px;color:var(--muted);min-width:30px;padding-top:1px;letter-spacing:.02em}
@@ -3206,13 +3240,20 @@ function badgeStil(club) {
   else if (m === 'h') grund = 'linear-gradient(180deg,' + c1 + ' 0 33%,' + c2 + ' 33% 67%,' + c1 + ' 67%)';
   else if (m === 'd') grund = 'linear-gradient(118deg,' + c1 + ' 0 42%,' + c2 + ' 42% 60%,' + c1 + ' 60%)';
   else grund = c1;
-  const h = helligkeit(c1);
-  return 'background:' + grund + ';color:' + (h > .55 ? '#0B0F0C' : '#F2F7F3')
-    + ';text-shadow:' + (h > .55 ? '0 1px 0 rgba(255,255,255,.6)' : '0 1px 3px rgba(0,0,0,.75)')
+  /* Das Band richtet sich nach der helleren der beiden Trikotfarben: Ueber
+     hellen Trikots liegt dunkle Schrift auf hellem Band und umgekehrt. */
+  const h = Math.max(helligkeit(c1), m === 's' ? 0 : helligkeit(c2));
+  const hell = h > .55;
+  return 'background:' + grund + ';color:' + (hell ? '#0B0F0C' : '#F2F7F3')
+    + ';--scrim:' + (hell ? 'rgba(244,248,245,.78)' : 'rgba(8,14,10,.62)')
     + ';box-shadow:inset 0 -12px 18px rgba(0,0,0,.24),inset 0 0 0 1px rgba(255,255,255,' + (h < .3 ? '.26' : '.12') + ')';
 }
-const badgeHtml = (c, kl) => '<div class="badge ' + (kl || '') + '" style="' + badgeStil(c) + '">' + esc(c.kurz) + '</div>';
-function badgeSetzen(node, club) { node.setAttribute('style', badgeStil(club)); node.textContent = club.kurz; }
+const badgeHtml = (c, kl) => '<div class="badge ' + (kl || '') + '" style="' + badgeStil(c) + '"><i>' + esc(c.kurz) + '</i></div>';
+function badgeSetzen(node, club) {
+  node.setAttribute('style', badgeStil(club));
+  node.innerHTML = '<i></i>';
+  node.firstChild.textContent = club.kurz;
+}
 const noteKl = n => 'note note-' + clamp(Math.floor(n), 1, 5);
 
 function frage({ eyebrow, titel, text, wahlen, extra }) {
@@ -3935,7 +3976,7 @@ function tabelleHtml(ligaId, eigene) {
 function renderWelt() {
   const p = S.p, eigene = S.liga.id;
   const auswahl = S.weltAuswahl || eigene;
-  let html = '<section><div class="chips" style="overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px">'
+  let html = '<section><div class="chips chips-quer">'
     + LEAGUES.map(l => '<button class="chip" data-welt="' + l.id + '" aria-pressed="' + (auswahl === l.id) + '" style="flex:none">'
       + l.flag + ' ' + esc(l.name) + '</button>').join('')
     + '<button class="chip" data-welt="euro" aria-pressed="' + (auswahl === 'euro') + '" style="flex:none">★ Europapokal</button>'
