@@ -4909,10 +4909,14 @@ function toast(text) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { t.hidden = true; }, 2600);
 }
-function sagen({ eyebrow, titel, text, effekte, knopf }) {
-  const extra = effekte && effekte.length
+/* sagen() nahm frueher kein extra entgegen und baute nur die Wirkungspillen.
+   Wer einem sagen() eigenes Markup mitgab, verlor es stillschweigend — der
+   Rundgang durch Europa kam deshalb als leerer Kasten heraus, beim
+   Saisonende wie beim spaeteren Nachschlagen. */
+function sagen({ eyebrow, titel, text, effekte, knopf, extra }) {
+  const pillen = effekte && effekte.length
     ? '<div class="fx">' + effekte.map(e => '<span class="pill ' + (e.gut ? 'pill-good' : 'pill-bad') + '">' + esc(e.t) + '</span>').join('') + '</div>' : '';
-  return frage({ eyebrow, titel, text, extra, wahlen: [{ label: knopf || 'Weiter' }] });
+  return frage({ eyebrow, titel, text, extra: pillen + (extra || ''), wahlen: [{ label: knopf || 'Weiter' }] });
 }
 
 /* ========================== SPIELTAG ========================== */

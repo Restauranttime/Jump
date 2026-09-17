@@ -198,6 +198,13 @@ Torschützenkönig, Aufsteiger, Absteiger** — nach Ländern geordnet, die eige
 hervorgehoben, der eigene Name farbig, wenn du selbst die Torjägerkrone geholt hast. Die
 letzten sechs Saisons lassen sich im Welt-Reiter jederzeit nachlesen.
 
+Eine Weile kam der Bildschirm leer heraus — Überschrift, Zeile, Knopf, darunter nichts, beim
+Saisonende wie beim Nachschlagen. Der Grund lag nicht im Rückblick, sondern eine Ebene
+tiefer: `sagen()` nahm gar kein eigenes Markup entgegen und baute nur die Wirkungspillen.
+Wer ihm `extra` mitgab, verlor es stillschweigend. Gefunden hat das erst ein Test, der den
+echten Weg geht und das Fenster anklickt wie eine Hand — der Test davor hatte das Fenster
+selbst zusammengesetzt und damit genau die Stelle übersprungen, an der es kaputtging.
+
 Dafür mussten zwei Dinge überhaupt erst entstehen:
 
 **Auf- und Abstieg gibt es jetzt in allen Ligen.** Vorher bewegte sich zwischen zwei Ligen
