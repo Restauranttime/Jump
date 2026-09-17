@@ -118,6 +118,9 @@ verfehlt, fliegt er mit hoher Wahrscheinlichkeit — und der Nachfolger bewertet
 deine Chance oder dein Problem sein kann. Liegt der Verein bei zwei Dritteln der Saison weit
 zurück, kommt die Freistellung schon mittendrin.
 
+**Leihe** — Wer nicht spielt, kann eine Saison oder eine Rückrunde woanders verbringen, ohne
+seinen Vertrag aufzugeben. Eigener Abschnitt weiter unten.
+
 **Kader** — Jeder Verein hat einen Kader aus 26 Spielern mit Position, Alter, Nation und
 Stärke. Entscheidend ist die Rangfolge auf deiner Position: Du siehst, wer vor dir steht und
 wie weit. Daraus berechnet sich, ob du aufgestellt wirst — nicht aus einer abstrakten
@@ -193,6 +196,34 @@ in drei von vier Karrieren bei Bayern.
 Gemessen: Ein 1. FC Heidenheim erscheint für einen passenden Spieler ohne Wunsch in 0 Prozent
 der Transferfenster — er macht dir von sich aus nie ein Angebot. Mit Wunsch in 92 Prozent, genau
 der angesagten Chance.
+
+## Leihe
+
+Wer auf seiner Position nicht die erste Wahl ist, saß bisher fest: für einen festen Wechsel ist
+er seinem Verein zu wertvoll, zum Spielen steht er zu weit hinten. Genau dafür gibt es die
+Leihe. Der Vertrag beim Stammverein läuft weiter, gespielt wird woanders.
+
+**Wann.** Im Sommer- und im Winterfenster, wenn du auf deiner Position nicht die Nummer eins
+bist und in weniger als 45 % der Wochen in der Startelf standest. Über den Berater lässt sich
+die Schwelle auf 80 % anheben, verliehen wird aber auch dann nur, wer nicht gesetzt ist. Ab 31
+gibt es keine Leihe mehr — wer in dem Alter nicht spielt, wechselt fest oder hört auf.
+
+**Wohin.** Zwei bis vier Vereine fragen an, mit Liga, Teamstärke und der zu erwartenden Rolle.
+Der Zielverein muss deutlich schwächer sein als dein eigener *und* schwächer als du selbst —
+sonst ist es keine Leihe, nur ein Ortswechsel. Ohne diese zweite Bedingung landete im Test ein
+Kölner Reservist bei Heidenheim und saß dort genauso auf der Bank.
+
+**Wie lange.** Eine Sommerleihe läuft eine ganze Saison, eine Winterleihe die Rückrunde. Beide
+enden zum Saisonende. Ist es gut gelaufen — mindestens 14 Spiele und ein Notenschnitt von 3,35
+oder besser —, darf der Leihverein dich fest verpflichten; du entscheidest. Sonst kehrst du
+zurück, mit spürbar mehr oder etwas weniger Trainer-Vertrauen als vorher. Die Leihe führt eine
+eigene Bilanz, damit bei einer Winterleihe nicht die Hinrunde beim Stammverein mitzählt.
+
+Gemessen über 690 Saisons: gut die Hälfte aller Karrieren enthält mindestens eine Leihe, im
+Schnitt 1,3 pro Karriere, praktisch alle zwischen 17 und 23. Ein Fünftel endet mit einer festen
+Verpflichtung. Der Effekt: **rund 22 % mehr Pflichtspiele bis zum 21. Geburtstag** und etwa 9 %
+mehr Spiele, Tore und Legacy-Punkte über die gesamte Karriere. Die Leihe beschleunigt die
+Entwicklung, sie hebt nicht die Decke.
 
 ## Bestmarken
 

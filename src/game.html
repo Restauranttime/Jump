@@ -2895,7 +2895,186 @@ function starteSaisonTeilweise(euroDrin) {
   for (let w = 1; w < S.woche; w++) simLigaSpieltag(w, true);
 }
 
+/* ---------- Leihe ----------
+   Wer auf seiner Position nicht die erste Wahl ist, sass bisher fest: fuer
+   einen festen Wechsel ist er seinem Verein zu wertvoll, zum Spielen steht er
+   zu weit hinten. Genau dafuer gibt es die Leihe. Der Vertrag beim Stammverein
+   laeuft weiter, gespielt wird woanders — im Sommer eine ganze Saison, im
+   Winter die Rueckrunde. Beides endet zum Saisonende; danach entscheidet sich,
+   ob er zurueckkehrt oder beim Leihverein unterschreibt. */
+
+/* Angeboten wird eine Leihe, wenn er nicht die erste Wahl ist und zu selten in
+   der Startelf stand. Ueber den Berater laesst sich die Schwelle anheben —
+   verliehen wird aber auch dann nur, wer nicht gesetzt ist. */
+function leihReif() {
+  const p = S.p;
+  if (S.leihe || p.vertrag.jahre <= 0 || p.verletzung) return false;
+  /* Eine Leihe soll Spielzeit bringen, aus der noch etwas wird. Ohne
+     Altersgrenze wurden im Test auch 36- bis 39-Jaehrige verliehen: Wer in dem
+     Alter nicht mehr spielt, wechselt fest oder hoert auf. */
+  if (p.alter > 30) return false;
+  const wochen = Math.max(1, Math.min(S.woche, S.saisonWochen) - 1);
+  if (platzInRangfolge() <= 1 || S.stats.startelf / wochen >= (p.leihWunsch ? .8 : .45)) return false;
+  /* Nicht in jedem Fenster liegt etwas auf dem Tisch — ausser der Berater
+     sucht ausdruecklich danach. */
+  return p.leihWunsch || chance(.6);
+}
+
+function leihAngebote() {
+  const p = S.p, o = OVR(), aktuell = CL(p.clubId);
+  /* Verliehen wird nach unten: dorthin, wo er auf Anhieb spielt. Ein Verein auf
+     Augenhoehe braucht keinen Leihspieler, ein staerkerer nimmt ihn nicht, und
+     drei Ligen tiefer bringt eine Saison ihm nichts mehr. */
+  /* Der Abstand muss gross genug sein, dass er dort wirklich spielt. Mit nur
+     zwei Punkten Abstand landete im Test ein Koelner Reservist bei Heidenheim
+     und sass dort genauso auf der Bank — das ist keine Leihe, nur ein
+     Ortswechsel. */
+  const kandidaten = CLUBS.filter(c => c.id !== p.clubId && c.liga !== 'sa1'
+    && c.staerke <= aktuell.staerke - 4 && c.staerke <= o - 2 && c.staerke >= o - 16);
+  if (!kandidaten.length) return [];
+  const land = LG(aktuell.liga).land;
+  return kandidaten
+    .map(c => ({ c, score: c.staerke + rnd(-6, 6) + (LG(c.liga).land === land ? 4 : 0) }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, ri(2, 4))
+    .map(x => {
+      const d = o - besterKonkurrent(x.c.id);
+      return { clubId: x.c.id,
+        rolle: d >= 3 ? 'du spielst dort sofort' : d >= -2 ? 'gute Aussicht auf Spielzeit' : 'auch dort Konkurrenz' };
+    });
+}
+
+function leihWechsel(clubId) {
+  const p = S.p, heim = CL(p.clubId), ziel = CL(clubId);
+  const ligaWechsel = heim.liga !== ziel.liga;
+  /* Die Sommerleihe wird im Saisonende der alten Spielzeit abgeschlossen, das
+     Jahr wird erst danach hochgezaehlt. Ohne die Korrektur stuende im Profil
+     "seit 2029/30" ueber einer Leihe, die 2030/31 gespielt wird. */
+  const saison = saisonLabel(S.jahr + (S.woche > S.saisonWochen ? 1 : 0));
+  S.leihe = { heim: heim.id, seit: saison, spiele: 0, tore: 0, vorlagen: 0, noten: [] };
+  p.clubId = clubId;
+  p.kapitaen = false;
+  p.wechselwunsch = false;
+  p.leihWunsch = false;
+  S.kader = kaderErzeugen(clubId);
+  S.trainer = trainerErzeugen(ziel);
+  /* Ein Leihspieler wird geholt, um zu spielen — er startet beim Trainer
+     deshalb hoeher als nach einem gewoehnlichen Wechsel. */
+  p.trainer = clamp(58 + (OVR() - ziel.staerke) * 1.2 + trainerStilBonus() * 50 + ri(-4, 4), 20, 92);
+  log('Auf Leihbasis zu ' + ziel.name + ' — bis Saisonende.', 'gold');
+  merken('transfer', 'Leihe zu ' + ziel.name + '.', 0);
+  if (ligaWechsel && S.woche <= S.saisonWochen) starteSaisonTeilweise(false);
+}
+
+async function leihFenster(sommer) {
+  const p = S.p;
+  if (!leihReif()) return;
+  const angebote = leihAngebote();
+  if (!angebote.length) return;
+  const club = CL(p.clubId), rang = platzInRangfolge();
+  const wahlen = angebote.map(a => {
+    const c = CL(a.clubId);
+    return { label: c.name, hinweis: LG(c.liga).flag + ' ' + LG(c.liga).name + ' · Teamstärke ' + c.staerke + ' · ' + a.rolle };
+  });
+  wahlen.push({ label: 'Hierbleiben und kämpfen', hinweis: 'Bei ' + club.name + ' um den Platz spielen' });
+  const idx = await frage({
+    eyebrow: sommer ? 'Leihe · Sommerfenster' : 'Leihe · Winterfenster',
+    titel: 'Spielpraxis woanders?',
+    text: club.name + ' will dich behalten, aber hier kommst du nicht zum Spielen — auf deiner Position bist du die Nummer '
+      + rang + '. Dein Berater legt Vereine vor, die dich ' + (sommer ? 'für eine ganze Saison' : 'für die Rückrunde')
+      + ' ausleihen würden. Dein Vertrag hier läuft weiter.',
+    wahlen
+  });
+  if (idx === wahlen.length - 1) {
+    p.leihWunsch = false;
+    const eff = wirke({ trainer: 3, moral: -2 });
+    await sagen({ eyebrow: 'Leihe', titel: 'Du bleibst',
+      text: 'Du willst es hier schaffen. Der Trainer registriert es — jetzt musst du es im Training zeigen.', effekte: eff });
+    return;
+  }
+  const ziel = CL(angebote[idx].clubId);
+  leihWechsel(ziel.id);
+  await sagen({
+    eyebrow: 'Leihe', titel: ziel.name,
+    text: 'Bis zum Saisonende spielst du für ' + ziel.name + '. Dein Vertrag bei ' + CL(S.leihe.heim).name
+      + ' läuft weiter — danach entscheidet sich, wie es dort für dich aussieht.',
+    effekte: [{ t: LG(ziel.liga).name, gut: true }, { t: 'Trainer-Vertrauen ' + Math.round(p.trainer), gut: true }]
+  });
+}
+
+/* Gibt zurueck, ob er zum Stammverein zurueckgekehrt ist — nur dann laeuft
+   danach noch das gewoehnliche Transferfenster. */
+async function leiheEnde() {
+  const p = S.p, l = S.leihe, heim = CL(l.heim), leihClub = CL(p.clubId);
+  const n = l.noten.length ? l.noten.reduce((a, b) => a + b, 0) / l.noten.length : 0;
+  /* Gemessen wird vor allem die Spielzeit — dafuer war die Leihe da. */
+  const gelungen = l.spiele >= 14 && (!n || n <= 3.35);
+  const festAngebot = gelungen && leihClub.staerke < heim.staerke && chance(.6) ? angebotFuer(leihClub) : null;
+
+  const wahlen = [{ label: 'Zurück zu ' + heim.name,
+    hinweis: LG(heim.liga).flag + ' ' + LG(heim.liga).name + ' · Teamstärke ' + heim.staerke
+      + ' · Vertrag noch ' + Math.max(0, p.vertrag.jahre) + ' Jahr(e)' }];
+  if (festAngebot) wahlen.push({ label: 'Fest bei ' + leihClub.name + ' unterschreiben', gold: true,
+    hinweis: LG(leihClub.liga).flag + ' ' + LG(leihClub.liga).name + ' · ' + money(festAngebot.gehalt) + '/Jahr · '
+      + festAngebot.jahre + ' Jahre · ' + festAngebot.rolle });
+
+  const idx = await frage({
+    eyebrow: 'Leihe beendet', titel: leihClub.name,
+    text: 'Deine Leihe läuft aus: ' + l.spiele + ' Spiele, ' + l.tore + ' Tore, ' + l.vorlagen + ' Vorlagen'
+      + (n ? ' · Notenschnitt ' + note(n) : '') + '.\n\n'
+      + (gelungen ? 'Du hast gespielt, und man hat es gesehen.' : 'Es lief nicht wie erhofft.')
+      + ' ' + heim.name + ' hat die Saison verfolgt.',
+    wahlen
+  });
+
+  if (festAngebot && idx === 1) {
+    const fertig = await vertragVerhandeln(festAngebot, leihClub.name);
+    if (fertig) {
+      const zielId = leihClub.id;
+      /* Der Wechsel geht formal vom Stammverein aus — sonst stuende im Verlauf
+         ein Wechsel von einem Verein zu sich selbst. */
+      p.clubId = l.heim;
+      S.leihe = null;
+      wechselVerein(zielId, fertig);
+      await sagen({ eyebrow: 'Transfer', titel: 'Du bleibst hier',
+        text: leihClub.name + ' zieht die Kaufoption. Aus der Leihe wird ein Vertrag bis ' + (S.jahr + fertig.jahre) + '.',
+        effekte: [{ t: money(fertig.gehalt) + ' / Jahr', gut: true }, { t: fertig.jahre + ' Jahre', gut: true }] });
+      return false;
+    }
+  }
+
+  /* Rueckkehr. Wer geliefert hat, kommt mit Rueckenwind zurueck — und trifft
+     womoeglich einen anderen Trainer an als den, der ihn weggeschickt hat. */
+  p.clubId = l.heim;
+  p.kapitaen = false;
+  S.leihe = null;
+  S.kader = kaderErzeugen(heim.id);
+  S.trainer = trainerErzeugen(heim);
+  p.trainer = clamp(46 + (gelungen ? 15 : -5) + (OVR() - heim.staerke) * 1.1 + trainerStilBonus() * 50 + ri(-4, 4), 10, 90);
+  log('Nach der Leihe zurück bei ' + heim.name + '.', 'gold');
+  merken('transfer', 'Von der Leihe zurück bei ' + heim.name + '.', 0);
+  await sagen({
+    eyebrow: 'Rückkehr', titel: heim.name,
+    text: 'Du bist zurück. Auf der Bank sitzt ' + S.trainer.name + ' — ' + STIL(S.trainer.stil).name + '.\n\n'
+      + 'Dein Stand bei ihm: ' + Math.round(p.trainer) + ' von 100. Auf deiner Position bist du die Nummer '
+      + platzInRangfolge() + '.'
+  });
+  return true;
+}
+
 async function transferfenster(sommer) {
+  /* Reihenfolge: erst eine laufende Leihe abschliessen, dann feste Angebote —
+     und wer danach immer noch dort sitzt, wo er nicht spielt, bekommt
+     Leihangebote statt gar nichts. */
+  if (S.leihe) {
+    if (!sommer) return;
+    if (!(await leiheEnde())) return;
+  }
+  const gewechselt = await transferAngebote(sommer);
+  if (!gewechselt) await leihFenster(sommer);
+}
+
+async function transferAngebote(sommer) {
   const angebote = angeboteErzeugen(sommer);
   const p = S.p;
   if (p.vertrag.jahre <= 0 && !angebote.length) {
@@ -2903,9 +3082,9 @@ async function transferfenster(sommer) {
     const gehalt = Math.round(jahresGehaltFuer(club) * .8 / 5000) * 5000;
     await sagen({ eyebrow: 'Vertrag', titel: 'Kein Markt', text: 'Niemand ruft an. ' + club.name + ' bietet dir einen Anschlussvertrag über ' + money(gehalt) + ' pro Jahr — nimm ihn oder such dir einen Beruf.' });
     p.vertrag = { gehalt, jahre: 1 };
-    return;
+    return false;
   }
-  if (!angebote.length) return;
+  if (!angebote.length) return false;
   const wahlen = angebote.map(a => {
     const c = CL(a.clubId);
     return { label: c.name, hinweis: LG(c.liga).flag + ' ' + LG(c.liga).name + ' · ' + money(a.gehalt) + '/Jahr · ' + a.jahre + ' Jahre · ' + a.rolle + (a.abloese ? ' · Ablöse ' + money(a.abloese) : ' · ablösefrei') };
@@ -2927,13 +3106,14 @@ async function transferfenster(sommer) {
       wirke({ trainer: 4, moral: 3 });
       await sagen({ eyebrow: 'Treue', titel: 'Du bleibst', text: 'Du schlägst alles aus. Die Kurve dankt es dir mit einem Banner im nächsten Heimspiel.' });
     }
-    return;
+    return false;
   }
   const a = angebote[idx];
   const fertig = await vertragVerhandeln(a, CL(a.clubId).name);
-  if (!fertig) return;
+  if (!fertig) return false;
   wechselVerein(a.clubId, fertig);
   await sagen({ eyebrow: 'Transfer', titel: 'Willkommen bei ' + CL(a.clubId).name, text: 'Medizincheck bestanden, Foto mit Schal, Vertrag bis ' + (S.jahr + fertig.jahre) + '. Ein neues Kapitel.', effekte: [{ t: money(fertig.gehalt) + ' / Jahr', gut: true }, { t: fertig.jahre + ' Jahre', gut: true }] });
+  return true;
 }
 
 /* ========================== NATIONALMANNSCHAFT ==========================
@@ -3542,7 +3722,7 @@ async function saisonEnde() {
   S.karriere.push({
     saison: saisonLabel(S.jahr), club: club.name, kurz: club.kurz, farbe: club.farbe, liga: lg.name, platz,
     spiele: st.spiele, tore: st.tore, vorlagen: st.vorlagen, note: avg ? round1(avg) : 0, ovr: OVR(),
-    titel: S.titelDieseSaison.map(t => t.name), alter: p.alter
+    titel: S.titelDieseSaison.map(t => t.name), alter: p.alter, leihe: S.leihe ? 1 : 0
   });
 
   /* Alterung */
@@ -3595,15 +3775,18 @@ async function saisonEnde() {
   p.sponsoren.forEach(s => s.jahre--);
   p.sponsoren = p.sponsoren.filter(s => s.jahre > 0);
 
+  const vorherClub = p.clubId;
   await transferfenster(true);
 
   /* Die uebrige Welt bewegt sich, bevor die neue Saison aufgesetzt wird */
   weltStaerkenDriften();
   weltTransferfenster();
 
-  /* Neue Saison */
+  /* Neue Saison. Nach einem Vereinswechsel — auch nach einer Leihe — zaehlt nur
+     noch der neue Verein: Sonst nahm ein Spieler den Europapokalplatz seines
+     alten Klubs mit zu einem Verein, der dort nichts verloren hat. */
   S.jahr++;
-  starteSaison(euroQuali || euroQualifiziert(p.clubId));
+  starteSaison(p.clubId === vorherClub ? (euroQuali || euroQualifiziert(p.clubId)) : euroQualifiziert(p.clubId));
   log('Saison ' + saisonLabel(S.jahr) + ' beginnt bei ' + CL(p.clubId).name + '.', 'gold');
 }
 
@@ -3924,6 +4107,13 @@ async function spielAustragen(fx) {
       S.stats.gelb += gelb; S.stats.rot += rot;
       S.stats.minuten += minuten;
       S.stats.noten.push(noteWert);
+      /* Die Leihe fuehrt ihre eigene Bilanz. Bei einer Winterleihe steht in der
+         Saisonzeile sonst die Hinrunde beim Stammverein mit drin, und am Ende
+         liesse sich nicht sagen, wie die Leihe gelaufen ist. */
+      if (S.leihe) {
+        S.leihe.spiele++; S.leihe.tore += meineTore; S.leihe.vorlagen += vorlagen;
+        S.leihe.noten.push(noteWert);
+      }
     }
     S.wochenMinuten = (S.wochenMinuten || 0) + minuten;
     /* Höhepunkte aus dem Spiel */
@@ -4098,6 +4288,7 @@ function render() {
   const f = formText();
   el('hud-chips').innerHTML = [
     p.verletzung ? '<span class="pill pill-bad">' + esc(p.verletzung.name) + ' · ' + p.verletzung.wochen + ' Wo.</span>' : '',
+    S.leihe ? '<span class="pill pill-warn">verliehen</span>' : '',
     '<span class="pill">Energie ' + Math.round(p.energie) + '</span>',
     '<span class="pill">Moral ' + Math.round(p.moral) + '</span>',
     '<span class="pill ' + (f.c ? 'pill-' + f.c : '') + '">' + f.t + '</span>',
@@ -4187,6 +4378,7 @@ function renderClub() {
     + '<div class="small muted">' + lg.flag + ' ' + esc(lg.name) + ' · Platz ' + platz + ' · Teamstärke ' + club.staerke + '</div></div></div>'
     + '<div class="attrs" style="margin-top:14px">'
     + '<div class="attr"><span class="k">Deine Rolle</span><span class="small ink2">' + rolleNachStaerke() + '</span><span class="v"></span></div>'
+    + (S.leihe ? '<div class="attr"><span class="k">Leihe</span><span class="small ink2 truncate">von ' + esc(CL(S.leihe.heim).name) + ' bis Saisonende</span><span class="v"></span></div>' : '')
     + (p.kapitaen ? '<div class="attr"><span class="k">Kapitän</span><span class="small ink2">Du trägst die Binde</span><span class="v"></span></div>' : '')
     + '</div></div>';
 
@@ -4259,18 +4451,40 @@ function renderMarkt() {
     + '<div style="font-family:var(--font-display);font-size:34px;color:var(--accent);line-height:1.1;margin:4px 0 2px">' + money(marktwert()) + '</div>'
     + '<p class="small muted">Stärke ' + OVR() + ' · ' + p.alter + ' Jahre · ' + formText().t + '</p></div>';
 
+  /* Bezahlt wird der Spieler von seinem Stammverein — bei einer Leihe steht
+     hier sonst der Verein, mit dem er gar keinen Vertrag hat. */
+  const vertragsClub = S.leihe ? CL(S.leihe.heim) : club;
   html += '<section><div class="sect-title"><h3>Vertrag</h3></div><div class="card attrs">'
-    + '<div class="attr"><span class="k">Verein</span><span class="small ink2 truncate">' + esc(club.name) + '</span><span class="v"></span></div>'
+    + '<div class="attr"><span class="k">Verein</span><span class="small ink2 truncate">' + esc(vertragsClub.name)
+      + (S.leihe ? ' <span class="muted">(verliehen)</span>' : '') + '</span><span class="v"></span></div>'
     + '<div class="attr"><span class="k">Gehalt</span><span class="small ink2">' + money(p.vertrag.gehalt) + ' / Jahr</span><span class="v"></span></div>'
     + '<div class="attr"><span class="k">Laufzeit</span><span class="small ink2">' + (p.vertrag.jahre > 0 ? 'noch ' + p.vertrag.jahre + ' Jahr(e)' : 'läuft aus') + '</span><span class="v"></span></div>'
     + '<div class="attr"><span class="k">Wochenlohn</span><span class="small ink2">' + money(p.vertrag.gehalt / 52) + '</span><span class="v"></span></div>'
     + '</div></section>';
 
+  if (S.leihe) {
+    const l = S.leihe, heim = CL(l.heim);
+    const n = l.noten.length ? l.noten.reduce((a, b) => a + b, 0) / l.noten.length : 0;
+    html += '<section><div class="sect-title"><h3>Leihe</h3><span class="small muted">seit ' + esc(l.seit) + '</span></div>'
+      + '<div class="card"><div class="row" style="gap:10px">' + badgeHtml(heim)
+      + '<div class="grow"><div style="font-weight:600;font-size:14px">' + esc(heim.name) + '</div>'
+      + '<div class="small muted">dein Stammverein · ' + LG(heim.liga).flag + ' Teamstärke ' + heim.staerke + '</div></div></div>'
+      + '<p class="small ink2" style="margin-top:9px">Du spielst bis Saisonende für ' + esc(club.name)
+      + '. Danach entscheidet sich, ob du zurückgehst oder hier fest unterschreibst — je nachdem, wie die Leihe läuft.</p>'
+      + '<div class="cond" style="margin-top:12px">'
+      + '<div class="cond-item"><span class="k">Spiele</span><span class="v">' + l.spiele + '</span></div>'
+      + '<div class="cond-item"><span class="k">Tore</span><span class="v">' + l.tore + '</span></div>'
+      + '<div class="cond-item"><span class="k">Ø Note</span><span class="v">' + (n ? note(n) : '—') + '</span></div>'
+      + '</div></div></section>';
+  }
+
   const wunsch = p.wunschClub && CL(p.wunschClub);
   html += '<section><div class="sect-title"><h3>Berater</h3>'
     + (wunsch ? '<span class="small muted">Einschätzung: ' + wunschText(wunsch.id) + '</span>' : '') + '</div>'
     + '<div class="card stack-sm">'
-    + (wunsch
+    + (S.leihe
+      ? '<p class="small ink2">Solange du verliehen bist, verhandelt dein Berater nichts — weder über einen Wechsel noch über einen neuen Vertrag. Beides wird erst zum Saisonende wieder ein Thema.</p>'
+      : wunsch
       ? '<div class="row" style="gap:10px">' + badgeHtml(wunsch)
         + '<div class="grow"><div style="font-weight:600;font-size:14px">' + esc(wunsch.name) + '</div>'
         + '<div class="small muted">' + LG(wunsch.liga).flag + ' ' + esc(LG(wunsch.liga).name) + ' · Teamstärke ' + wunsch.staerke + '</div></div></div>'
@@ -4279,12 +4493,21 @@ function renderMarkt() {
         ? 'Dein Berater hört sich aktiv um. Im nächsten Transferfenster kommen mehr Angebote — dein Trainer weiß das inzwischen auch.'
         : 'Dein Berater wartet ab. Du kannst ihn losschicken, um im nächsten Fenster mehr Angebote zu bekommen.') + '</p>')
     + '<p class="small muted">' + naechstes + '</p>'
-    + '<div class="btn-row">'
-    + '<button class="btn btn-sm" data-act="wunsch">' + (wunsch ? 'Anderer Verein' : 'Wunschverein wählen') + '</button>'
-    + (wunsch ? '<button class="btn btn-sm btn-quiet" data-act="wunschWeg">Wunsch zurückziehen</button>'
-      : p.wechselwunsch ? '<button class="btn btn-sm btn-quiet" data-act="bleiben">Wechselwunsch zurückziehen</button>'
-      : '<button class="btn btn-sm" data-act="berater">Umhören lassen</button>')
-    + '</div></div></section>';
+    + (S.leihe ? ''
+      : '<div class="btn-row">'
+        + '<button class="btn btn-sm" data-act="wunsch">' + (wunsch ? 'Anderer Verein' : 'Wunschverein wählen') + '</button>'
+        + (wunsch ? '<button class="btn btn-sm btn-quiet" data-act="wunschWeg">Wunsch zurückziehen</button>'
+          : p.wechselwunsch ? '<button class="btn btn-sm btn-quiet" data-act="bleiben">Wechselwunsch zurückziehen</button>'
+          : '<button class="btn btn-sm" data-act="berater">Umhören lassen</button>')
+        + '</div>'
+        + (platzInRangfolge() > 1
+          ? '<button class="btn btn-sm ' + (p.leihWunsch ? '' : 'btn-quiet') + '" data-act="leihe" style="width:100%">'
+            + (p.leihWunsch ? 'Leihsuche beenden' : 'Nach einer Leihe suchen lassen') + '</button>'
+            + '<p class="tiny muted">' + (p.leihWunsch
+              ? 'Dein Berater sucht im nächsten Fenster einen Verein, bei dem du spielst.'
+              : 'Du bist hier die Nummer ' + platzInRangfolge() + '. Eine Saison woanders bringt Spielzeit — dein Vertrag hier läuft weiter.') + '</p>'
+          : ''))
+    + '</div></section>';
 
   /* Wochenbilanz */
   const ein = wochenEinnahmen(), aus = stabKosten();
@@ -4498,7 +4721,7 @@ function renderProfil() {
     html += '<section><div class="sect-title"><h3>Karriere</h3></div><div class="card tablewrap">'
       + '<table class="tbl"><thead><tr><th class="pos"></th><th>Saison</th><th>Sp</th><th>T</th><th>V</th><th>Ø</th><th>Stk</th></tr></thead><tbody>'
       + S.karriere.slice().reverse().map(k => '<tr><td class="pos"></td><td><span class="truncate">' + esc(k.saison) + '</span>'
-        + '<div class="tiny muted truncate">' + esc(k.club) + ' · ' + k.platz + '.</div></td>'
+        + '<div class="tiny muted truncate">' + esc(k.club) + (k.leihe ? ' (Leihe)' : '') + ' · ' + k.platz + '.</div></td>'
         + '<td>' + k.spiele + '</td><td>' + k.tore + '</td><td>' + k.vorlagen + '</td><td>' + (k.note ? note(k.note) : '—') + '</td><td>' + k.ovr + '</td></tr>').join('')
       + '</tbody></table></div></section>';
   }
@@ -4706,6 +4929,11 @@ async function aktion(name) {
   if (name === 'woche') return wocheVor();
   if (name === 'berater') { S.p.wechselwunsch = true; wirke({ trainer: -3 }); speichern(); render(); return; }
   if (name === 'bleiben') { S.p.wechselwunsch = false; speichern(); render(); return; }
+  if (name === 'leihe') {
+    S.p.leihWunsch = !S.p.leihWunsch;
+    toast(S.p.leihWunsch ? 'Der Berater sucht eine Leihe' : 'Leihsuche beendet');
+    speichern(); render(); return;
+  }
   if (name === 'wunsch') { await wunschWaehlen(); speichern(); render(); return; }
   if (name === 'wunschWeg') {
     S.p.wunschClub = null;
@@ -4882,7 +5110,7 @@ function karriereStarten() {
   const gehalt = Math.max(24000, Math.round(Math.pow(club.staerke / 10, 5.2) * 45 * .35 / 1000) * 1000);
   S = {
     v: 1, jahr: 2026, woche: 1, plan: 'technik', trainFokus: top2[0],
-    beendet: false, ligaTausch: {}, staerkeTausch: {}, transfers: {}, verlauf: [], karriere: [], stars: [], hoehepunkte: [],
+    beendet: false, leihe: null, ligaTausch: {}, staerkeTausch: {}, transfers: {}, verlauf: [], karriere: [], stars: [], hoehepunkte: [],
     p: {
       vorname: NEU.vorname, nachname: NEU.nachname, natId: NEU.natId, pos: NEU.pos, fuss: NEU.fuss, archetyp: NEU.archetyp,
       alter: 17, attr, potenzial: clamp(o + ri(19, 35) + weg.potenzial, 62, 99), kondition: ri(10, 20),
@@ -4935,6 +5163,8 @@ function migriere() {
   S.serie = S.serie || [];
   S.hoehepunkte = S.hoehepunkte || [];
   S.rekorde = S.rekorde || {};
+  if (S.leihe && (!CL(S.leihe.heim) || !CL(S.p.clubId))) S.leihe = null;
+  if (S.leihe) S.leihe.noten = S.leihe.noten || [];
   if (S.p.wunschClub && !CL(S.p.wunschClub)) S.p.wunschClub = null;
   if (typeof S.p.nat.vertrauen !== 'number') S.p.nat.vertrauen = 50;
   if (S.p.nat.dabei && !S.natTrainer) S.natTrainer = natTrainerErzeugen();
