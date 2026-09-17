@@ -4316,6 +4316,44 @@ function startseite() {
   }
 }
 
+/* ========================== BILDSCHIRMHOEHE ==========================
+   Die Homescreen-App auf iOS meldet direkt nach dem Start eine zu kleine
+   Viewport-Hoehe: der Bereich unter der Statusleiste fehlt, bis zum ersten Mal
+   gescrollt wird. Auf einem iPhone 16 Pro Max gemessen 894 statt 956 Punkte --
+   die Tableiste stand dadurch 62 Punkte ueber dem unteren Bildschirmrand und
+   sprang erst beim ersten Ziehen an ihren Platz. 100dvh hilft nicht, weil auch
+   dvh diesen falschen Wert bekommt; screen.height kennt die richtige Hoehe von
+   Anfang an.
+
+   Der Wert wird als Inline-Stil gesetzt und schlaegt damit das Stylesheet.
+   Laeuft das Skript nicht, bleibt dort 100dvh beziehungsweise 100% stehen. */
+let letzteHoehe = 0;
+function hoeheAnpassen() {
+  let h = window.innerHeight;
+  if (!h) return;
+  /* Nur auf iOS im Homescreen-Betrieb, und nur wenn die Abweichung klein genug
+     ist, um ein Sicherheitsbereich zu sein. Im Querformat oder bei geteiltem
+     Bildschirm ist der Abstand groesser — dann bleibt innerHeight massgeblich. */
+  if (navigator.standalone === true) {
+    const s = window.screen && window.screen.height;
+    if (s && s > h && s - h <= 130) h = s;
+  }
+  if (h === letzteHoehe) return;
+  letzteHoehe = h;
+  document.documentElement.style.height = h + 'px';
+  document.body.style.height = h + 'px';
+  /* Solange iOS noch die zu kleine Hoehe meldet, ist die Seite um die Differenz
+     scrollbar. Gescrollt werden soll im Spiel aber nur innerhalb der Ansichten,
+     nie das Geruest — sonst wandert die Tableiste aus dem Bild. */
+  if (window.scrollY) window.scrollTo(0, 0);
+}
+hoeheAnpassen();
+['resize', 'orientationchange', 'pageshow'].forEach(e => addEventListener(e, hoeheAnpassen));
+if (window.visualViewport) visualViewport.addEventListener('resize', hoeheAnpassen);
+/* iOS korrigiert die Hoehe teils erst kurz nach dem Start, ohne ein Ereignis zu
+   schicken — daher zwei Nachmessungen. */
+[400, 1500].forEach(ms => setTimeout(hoeheAnpassen, ms));
+
 /* ========================== START ========================== */
 function verdrahten() {
   el('btn-new').addEventListener('click', () => {
