@@ -166,6 +166,36 @@ Potenzial, ab 29 baut der Körper ab. Saisonbilanz mit Torschützenkönig, Spiel
 und Goldenem Ball, Weltrangliste, Titelvitrine, Karrieretabelle über alle Saisons.
 Am Schluss: Rücktritt und Legacy-Punkte.
 
+## Nationalmannschaft
+
+Länderspiele laufen über denselben Bildschirm wie Vereinsspiele — mit Schlüsselmomenten, Note,
+Verletzungsrisiko und allem anderen. Dafür treten Nationen als Pseudo-Vereine auf, mit
+Trikotfarben, Kürzel und Stärke; der Spieltag-Ablauf musste nicht verdoppelt werden.
+
+**Der Kader** entsteht aus den echten Spielern, die der Nation angehören — quer durch alle
+Ligen, auf die laufende Saison fortgeschrieben, nach Positionen aufgebaut (3 Torhüter, 4
+Innenverteidiger, 2 Sechser und so weiter). Damit ist der Platz in der Nationalelf keine
+Würfelsache mehr: Als deutscher Mittelstürmer stehst du hinter Havertz, Undav und Woltemade,
+als österreichischer Innenverteidiger hast du es deutlich leichter. Fehlt auf einer Position der
+Nachwuchs, weil die bekannten Spieler längst aufgehört haben, stellt der Verband trotzdem
+jemanden auf Landesniveau auf — sonst wärst du nach fünfzehn Jahren automatisch die Nummer eins
+deines Landes.
+
+**Eingeladen** wird, wer zu den ersten seiner Position zählt; wer zweimal in Folge dahinter
+fällt, fliegt wieder heraus. Die Zahl der Plätze richtet sich nach der Position: vier für
+Innenverteidiger, zwei für Sechser.
+
+**Der Bundestrainer** hat eine eigene Spielidee wie ein Vereinstrainer und ein eigenes
+Vertrauenskonto. Wer das Halbfinale erreicht, bleibt im Amt.
+
+**Qualifikation und Turnier:** In der Saison vor einem Turnier sind drei der vier
+Länderspieltermine Qualifikationsspiele gegen drei Gegner — jeder spielt dreimal, die ersten
+zwei fahren hin. Das Turnier läuft dann als Folge einzelner Spiele: drei Gruppenspiele, dann die
+K.-o.-Runde.
+
+Gemessen über acht volle Karrieren: alle acht kommen zu Länderspielen, im Mittel 25 Einsätze,
+zwölf Turniere und ein Titel; sechsmal verlor jemand seinen Platz im Aufgebot wieder.
+
 ## Dein Jahrgang
 
 Beim Anlegen bekommst du einen echten Spieler deiner Position und deines Jahrgangs als Rivalen

@@ -647,7 +647,10 @@ for (const lid of Object.keys(CLUBS_RAW)) {
     CLUBS.push({ id: lid + '-' + i, name: c[0], kurz: c[1], liga: lid, staerke: c[2], farbe: c[3], farbe2: c[4], muster: c[5] });
   });
 }
-const CL = id => CLUBS.find(c => c.id === id);
+/* Nationen treten im Spieltag als Pseudo-Vereine auf (siehe natClub). Der
+   Rueckfall greift nur, wenn kein echter Verein passt, kostet also nichts. */
+const CL = id => CLUBS.find(c => c.id === id)
+  || (typeof id === 'string' && id.startsWith('nat-') ? natClub(id.slice(4)) : undefined);
 const ligaClubs = lid => CLUBS.filter(c => c.liga === lid);
 /* Die Staerke aus der Vorlage, bevor ein Spielstand sie veraendert. Die Drift
    zwischen den Saisons laeuft immer ein Stueck dorthin zurueck — sonst waere die
@@ -1147,26 +1150,26 @@ const ECHTE_KADER = {
 
 /* ------------------------------ Nationen ------------------------------ */
 const NATIONEN = [
-  { id: 'DE', name: 'Deutschland', flag: '🇩🇪', staerke: 85, pool: 'de' },
-  { id: 'FR', name: 'Frankreich', flag: '🇫🇷', staerke: 90, pool: 'fr' },
-  { id: 'ES', name: 'Spanien', flag: '🇪🇸', staerke: 88, pool: 'es' },
-  { id: 'BR', name: 'Brasilien', flag: '🇧🇷', staerke: 89, pool: 'pt' },
-  { id: 'AR', name: 'Argentinien', flag: '🇦🇷', staerke: 88, pool: 'es' },
-  { id: 'EN', name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', staerke: 86, pool: 'en' },
-  { id: 'PT', name: 'Portugal', flag: '🇵🇹', staerke: 86, pool: 'pt' },
-  { id: 'NL', name: 'Niederlande', flag: '🇳🇱', staerke: 84, pool: 'nl' },
-  { id: 'IT', name: 'Italien', flag: '🇮🇹', staerke: 82, pool: 'it' },
-  { id: 'BE', name: 'Belgien', flag: '🇧🇪', staerke: 81, pool: 'nl' },
-  { id: 'HR', name: 'Kroatien', flag: '🇭🇷', staerke: 80, pool: 'sl' },
-  { id: 'MA', name: 'Marokko', flag: '🇲🇦', staerke: 78, pool: 'af' },
-  { id: 'JP', name: 'Japan', flag: '🇯🇵', staerke: 77, pool: 'jp' },
-  { id: 'NG', name: 'Nigeria', flag: '🇳🇬', staerke: 76, pool: 'af' },
-  { id: 'TR', name: 'Türkei', flag: '🇹🇷', staerke: 75, pool: 'tr' },
-  { id: 'PL', name: 'Polen', flag: '🇵🇱', staerke: 74, pool: 'sl' },
-  { id: 'AT', name: 'Österreich', flag: '🇦🇹', staerke: 74, pool: 'de' },
-  { id: 'CH', name: 'Schweiz', flag: '🇨🇭', staerke: 74, pool: 'de' },
-  { id: 'NO', name: 'Norwegen', flag: '🇳🇴', staerke: 73, pool: 'sk' },
-  { id: 'US', name: 'USA', flag: '🇺🇸', staerke: 72, pool: 'en' }
+  { id: 'DE', name: 'Deutschland', flag: '🇩🇪', staerke: 85, pool: 'de', kurz: 'DEU', farbe: '#FFFFFF', farbe2: '#101010', muster: 's' },
+  { id: 'FR', name: 'Frankreich', flag: '🇫🇷', staerke: 90, pool: 'fr', kurz: 'FRA', farbe: '#1E3A8A', farbe2: '#FFFFFF', muster: 's' },
+  { id: 'ES', name: 'Spanien', flag: '🇪🇸', staerke: 88, pool: 'es', kurz: 'ESP', farbe: '#C60B1E', farbe2: '#FFC400', muster: 's' },
+  { id: 'BR', name: 'Brasilien', flag: '🇧🇷', staerke: 89, pool: 'pt', kurz: 'BRA', farbe: '#FFDF00', farbe2: '#009C3B', muster: 's' },
+  { id: 'AR', name: 'Argentinien', flag: '🇦🇷', staerke: 88, pool: 'es', kurz: 'ARG', farbe: '#75AADB', farbe2: '#FFFFFF', muster: 'v' },
+  { id: 'EN', name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', staerke: 86, pool: 'en', kurz: 'ENG', farbe: '#FFFFFF', farbe2: '#CE1124', muster: 's' },
+  { id: 'PT', name: 'Portugal', flag: '🇵🇹', staerke: 86, pool: 'pt', kurz: 'POR', farbe: '#C8102E', farbe2: '#046A38', muster: 's' },
+  { id: 'NL', name: 'Niederlande', flag: '🇳🇱', staerke: 84, pool: 'nl', kurz: 'NED', farbe: '#F36C21', farbe2: '#FFFFFF', muster: 's' },
+  { id: 'IT', name: 'Italien', flag: '🇮🇹', staerke: 82, pool: 'it', kurz: 'ITA', farbe: '#1E3C8C', farbe2: '#FFFFFF', muster: 's' },
+  { id: 'BE', name: 'Belgien', flag: '🇧🇪', staerke: 81, pool: 'nl', kurz: 'BEL', farbe: '#ED2939', farbe2: '#101010', muster: 's' },
+  { id: 'HR', name: 'Kroatien', flag: '🇭🇷', staerke: 80, pool: 'sl', kurz: 'CRO', farbe: '#FFFFFF', farbe2: '#E4002B', muster: 'v' },
+  { id: 'MA', name: 'Marokko', flag: '🇲🇦', staerke: 78, pool: 'af', kurz: 'MAR', farbe: '#C1272D', farbe2: '#006233', muster: 's' },
+  { id: 'JP', name: 'Japan', flag: '🇯🇵', staerke: 77, pool: 'jp', kurz: 'JPN', farbe: '#0B1E66', farbe2: '#FFFFFF', muster: 's' },
+  { id: 'NG', name: 'Nigeria', flag: '🇳🇬', staerke: 76, pool: 'af', kurz: 'NGA', farbe: '#008751', farbe2: '#FFFFFF', muster: 's' },
+  { id: 'TR', name: 'Türkei', flag: '🇹🇷', staerke: 75, pool: 'tr', kurz: 'TUR', farbe: '#E30A17', farbe2: '#FFFFFF', muster: 's' },
+  { id: 'PL', name: 'Polen', flag: '🇵🇱', staerke: 74, pool: 'sl', kurz: 'POL', farbe: '#FFFFFF', farbe2: '#DC143C', muster: 'h' },
+  { id: 'AT', name: 'Österreich', flag: '🇦🇹', staerke: 74, pool: 'de', kurz: 'AUT', farbe: '#ED2939', farbe2: '#FFFFFF', muster: 'h' },
+  { id: 'CH', name: 'Schweiz', flag: '🇨🇭', staerke: 74, pool: 'de', kurz: 'SUI', farbe: '#DA291C', farbe2: '#FFFFFF', muster: 's' },
+  { id: 'NO', name: 'Norwegen', flag: '🇳🇴', staerke: 73, pool: 'sk', kurz: 'NOR', farbe: '#BA0C2F', farbe2: '#00205B', muster: 's' },
+  { id: 'US', name: 'USA', flag: '🇺🇸', staerke: 72, pool: 'en', kurz: 'USA', farbe: '#FFFFFF', farbe2: '#0A3161', muster: 's' }
 ];
 const NAT = id => NATIONEN.find(n => n.id === id);
 
@@ -1489,8 +1492,8 @@ function besterKonkurrent(clubId) {
      Spieler aufgehoert haben, steht dort ein Nachfolger. */
   return Math.max(echt, Math.round(CL(clubId).staerke + 1));
 }
-function torschuetze() {
-  const feld = (S.kader || []).filter(k => POS(k.pos));
+function torschuetze(kader) {
+  const feld = (kader || S.kader || []).filter(k => POS(k.pos));
   if (!feld.length) return null;
   const gew = feld.map(k => ({ k, w: POS(k.pos).angriff * (k.ovr / 80) + .04 }));
   let r = Math.random() * gew.reduce((a, x) => a + x.w, 0);
@@ -1605,6 +1608,12 @@ function starteSaison(neueEuroQuali) {
   S.pokalWeg = [];
   S.transferOffen = false;
   S.angebote = [];
+  /* Vier Laenderspieltermine pro Saison. Steht am Saisonende ein Turnier an,
+     sind es Qualifikationsspiele gegen vier Gegner, sonst Freundschaftsspiele. */
+  S.natWochen = [.18, .34, .56, .78].map(W);
+  if ((S.jahr + 1) % 2 === 0) natQualiAufsetzen(); else S.natQuali = null;
+  S.turnier = null;
+  natKaderCache = null;
 }
 
 /* ---------- Tabelle ---------- */
@@ -1746,12 +1755,11 @@ function simErgebnis(sh, sg) {
 function einsatzBestimmen(fx) {
   const p = S.p;
   if (p.verletzung) return { status: 'verletzt', ab: 0 };
-  const club = CL(p.clubId);
-  const konk = konkurrenten();
-  const bester = konk.length ? konk[0].ovr : club.staerke - 2;
+  const ts = teamStand(fx);
+  const konk = ts.kader.filter(k => k.pos === p.pos).sort((a, b) => b.ovr - a.ovr);
+  const bester = konk.length ? konk[0].ovr : ts.team.staerke - 2;
   const diff = effOvr() - bester;
-  const stil = STIL(S.trainer ? S.trainer.stil : 'ergebnis');
-  let pStart = 0.55 + diff * 0.075 * (stil.diff || 1) + (p.trainer - 50) * 0.012 + trainerStilBonus();
+  let pStart = 0.55 + diff * 0.075 * (ts.stil.diff || 1) + (ts.vertrauen - 50) * 0.012 + ts.stilBonus;
   if (p.energie < 35) pStart -= .3;
   if (p.alter < 19) pStart -= 0.08;
   if (fx.comp === 'pokal') pStart += 0.06;
@@ -1975,9 +1983,16 @@ const ERGEBNIS_TEXT = {
 };
 
 function baueSpielverlauf(fx, einsatz) {
-  const p = S.p, club = CL(p.clubId), gegner = CL(fx.gegnerId);
+  const p = S.p, ts = teamStand(fx), club = ts.team, gegner = CL(fx.gegnerId);
   const spielt = einsatz.status === 'startelf' || einsatz.status === 'einwechslung';
-  const meineStr = club.staerke + (fx.heim ? 3 : 0) + (spielt ? clamp((effOvr() - club.staerke) * 0.2, -3, 6) : -1);
+  /* Dein Gewicht in der Mannschaft. In der Nationalelf faellt es kleiner aus:
+     Dort ersetzt dich einer aus einem 24 Mann starken Aufgebot, waehrend bei
+     deinem Verein die gesamte Kaderstaerke an dir haengt. Ohne diese
+     Unterscheidung wurde die eigene Nation in der Qualifikation im Schnitt
+     Dritter von vier, nur weil der eigene Spieler noch jung war. */
+  const gewicht = ts.nat ? clamp((effOvr() - club.staerke) * 0.1, -1.5, 3)
+                         : clamp((effOvr() - club.staerke) * 0.2, -3, 6);
+  const meineStr = club.staerke + (fx.heim ? 3 : 0) + (spielt ? gewicht : (ts.nat ? -.5 : -1));
   const d = meineStr - gegner.staerke;
   const xMein = clamp(1.42 * Math.exp(d * 0.033), 0.22, 4.6);
   const xGegen = clamp(1.42 * Math.exp(-d * 0.033), 0.22, 4.6);
@@ -2484,6 +2499,16 @@ function wochenSpiele(w) {
   }
   if (S.pokal.drin && S.pokal.wochen.includes(w)) out.push({ comp: 'pokal', heim: chance(.5), gegnerId: pokalGegner(), runde: S.pokal.runde });
   if (S.euro.drin && S.euro.wochen.includes(w)) out.push({ comp: 'euro', heim: chance(.5), gegnerId: euroGegner(), phase: S.euro.phase });
+  /* Laenderspiele laufen ueber denselben Bildschirm wie Vereinsspiele. Wer
+     verletzt ist, faehrt nicht mit. */
+  if (S.p.nat.dabei && !S.p.verletzung && S.natWochen && S.natWochen.includes(w)) {
+    /* Es gibt vier Termine, aber nur drei Gruppengegner. Der uebrige Termin ist
+       ein Freundschaftsspiel — sonst wuerde ein viertes Ergebnis in eine
+       Tabelle gebucht, in der jede Mannschaft drei Spiele hat. */
+    const quali = !!(S.natQuali && S.natQuali.offen && S.natQuali.offen.length);
+    const g = natGegner();
+    if (g) out.push({ comp: 'nat', heim: chance(.5), gegnerId: 'nat-' + g, art: quali ? 'quali' : 'freundschaft' });
+  }
   return out;
 }
 function aktuelleSpiele() {
@@ -2496,6 +2521,10 @@ function wettbewerbName(fx) {
   if (fx.comp === 'liga') return LG(S.liga.id).name + ' · ' + fx.spieltag + '. Spieltag';
   if (fx.comp === 'pokal') return S.pokal.name + ' · ' + POKAL_RUNDEN[Math.min(fx.runde, 5)];
   if (fx.comp === 'euro') return 'Europapokal · ' + EURO_PHASEN[Math.min(fx.phase, 9)];
+  if (fx.comp === 'nat') {
+    if (fx.turnier) return fx.turnier + ' · ' + fx.runde;
+    return NAT(S.p.natId).name + ' · ' + (fx.art === 'quali' ? 'Qualifikation' : 'Freundschaftsspiel');
+  }
   return 'Länderspiel';
 }
 
@@ -2614,16 +2643,11 @@ async function wocheVor() {
         });
       }
     }
-    if (S.p.nat.dabei && !S.p.verletzung && (w === Math.round(S.saisonWochen * .25) || w === Math.round(S.saisonWochen * .62))) {
-      const b = natSpiele(2);
-      const meine = b.filter(x => x.spielt);
-      wirke({ energie: -(meine.length ? 7 : 2) * (hatBesitz('jet') ? .6 : 1) });
-      if (meine.length) {
-        const tore = meine.reduce((a, x) => a + x.tore, 0);
-        log('Länderspielpause: ' + b.map(x => x.flag + ' ' + x.gegner + ' ' + x.th + ':' + x.tg).join(' · ') + (tore ? ' · ' + tore + ' Tor(e) von dir' : ''), 'gold');
-      }
+    /* Die Reise kostet zusaetzlich Kraft — ein Anteil am Privatjet hilft. */
+    if (S.natWochen && S.natWochen.includes(w) && S.p.nat.dabei) {
+      wirke({ energie: -4 * (hatBesitz('jet') ? .6 : 1) });
     }
-    if (w === Math.round(S.saisonWochen * .3)) natCheck();
+    if (w === Math.round(S.saisonWochen * .3) || w === Math.round(S.saisonWochen * .75)) natCheck();
     S.woche++;
     if (S.woche > S.saisonWochen) await saisonEnde();
   } finally {
@@ -2790,68 +2814,250 @@ async function transferfenster(sommer) {
   await sagen({ eyebrow: 'Transfer', titel: 'Willkommen bei ' + CL(a.clubId).name, text: 'Medizincheck bestanden, Foto mit Schal, Vertrag bis ' + (S.jahr + fertig.jahre) + '. Ein neues Kapitel.', effekte: [{ t: money(fertig.gehalt) + ' / Jahr', gut: true }, { t: fertig.jahre + ' Jahre', gut: true }] });
 }
 
-/* ========================== NATIONALMANNSCHAFT ========================== */
+/* ========================== NATIONALMANNSCHAFT ==========================
+   Nationen treten im Spieltag-Ablauf wie Vereine auf. Statt den ganzen Ablauf
+   ein zweites Mal zu schreiben, bekommen sie einen Pseudo-Verein mit denselben
+   Feldern — Laenderspiele laufen dadurch mit Schluesselmomenten, Note,
+   Verletzungsrisiko und allem anderen genauso ab wie Vereinsspiele. */
+const NAT_CLUBS = {};
+function natClub(natId) {
+  if (NAT_CLUBS[natId]) return NAT_CLUBS[natId];
+  const n = NAT(natId);
+  if (!n) return null;
+  return (NAT_CLUBS[natId] = {
+    id: 'nat-' + natId, name: n.name, kurz: n.kurz, liga: null, staerke: n.staerke,
+    farbe: n.farbe, farbe2: n.farbe2, muster: n.muster, nation: natId
+  });
+}
+
+/* Der Kader einer Nation entsteht aus den echten Spielern, die ihr angehoeren —
+   quer durch alle Ligen, auf die laufende Saison fortgeschrieben. Damit ist der
+   Platz in der Nationalelf keine Wuerfelsache mehr: Er haengt daran, wer sonst
+   noch auf deiner Position spielt. Fuer Frankreich ist das ungleich schwerer
+   als fuer Oesterreich, und genau so soll es sein. */
+const NAT_PLAN = [['TW', 3], ['IV', 4], ['AV', 3], ['DM', 2], ['ZM', 3], ['OM', 3], ['FL', 3], ['ST', 3]];
+let natKaderCache = null;
+function natKader(natId) {
+  natId = natId || S.p.natId;
+  const schluessel = natId + '|' + S.jahr + '|' + Object.keys(S.transfers || {}).length;
+  if (natKaderCache && natKaderCache.schluessel === schluessel) return natKaderCache.liste;
+  const nat = NAT(natId);
+  const nachPos = {};
+  for (const cid of Object.keys(ECHTE_KADER)) {
+    for (const k of echterKaderStand(cid)) {
+      if (k.natId !== natId) continue;
+      (nachPos[k.pos] = nachPos[k.pos] || []).push(k);
+    }
+  }
+  /* Nach Positionen aufgebaut statt einfach die 23 Staerksten: Sonst stuenden
+     bei Norwegen neun Stuermer und kein Torwart im Aufgebot, und dein Platz
+     haenge davon ab, wie die Torjaeger deines Landes gerade verteilt sind. */
+  const liste = [];
+  for (const [pos, anzahl] of NAT_PLAN) {
+    const da = (nachPos[pos] || []).sort((a, b) => b.ovr - a.ovr).slice(0, anzahl);
+    liste.push(...da);
+    /* Fehlt auf einer Position der Nachwuchs — etwa weil die namentlich
+       bekannten Spieler laengst aufgehoert haben —, stellt der Verband
+       trotzdem jemanden auf Landesniveau auf. Ohne das waerst du nach fuenfzehn
+       Jahren automatisch die Nummer eins deines Landes. */
+    for (let i = da.length; i < anzahl; i++) {
+      const nm = zufallsname(nat.pool);
+      liste.push({ name: nm.v + ' ' + nm.n, pos, alter: ri(21, 31), natId,
+        ovr: clamp(Math.round(nat.staerke + (i === 0 ? rnd(-5, 1) : rnd(-13, -4))), 40, 93) });
+    }
+  }
+  natKaderCache = { schluessel, liste };
+  return liste;
+}
+function natKonkurrenten() {
+  return natKader().filter(k => k.pos === S.p.pos);
+}
+function natRang() {
+  return natKonkurrenten().filter(k => k.ovr > effOvr()).length + 1;
+}
+/* Wie viele Spieler deiner Position der Verband mitnimmt. Daran haengt beides:
+   Einladung und Aussortierung. Fuer einen Innenverteidiger sind vier Plaetze
+   frei, fuer einen Sechser nur zwei — der Weg ins Aufgebot ist also nicht
+   ueberall gleich weit. */
+function natPlaetze() {
+  const e = NAT_PLAN.find(x => x[0] === S.p.pos);
+  return e ? e[1] : 3;
+}
+
+function natTrainerErzeugen() {
+  const n = NAT(S.p.natId), nm = zufallsname(n.pool);
+  return { name: nm.v + ' ' + nm.n, stil: pick(TRAINER_STILE).id, jahre: 0 };
+}
+function natStilBonus() { return STIL(S.natTrainer ? S.natTrainer.stil : 'ergebnis').bonus(); }
+
+/* Welche Mannschaft in diesem Spiel deine ist — Verein oder Nation. Alles
+   Weitere im Spieltag haengt nur noch hieran. */
+function teamStand(fx) {
+  if (fx && fx.comp === 'nat') {
+    return {
+      nat: true, team: natClub(S.p.natId), kader: natKader(),
+      stil: STIL(S.natTrainer ? S.natTrainer.stil : 'ergebnis'),
+      stilBonus: natStilBonus(), vertrauen: S.p.nat.vertrauen || 50
+    };
+  }
+  return {
+    nat: false, team: CL(S.p.clubId), kader: S.kader || [],
+    stil: STIL(S.trainer ? S.trainer.stil : 'ergebnis'),
+    stilBonus: trainerStilBonus(), vertrauen: S.p.trainer
+  };
+}
+
+/* Einladung und Aussortierung: Wer auf seiner Position zu den ersten drei des
+   Landes zaehlt, wird eingeladen; wer zweimal in Folge hinter die ersten fuenf
+   faellt, fliegt wieder heraus. */
 function natCheck() {
   const p = S.p, nat = NAT(p.natId);
-  if (p.nat.dabei) return;
-  const schwelle = nat.staerke - 14;
-  if (OVR() >= schwelle && p.ruf > 22) {
-    p.nat.dabei = true;
-    log('Erste Einladung in die Nationalmannschaft von ' + nat.name + '.', 'gold');
-    p.pendingNat = true;
-  }
-}
-function natSpiele(anzahl, turnier) {
-  const p = S.p, nat = NAT(p.natId);
-  const berichte = [];
-  for (let i = 0; i < anzahl; i++) {
-    const gegner = pick(NATIONEN.filter(n => n.id !== p.natId));
-    const [th, tg] = simErgebnis(nat.staerke + 2, gegner.staerke);
-    const spielt = chance(clamp(.35 + (OVR() - nat.staerke) * .07, .1, .95));
-    let tore = 0;
-    if (spielt) {
-      p.nat.spiele++; S.natStats.spiele++;
-      const ch = POS(p.pos).angriff * (OVR() / 88);
-      tore = Math.min(poisson(ch * .55), th);
-      if (p.nat.spiele === 1) merken('nat', 'Länderspieldebüt für ' + nat.name + ' gegen ' + gegner.name + '.', 1);
-      if (p.nat.tore === 0 && tore > 0) merken('nat', 'Erstes Länderspieltor für ' + nat.name + ' gegen ' + gegner.name + '.', 1);
-      p.nat.tore += tore; S.natStats.tore += tore;
+  const rang = natRang(), plaetze = natPlaetze();
+  if (!p.nat.dabei) {
+    if (rang <= plaetze && p.ruf > 18) {
+      p.nat.dabei = true;
+      p.nat.vertrauen = clamp(54 - (rang - 1) * 9, 20, 70);
+      p.nat.ausserhalb = 0;
+      if (!S.natTrainer) S.natTrainer = natTrainerErzeugen();
+      log('Erste Einladung in die Nationalmannschaft von ' + nat.name + '.', 'gold');
+      p.pendingNat = true;
     }
-    berichte.push({ gegner: gegner.name, flag: gegner.flag, th, tg, spielt, tore });
+    return;
   }
-  return berichte;
+  /* Frueher stand hier Rang 5 — den es bei zwei bis vier Plaetzen je Position
+     gar nicht geben kann. Es flog deshalb nie jemand heraus. */
+  if (rang > plaetze) {
+    p.nat.ausserhalb = (p.nat.ausserhalb || 0) + 1;
+    if (p.nat.ausserhalb >= 2) {
+      p.nat.dabei = false;
+      p.nat.ausserhalb = 0;
+      log('Nicht mehr im Aufgebot von ' + nat.name + ' — die Konkurrenz ist vorbeigezogen.', 'bad');
+      merken('nat', 'Aus dem Aufgebot von ' + nat.name + ' gestrichen.', 0);
+    }
+  } else p.nat.ausserhalb = 0;
 }
+
+/* ---------- Qualifikation ----------
+   In der Saison vor einem Turnier sind die Laenderspieltermine Qualifikations-
+   spiele: vier Gegner, eine Tabelle, die ersten beiden fahren hin. In allen
+   anderen Jahren sind es Freundschaftsspiele ohne Folgen. */
+function natQualiAufsetzen() {
+  const eigene = S.p.natId;
+  const pool = NATIONEN.filter(n => n.id !== eigene).sort((a, b) => Math.abs(a.staerke - NAT(eigene).staerke) - Math.abs(b.staerke - NAT(eigene).staerke));
+  /* Drei Gegner, nicht vier: Bei vier Mannschaften spielt jeder an jedem der
+     drei Termine, und die Tabelle vergleicht gleiche Spielzahlen. Bei fuenf
+     saesse pro Termin eine Mannschaft aus und die Punkte waeren wertlos. */
+  const gegner = shuffle(pool.slice(0, 7)).slice(0, 3).map(n => n.id);
+  const punkte = { [eigene]: 0 };
+  gegner.forEach(g => punkte[g] = 0);
+  S.natQuali = { gegner, punkte, tore: Object.assign({}, punkte), offen: gegner.slice() };
+}
+function natQualiBuchen(gegnerNat, th, tg) {
+  const q = S.natQuali;
+  /* Nur Gegner aus der eigenen Gruppe zaehlen — alles andere wuerde Punkte auf
+     Mannschaften buchen, die gar nicht in der Tabelle stehen. */
+  if (!q || q.gegner.indexOf(gegnerNat) < 0) return;
+  const eigene = S.p.natId;
+  q.punkte[eigene] += th > tg ? 3 : th === tg ? 1 : 0;
+  q.punkte[gegnerNat] += tg > th ? 3 : th === tg ? 1 : 0;
+  q.tore[eigene] += th - tg;
+  q.tore[gegnerNat] += tg - th;
+  /* Die uebrigen beiden spielen am selben Termin gegeneinander — damit hat am
+     Ende jede Mannschaft drei Spiele. */
+  const rest = shuffle(q.gegner.filter(g => g !== gegnerNat));
+  for (let i = 0; i + 1 < rest.length; i += 2) {
+    const [a, b] = [rest[i], rest[i + 1]];
+    /* simErgebnis rechnet den Heimvorteil selbst ein; wer heim spielt, wird
+       ausgelost, sonst haette immer dieselbe Mannschaft den Vorteil. */
+    const [ta, tb] = simErgebnis(NAT(a).staerke, NAT(b).staerke);
+    q.punkte[a] += ta > tb ? 3 : ta === tb ? 1 : 0;
+    q.punkte[b] += tb > ta ? 3 : ta === tb ? 1 : 0;
+    q.tore[a] += ta - tb; q.tore[b] += tb - ta;
+  }
+}
+function natQualiTabelle() {
+  const q = S.natQuali;
+  if (!q) return [];
+  return Object.keys(q.punkte)
+    .map(id => ({ id, p: q.punkte[id], diff: q.tore[id] }))
+    .sort((a, b) => b.p - a.p || b.diff - a.diff || NAT(b.id).staerke - NAT(a.id).staerke);
+}
+function natQualifiziert() {
+  if (!S.natQuali) return true;                 /* ohne Qualifikation immer dabei */
+  return natQualiTabelle().findIndex(x => x.id === S.p.natId) < 2;
+}
+
+/* ---------- Gegner und Termine ---------- */
+function natGegner() {
+  const q = S.natQuali;
+  if (q && q.offen && q.offen.length) return q.offen[0];
+  const pool = NATIONEN.filter(n => n.id !== S.p.natId);
+  return pick(pool).id;
+}
+
+/* ---------- Turnier ----------
+   Gruppenphase und K.-o.-Runde laufen jetzt als einzelne Spiele durch denselben
+   Bildschirm wie alles andere. Vorher war das ein einziges Textfenster. */
+const TURNIER_RUNDEN = ['Achtelfinale', 'Viertelfinale', 'Halbfinale', 'Finale'];
 async function turnierSpielen() {
   const p = S.p, nat = NAT(p.natId);
   const jahr = S.jahr + 1;
   const name = jahr % 4 === 2 ? 'Weltmeisterschaft ' + jahr : 'Kontinentalmeisterschaft ' + jahr;
-  const gruppe = natSpiele(3, true);
-  let runden = ['Achtelfinale', 'Viertelfinale', 'Halbfinale', 'Finale'];
-  let raus = null, gewonnen = false;
-  const ko = [];
-  for (const r of runden) {
+  S.turnier = { name, phase: 'gruppe', spiel: 0, punkte: 0, tore: 0, gegentore: 0 };
+
+  await sagen({
+    eyebrow: nat.flag + ' ' + name, titel: 'Nominiert',
+    text: S.natTrainer.name + ' nimmt dich mit. Drei Gruppenspiele, danach geht es um alles.\n\n'
+      + 'Auf deiner Position stehen ' + (natKonkurrenten().length) + ' weitere Spieler im Aufgebot; du bist die Nummer ' + natRang() + '.'
+  });
+
+  /* Gruppenphase */
+  const gruppe = shuffle(NATIONEN.filter(n => n.id !== p.natId && Math.abs(n.staerke - nat.staerke) < 16)).slice(0, 3);
+  while (gruppe.length < 3) gruppe.push(pick(NATIONEN.filter(n => n.id !== p.natId)));
+  for (const g of gruppe) {
+    const erg = await spielAustragen({ comp: 'nat', heim: chance(.5), gegnerId: 'nat-' + g.id, turnier: name, runde: 'Gruppenphase' });
+    S.turnier.punkte += erg.ergebnis === 'sieg' ? 3 : erg.ergebnis === 'unentschieden' ? 1 : 0;
+    S.turnier.tore += erg.toreMein; S.turnier.gegentore += erg.toreGegner;
+  }
+  if (S.turnier.punkte < 4 && !(S.turnier.punkte === 3 && S.turnier.tore > S.turnier.gegentore)) {
+    await sagen({
+      eyebrow: nat.flag + ' ' + name, titel: 'Aus in der Gruppenphase',
+      text: S.turnier.punkte + ' Punkte aus drei Spielen, ' + S.turnier.tore + ':' + S.turnier.gegentore + ' Tore. Das reicht nicht.'
+    });
+    wirke({ ruf: 2, moral: -6, energie: -8 });
+    S.turnier = null;
+    return;
+  }
+
+  /* K.-o.-Runde */
+  let gewonnen = false, raus = null;
+  for (const r of TURNIER_RUNDEN) {
     const gegner = pick(NATIONEN.filter(n => n.id !== p.natId && n.staerke > 70));
-    const pSieg = clamp(.5 + (nat.staerke + (OVR() - nat.staerke) * .12 - gegner.staerke) * .035, .18, .85);
-    const sieg = chance(pSieg);
-    const [th, tg] = sieg ? [ri(1, 3), ri(0, 1)] : [ri(0, 1), ri(1, 3)];
-    const spielt = chance(clamp(.4 + (OVR() - nat.staerke) * .07, .12, .96));
-    let tore = 0;
-    if (spielt) { p.nat.spiele++; S.natStats.spiele++; tore = Math.min(poisson(POS(p.pos).angriff * .5), th); p.nat.tore += tore; S.natStats.tore += tore; }
-    ko.push({ runde: r, gegner: gegner.name, flag: gegner.flag, th, tg, spielt, tore });
-    if (!sieg) { raus = r; break; }
+    const erg = await spielAustragen({ comp: 'nat', heim: false, gegnerId: 'nat-' + gegner.id, turnier: name, runde: r, ko: true });
+    if (!erg.weiter) { raus = r; break; }
     if (r === 'Finale') gewonnen = true;
   }
-  if (gewonnen) titelGeben(jahr % 4 === 2 ? 'Weltmeister' : 'Kontinentalmeister', jahr, nat.name);
-  const zeilen = gruppe.map(g => 'Gruppenphase · ' + g.flag + ' ' + g.gegner + ' — ' + g.th + ':' + g.tg + (g.spielt ? (g.tore ? ' · ' + g.tore + ' Tor(e) von dir' : ' · du gespielt') : ' · du auf der Bank'))
-    .concat(ko.map(k => k.runde + ' · ' + k.flag + ' ' + k.gegner + ' — ' + k.th + ':' + k.tg + (k.spielt ? (k.tore ? ' · ' + k.tore + ' Tor(e) von dir' : ' · du gespielt') : ' · du auf der Bank')));
+  if (gewonnen) {
+    titelGeben(jahr % 4 === 2 ? 'Weltmeister' : 'Kontinentalmeister', jahr, nat.name);
+    merken('titel', (jahr % 4 === 2 ? 'Weltmeister' : 'Kontinentalmeister') + ' mit ' + nat.name + '.', 1);
+  }
   await sagen({
     eyebrow: nat.flag + ' ' + name,
-    titel: gewonnen ? 'Ihr seid ' + (jahr % 4 === 2 ? 'Weltmeister' : 'Europameister') + '!' : 'Aus im ' + (raus || 'Turnier'),
-    text: zeilen.join('\n'),
+    titel: gewonnen ? 'Ihr seid ' + (jahr % 4 === 2 ? 'Weltmeister' : 'Kontinentalmeister') + '!' : 'Aus im ' + raus,
+    text: gewonnen ? 'Nach dem Schlusspfiff steht das halbe Land auf der Strasse.'
+      : 'Der Traum endet im ' + raus + '. Beim naechsten Mal.',
     effekte: gewonnen ? [{ t: 'Ruf +14', gut: true }, { t: 'Moral +18', gut: true }] : []
   });
   wirke(gewonnen ? { ruf: 14, moral: 18, follower: Math.round(p.follower * .5 + 40000), energie: -14 }
                  : { ruf: 5, moral: -3, follower: Math.round(p.follower * .12 + 4000), energie: -12 });
+  /* Wer das Halbfinale erreicht, bleibt im Amt — vorher flog nach fast jedem
+     Turnier jemand, und kein Bundestrainer erlebte je eine zweite Endrunde. */
+  const frueh = raus === 'Achtelfinale' || raus === 'Viertelfinale';
+  if (frueh && chance(.55)) {
+    S.natTrainer = natTrainerErzeugen();
+    log('Neuer Bundestrainer: ' + S.natTrainer.name + ' übernimmt ' + nat.name + '.', 'gold');
+  } else if (S.natTrainer) S.natTrainer.jahre++;
+  S.turnier = null;
 }
 
 function titelGeben(name, jahr, wo) {
@@ -3227,13 +3433,21 @@ async function saisonEnde() {
 
   /* Sommerpause */
   const turnierJahr = (S.jahr + 1) % 2 === 0;
-  if (p.nat.dabei && turnierJahr) await turnierSpielen();
-  else if (p.nat.dabei) {
-    const b = natSpiele(2);
-    if (b.some(x => x.spielt)) await sagen({
-      eyebrow: NAT(p.natId).flag + ' Nationalmannschaft', titel: 'Länderspiele im Sommer',
-      text: b.map(x => x.flag + ' ' + x.gegner + ' — ' + x.th + ':' + x.tg + (x.spielt ? (x.tore ? ' · ' + x.tore + ' Tor(e) von dir' : ' · du gespielt') : ' · ohne dich')).join('\n')
-    });
+  if (p.nat.dabei && turnierJahr) {
+    if (natQualifiziert()) await turnierSpielen();
+    else {
+      const t = natQualiTabelle();
+      await sagen({
+        eyebrow: NAT(p.natId).flag + ' Qualifikation verpasst', titel: 'Kein Turnier',
+        text: t.map((x, i) => (i + 1) + '. ' + NAT(x.id).flag + ' ' + NAT(x.id).name + ' — ' + x.p + ' Punkte').join('\n')
+          + '\n\nNur die ersten beiden fahren hin. Ein Sommer ohne Turnier.'
+      });
+      wirke({ moral: -7 });
+      if (chance(.35)) {
+        S.natTrainer = natTrainerErzeugen();
+        log('Neuer Bundestrainer nach der verpassten Qualifikation: ' + S.natTrainer.name + '.', 'gold');
+      }
+    }
   }
   natCheck();
   if (p.pendingNat) {
@@ -3430,7 +3644,7 @@ function warteWahl(text, optionen) {
 }
 
 async function spielAustragen(fx) {
-  const p = S.p, club = CL(p.clubId), gegner = CL(fx.gegnerId);
+  const p = S.p, ts = teamStand(fx), club = ts.team, gegner = CL(fx.gegnerId);
   const einsatz = einsatzBestimmen(fx);
   const spielt = einsatz.status === 'startelf' || einsatz.status === 'einwechslung';
   const verlauf = baueSpielverlauf(fx, einsatz);
@@ -3470,7 +3684,7 @@ async function spielAustragen(fx) {
       if (e.mein) {
         if (e.tor) {
           toreMein++; stand(toreMein, toreGegner, fx.heim);
-          const sch = torschuetze();
+          const sch = torschuetze(ts.kader);
           tickerEintrag(e.min, 'Tor ' + club.kurz, sch ? sch.name + ' ' + pick(TICKER_TEXTE.torMein) : 'Dein Team trifft.', 'ev-goal');
         } else { tickerEintrag(e.min, 'Chance', club.name + pick(TICKER_TEXTE.chance), ''); continue; }
       } else {
@@ -3517,7 +3731,7 @@ async function spielAustragen(fx) {
 
   /* Elfmeterschießen im K.-o. */
   let elfer = null;
-  const koSpiel = (fx.comp === 'pokal') || (fx.comp === 'euro' && fx.phase >= 6);
+  const koSpiel = (fx.comp === 'pokal') || (fx.comp === 'euro' && fx.phase >= 6) || (fx.comp === 'nat' && fx.ko);
   if (koSpiel && toreMein === toreGegner) {
     const pSieg = clamp(.5 + (club.staerke - gegner.staerke) * .012 + (spielt ? .04 : 0), .2, .8);
     const sieg = chance(pSieg);
@@ -3534,18 +3748,31 @@ async function spielAustragen(fx) {
   if (spielt) {
     const basis = 3.5 - clamp((effOvr() - club.staerke) * .035, -.5, .6);
     noteWert = noteBerechnen(basis, meineTore, vorlagen, aktionen, fehler, ergebnis, minuten);
-    S.stats.spiele++;
-    if (einsatz.status === 'startelf') S.stats.startelf++;
-    S.stats.tore += meineTore; S.stats.vorlagen += vorlagen;
-    S.stats.gelb += gelb; S.stats.rot += rot;
-    S.stats.minuten += minuten;
-    S.wochenMinuten = (S.wochenMinuten || 0) + minuten;
-    S.stats.noten.push(noteWert);
-    /* Höhepunkte aus dem Spiel */
-    const vorherSpiele = karriereSpiele() - 1, vorherTore = karriereTore() - meineTore;
+    /* Laenderspiele zaehlen in die Laenderspielbilanz, nicht in die Saison
+       beim Verein — sonst stuende am Saisonende eine Zahl, die kein Verein je
+       gesehen hat. Einsatzminuten zaehlen dagegen ueberall, denn der Koerper
+       unterscheidet nicht. */
     const gegnerName = CL(fx.gegnerId).name;
-    if (vorherSpiele === 0) merken('debuet', 'Profidebüt für ' + club.name + ' gegen ' + gegnerName + '.', 1);
-    if (vorherTore === 0 && meineTore > 0) merken('tor', 'Erstes Profitor — gegen ' + gegnerName + '.', 1);
+    if (ts.nat) {
+      p.nat.spiele++; S.natStats.spiele++;
+      p.nat.tore += meineTore; S.natStats.tore += meineTore;
+      p.nat.vertrauen = clamp((p.nat.vertrauen || 50) + clamp((3.3 - noteWert) * 5, -8, 9), 0, 100);
+      if (p.nat.spiele === 1) merken('nat', 'Länderspieldebüt für ' + club.name + ' gegen ' + gegnerName + '.', 1);
+      if (p.nat.tore === meineTore && meineTore > 0) merken('nat', 'Erstes Länderspieltor gegen ' + gegnerName + '.', 1);
+      if (fx.runde === 'Finale' && meineTore > 0) merken('tor', 'Tor im Finale gegen ' + gegnerName + '.', 1);
+    } else {
+      S.stats.spiele++;
+      if (einsatz.status === 'startelf') S.stats.startelf++;
+      S.stats.tore += meineTore; S.stats.vorlagen += vorlagen;
+      S.stats.gelb += gelb; S.stats.rot += rot;
+      S.stats.minuten += minuten;
+      S.stats.noten.push(noteWert);
+    }
+    S.wochenMinuten = (S.wochenMinuten || 0) + minuten;
+    /* Höhepunkte aus dem Spiel */
+    const vorherSpiele = karriereSpiele() - (ts.nat ? 0 : 1), vorherTore = karriereTore() - (ts.nat ? 0 : meineTore);
+    if (!ts.nat && vorherSpiele === 0) merken('debuet', 'Profidebüt für ' + club.name + ' gegen ' + gegnerName + '.', 1);
+    if (!ts.nat && vorherTore === 0 && meineTore > 0) merken('tor', 'Erstes Profitor — gegen ' + gegnerName + '.', 1);
     if (meineTore >= 3) merken('serie', meineTore + ' Tore in einem Spiel gegen ' + gegnerName + '.', 1);
     if (noteWert <= 1.5) merken('note', 'Note ' + note(noteWert) + ' gegen ' + gegnerName + ' — ein Spiel wie aus dem Lehrbuch.', 1);
     if (fx.comp === 'euro' && fx.phase >= 9 && meineTore > 0) merken('tor', 'Tor im Europapokalfinale gegen ' + gegnerName + '.', 1);
@@ -3560,7 +3787,7 @@ async function spielAustragen(fx) {
     if (p.formNoten.length > 14) p.formNoten.shift();
     wirke({
       energie: -(6 + minuten * .07 + (fx.comp !== 'liga' ? 2 : 0)) * energieFaktor(),
-      trainer: clamp((3.3 - noteWert) * 5, -8, 9),
+      trainer: ts.nat ? 0 : clamp((3.3 - noteWert) * 5, -8, 9),
       moral: clamp((3.4 - noteWert) * 5 + (ergebnis === 'sieg' ? 4 : ergebnis === 'niederlage' ? -4 : 0), -12, 14),
       ruf: clamp(meineTore * 1.4 + vorlagen * .8 + (noteWert < 2 ? 1.6 : 0), 0, 8),
       follower: Math.round(p.follower * (.004 + meineTore * .022) + meineTore * 900 + (noteWert < 2 ? 1400 : 0))
@@ -3647,8 +3874,18 @@ async function spielAustragen(fx) {
   await warteKnopf('Abpfiff', 'btn btn-primary');
   el('match').hidden = true;
 
+  /* Qualifikation fortschreiben */
+  if (fx.comp === 'nat' && fx.art === 'quali' && S.natQuali) {
+    const gid = String(fx.gegnerId).slice(4);
+    natQualiBuchen(gid, toreMein, toreGegner);
+    S.natQuali.offen = S.natQuali.offen.filter(x => x !== gid);
+  }
+
   /* Presse */
   if (spielt && chance(.3)) await presseInterview(ergebnis, meineTore, noteWert);
+
+  return { ergebnis, toreMein, toreGegner, meineTore, vorlagen, noteWert, einsatz,
+    weiter: ergebnis === 'sieg' || elfer === true };
 }
 
 async function presseInterview(ergebnis, tore, noteWert) {
@@ -3949,11 +4186,44 @@ function renderSocial() {
       + '<td>' + r.tore + '</td><td><b>' + r.punkte + '</b></td></tr>').join('')
     + '</tbody></table></div></section>';
 
-  if (p.nat.dabei) {
-    html += '<section><div class="sect-title"><h3>Nationalmannschaft</h3></div><div class="card row-between">'
-      + '<div><div style="font-weight:600">' + NAT(p.natId).flag + ' ' + esc(NAT(p.natId).name) + '</div>'
-      + '<div class="small muted">' + p.nat.spiele + ' Länderspiele · ' + p.nat.tore + ' Tore</div></div>'
-      + '<span class="pill pill-accent">nominiert</span></div></section>';
+  if (p.nat.dabei || p.nat.spiele) {
+    const nat = NAT(p.natId);
+    const rang = natRang(), konk = natKonkurrenten();
+    html += '<section><div class="sect-title"><h3>Nationalmannschaft</h3>'
+      + '<span class="small muted">' + p.nat.spiele + ' Spiele · ' + p.nat.tore + ' Tore</span></div><div class="card">'
+      + '<div class="row"><div class="grow"><div style="font-weight:600;font-size:15px">' + nat.flag + ' ' + esc(nat.name) + '</div>'
+      + '<div class="small muted">' + (p.nat.dabei ? 'Nummer ' + rang + ' auf deiner Position' : 'derzeit nicht im Aufgebot') + '</div></div>'
+      + '<span class="pill ' + (p.nat.dabei ? 'pill-accent' : '') + '">' + (p.nat.dabei ? 'nominiert' : 'draußen') + '</span></div>';
+
+    if (S.natTrainer) {
+      const st = STIL(S.natTrainer.stil);
+      html += '<div class="attr" style="margin-top:12px"><span class="k">Bundestrainer</span>'
+        + '<span class="small ink2 truncate">' + esc(S.natTrainer.name) + ' · ' + esc(st.name) + '</span><span class="v"></span></div>'
+        + '<div class="attr"><span class="k">Vertrauen</span>' + meter(p.nat.vertrauen || 50, zustandsKlasse(p.nat.vertrauen || 50))
+        + '<span class="v">' + Math.round(p.nat.vertrauen || 50) + '</span></div>';
+    }
+
+    /* Wer dir im Aufgebot den Platz streitig macht — dieselbe Darstellung wie
+       beim Verein, damit man beides ohne Umdenken liest. */
+    if (konk.length) {
+      const reihe = konk.map(k => ({ name: k.name, ovr: k.ovr, alter: k.alter, natId: k.natId }))
+        .concat([{ name: p.vorname + ' ' + p.nachname, ovr: OVR(), alter: p.alter, natId: p.natId, ich: 1 }])
+        .sort((a, b) => b.ovr - a.ovr);
+      html += '<div class="gruppe-titel" style="margin-top:14px">' + esc(POS(p.pos).name) + ' im Aufgebot</div>'
+        + reihe.map((k, i) => spielerZeile(k, i + 1)).join('');
+    }
+    html += '</div></section>';
+
+    if (S.natQuali) {
+      const t = natQualiTabelle();
+      html += '<section><div class="sect-title"><h3>Qualifikation</h3><span class="small muted">die ersten zwei fahren hin</span></div>'
+        + '<div class="card tablewrap"><table class="tbl"><thead><tr><th class="pos">#</th><th>Nation</th><th>Diff</th><th>Pkt</th></tr></thead><tbody>'
+        + t.map((x, i) => '<tr class="' + (x.id === p.natId ? 'me ' : '') + (i < 2 ? 'zone-cl' : '') + '">'
+          + '<td class="pos">' + (i + 1) + '</td>'
+          + '<td>' + NAT(x.id).flag + ' <span class="truncate">' + esc(NAT(x.id).name) + '</span></td>'
+          + '<td>' + (x.diff > 0 ? '+' : '') + x.diff + '</td><td><b>' + x.p + '</b></td></tr>').join('')
+        + '</tbody></table></div></section>';
+    }
   }
   el('view-social').innerHTML = html;
 }
@@ -4420,6 +4690,13 @@ function migriere() {
   if (!S.saisonZiel) saisonZielSetzen();
   S.serie = S.serie || [];
   S.hoehepunkte = S.hoehepunkte || [];
+  if (typeof S.p.nat.vertrauen !== 'number') S.p.nat.vertrauen = 50;
+  if (S.p.nat.dabei && !S.natTrainer) S.natTrainer = natTrainerErzeugen();
+  if (!S.natWochen) {
+    const W = f => clamp(Math.round(f * (S.saisonWochen || 34)), 1, S.saisonWochen || 34);
+    S.natWochen = [.18, .34, .56, .78].map(W);
+  }
+  natKaderCache = null;
   /* Laufende Karrieren bekommen ihren Rivalen nachtraeglich — mit einer
      Vorgeschichte, die zu den schon gespielten Saisons passt, statt bei null
      zu beginnen. */

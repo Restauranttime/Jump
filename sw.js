@@ -4,10 +4,10 @@
  * startet auch ohne Internet. Der normale Browser-Cache reicht dafuer nicht --
  * den raeumt Safari weg, wenn Platz knapp wird.
  *
- * Diese Datei ist eine Vorlage. build.sh ersetzt 1e2b6afc0a3e durch einen Hash
+ * Diese Datei ist eine Vorlage. build.sh ersetzt 3f7c0ff71ee9 durch einen Hash
  * des gebauten Spiels, damit ein neuer Stand den alten Cache sicher ersetzt.
  */
-const VERSION = '1e2b6afc0a3e';
+const VERSION = '3f7c0ff71ee9';
 const CACHE = 'flutlicht-' + VERSION;
 
 /* Das Spiel selbst. Ohne diese Dateien startet nichts. */
