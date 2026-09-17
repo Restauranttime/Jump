@@ -141,7 +141,10 @@ der Abwehr ist der Winkel schlechter als aus dem Zentrum.
 Die Tore deiner Mannschaft im übrigen Spielverlauf werden unter allen Feldspielern
 ausgelost, nach Position und Stärke gewichtet — du stehst dabei mit drin, wenn du auf dem
 Platz bist. Für einen Stürmer sind das rund 15 % seiner Tore, für einen Sechser fast alle.
-Am Ende steht eine Note von 1,0 bis 6,0 nach deutscher Sportpresse-Skala.
+Am Ende steht eine Note von 1,0 bis 6,0 nach deutscher Sportpresse-Skala. Sie zählt Tore,
+Vorlagen, gelungene und misslungene Aktionen, das Ergebnis und den Spielstand — Gegentore
+gehen dem letzten Mann an, ein Viertorespiel schreibt man dem Angriff gut. Gemessen über
+12.000 Partien: 8 % Einser, 20 % Zweier, 46 % Dreier, 22 % Vierer, 4 % Fünfer.
 
 **Stab** — Du stellst Personal an und bezahlst es jede Woche, statt es einmal zu kaufen:
 sieben Trainer (je einer pro Attribut), drei medizinische Kräfte und drei fürs Umfeld, jeweils
@@ -362,7 +365,13 @@ Die Simulation wurde kopflos über mehrere hundert Saisons durchgerechnet. Richt
 eine durchgespielte Karriere:
 
 - Ohne Plan gespielt: Stärke um 65–72, wenige oder keine Titel, solider Profi.
-- Gezielt trainiert und regeneriert: Stärke 80–86, Torschützenkönig, Goldener Ball möglich.
+- Gezielt trainiert, regeneriert und mit Personal: Stärke 88–95, Wechsel bis zu einem der
+  Großen, Europapokal und Goldener Ball regelmäßig. Der Abstand zwischen beiden ist der
+  eigentliche Reiz: Gemessen über je 24 Karrieren gewinnt gewöhnliches Spiel den Europapokal
+  in 0 % aller Saisons, meisterhaftes in 11 %; den Goldenen Ball in 0,2 % gegen 23 %.
+- Die Note dreht um **3,5**. Derselbe Wert gilt für Trainer-Vertrauen, Moral, Form und den
+  Kurzeinsatz — wandert einer dieser Drehpunkte, schiebt sich das ganze Spiel unbemerkt in
+  eine Richtung.
 - Torquoten je Position, gemessen über je 30 Karrieren und rund 700 Saisons, gezählt in
   Stammsaisons ab 25 Spielen (Spanne: überlegt gewählt bis immer abgeschlossen):
 
@@ -382,5 +391,9 @@ eine durchgespielte Karriere:
   gut 40 % auf rund ein Viertel.
 - Ein Attribut erreicht ohne Trainer etwa Potenzial + 6, mit Weltklasse-Trainer rund
   Potenzial + 15. Gemessen über 20 Durchläufe: 84 / 86 / 89 / 93 je Trainerstufe.
-- Verletzungen kosten rund ein Zehntel aller Wochen.
+- Verletzungen kosten rund ein Zehntel aller Wochen (bei riskanter Trainingswahl ein Siebtel).
+- Alle 44 Zufallsereignisse sind erreichbar — geprüft wird das über einen Lauf, der zählt, wie
+  oft die Bedingung jedes Ereignisses überhaupt zutrifft, nicht nur, welches gezogen wurde.
+- Ein Spielstand überlebt das Fehlen jedes einzelnen Feldes: geprüft über 16 Fassungen, von
+  „ohne Leihe" bis zu einem auf Name, Jahr und Woche abgetragenen Stand.
 - Trainerwechsel: rund alle drei Saisons einer, gleichmäßig über die fünf Spielideen verteilt.

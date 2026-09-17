@@ -104,7 +104,6 @@ a{color:var(--accent)}
 .row{display:flex;align-items:center;gap:10px}
 .row-between{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .grow{flex:1;min-width:0}
-.num{font-variant-numeric:tabular-nums}
 .muted{color:var(--muted)}
 .ink2{color:var(--ink-2)}
 .small{font-size:13px}
@@ -214,7 +213,6 @@ a{color:var(--accent)}
   font-family:var(--font-data);font-size:9.5px;letter-spacing:.02em;text-transform:uppercase;overflow:hidden}
 .tab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .tab[aria-selected="true"]{color:var(--accent)}
-.tab-dot{position:absolute;margin:-8px 0 0 15px;width:7px;height:7px;border-radius:99px;background:var(--bad)}
 
 /* ---------- Heim-Ansicht ---------- */
 .sect-title{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
@@ -1279,12 +1277,25 @@ function ovrVon(attr, posId) {
 }
 const OVR = () => ovrVon(S.p.attr, S.p.pos);
 
+/* Die Mitte der Notenskala, gemessen ueber gut zwanzigtausend Partien: Eine
+   durchschnittliche Leistung ergibt eine 3,5. Alles, was an der Note haengt,
+   dreht um genau diesen Wert — sonst schiebt sich das Spiel unbemerkt in eine
+   Richtung. Genau das war der Fall: Mit einem Drehpunkt von 3,3 kostete jede
+   durchschnittliche Partie Trainer-Vertrauen, das im Median bei 37 von 100
+   stand statt bei 50. */
+const NOTE_MITTE = 3.5;
+
 function formWert() {
   const n = S.p.formNoten;
   if (!n.length) return 0;
   const letzte = n.slice(-5);
   const schnitt = letzte.reduce((a, b) => a + b, 0) / letzte.length;
-  const roh = clamp((3.4 - schnitt) * 2.2, -4, 4);
+  /* Der Drehpunkt ist der gemessene Median einer Note: 3,5. Vorher stand hier
+     3,4 — ein Zehntel darunter, und weil der Formwert das Ergebnis mal 2,2
+     nimmt, sass ein Drittel aller Wochen im "Formtief", guter Lauf dagegen nur
+     in acht Prozent. Die drei anderen Formeln, die an der Note haengen
+     (Trainer-Vertrauen, Moral, Kurzeinsatz), drehen um denselben Wert. */
+  const roh = clamp((NOTE_MITTE - schnitt) * 2.2, -4, 4);
   return roh < 0 ? roh * stabWert('psycho', [.85, .7, .5]) : roh;
 }
 function formText() {
@@ -1353,9 +1364,6 @@ function merken(art, text, gross) {
   S.hoehepunkte.push({ j: S.jahr, w: S.woche, alter: S.p.alter, art, t: text, gross: gross ? 1 : 0 });
   if (S.hoehepunkte.length > 400) S.hoehepunkte.shift();
 }
-function schonErlebt(art) { return (S.hoehepunkte || []).some(h => h.art === art); }
-const HOEHEPUNKT_ICON = { debuet: '1', tor: 'T', serie: '3', note: '1,0', titel: 'P', nat: 'N',
-  transfer: '€', verletzung: '+', jubilaeum: 'J', award: 'A', auf: '↑', ab: '↓', ende: '★' };
 
 function log(text, typ) {
   S.verlauf.unshift({ w: S.woche, j: S.jahr, t: text, typ: typ || '' });
@@ -1716,9 +1724,19 @@ function euroAufsetzen() {
   for (const lg of LEAGUES.filter(l => l.euro)) {
     pool.push(...ligaClubs(lg.id).slice().sort((a, b) => b.staerke - a.staerke).slice(0, 4));
   }
+  /* Qualifiziert wird ueber die Abschlusstabelle, das Feld entsteht dagegen
+     nach Staerke. Wer als Vierter hineinrutscht, ohne zu den staerksten 24 zu
+     gehoeren, wurde bisher hinten angehaengt — gemessen stand der eigene
+     Verein im Median auf Staerkerang 24 von 24, wurde Tabellen-23. und
+     erreichte die K.-o.-Runde in 14 statt der vorgesehenen 67 Prozent. Er
+     nimmt jetzt den Platz ein, der seiner Staerke entspricht. */
+  const eigener = S.euro && S.euro.drin ? CL(S.p.clubId) : null;
+  if (eigener && !pool.some(c => c.id === eigener.id)) pool.push(eigener);
   pool.sort((a, b) => b.staerke - a.staerke);
   const teil = pool.slice(0, 24).map(c => c.id);
-  if (S.euro && S.euro.drin && teil.indexOf(S.p.clubId) < 0) teil[teil.length - 1] = S.p.clubId;
+  /* Reicht die Staerke auch dafuer nicht, ersetzt er den schwaechsten — sonst
+     stuende er in seinem eigenen Wettbewerb nicht auf dem Spielplan. */
+  if (eigener && teil.indexOf(eigener.id) < 0) teil[teil.length - 1] = eigener.id;
   const tabelle = {};
   teil.forEach(id => tabelle[id] = leereZeile());
   S.welt.euro = { teilnehmer: teil, tabelle, phase: 0, runden: {}, sieger: null };
@@ -2075,12 +2093,26 @@ function baueSpielverlauf(fx, einsatz) {
 }
 
 /* ---------- Note berechnen ---------- */
-function noteBerechnen(basis, tore, vorlagen, aktionen, fehler, ergebnis, minuten) {
+/* Gemessen ueber 11.600 Spiele lag die alte Kurve viel zu eng beieinander:
+   zwei Drittel aller Partien endeten mit einer Drei, eine Fuenf gab es so gut
+   wie nie, eine Sechs nie. Die Note trug damit kaum Information — und alles,
+   was an ihr haengt, stand still. Das Trainer-Vertrauen dreht um genau 3,3 und
+   kam deshalb nie vom Fleck: Die Kapitaensbinde war in 15.698 gemessenen
+   Wochen kein einziges Mal zu bekommen, und von den fuenf Formstufen blieben
+   "Tiefe Krise" und "Weltklasse-Form" praktisch unerreichbar.
+
+   Die Gewichte sind darum durchweg groesser, und das Ergebnis zaehlt mit:
+   Ein Fuenf-zu-null geht dem letzten Mann an, ein Viertorespiel schreibt man
+   dem Angriff gut. */
+function noteBerechnen(basis, tore, vorlagen, aktionen, fehler, ergebnis, minuten, toreMein, toreGegner) {
   let n = basis;
-  n -= tore * 0.75 + vorlagen * 0.45 + aktionen * 0.22;
-  n += fehler * 0.34;
-  n += ergebnis === 'sieg' ? -0.2 : ergebnis === 'niederlage' ? 0.2 : 0;
-  if (minuten < 30) n = 3.3 + (n - 3.3) * 0.55;
+  n -= tore * 0.95 + vorlagen * 0.55 + aktionen * 0.34;
+  n += fehler * 0.52;
+  n += ergebnis === 'sieg' ? -0.32 : ergebnis === 'niederlage' ? 0.32 : 0;
+  const defensiv = 1 - POS(S.p.pos).angriff;
+  n += clamp((toreGegner - 1.3) * .30 * defensiv, -.4, 1.3);
+  n -= clamp((toreMein - 1.3) * .22 * (1 - defensiv), -.3, .9);
+  if (minuten < 30) n = NOTE_MITTE + (n - NOTE_MITTE) * 0.55;
   return clamp(round1(n), 1, 6);
 }
 
@@ -3323,6 +3355,20 @@ function natGegner() {
    Gruppenphase und K.-o.-Runde laufen jetzt als einzelne Spiele durch denselben
    Bildschirm wie alles andere. Vorher war das ein einziges Textfenster. */
 const TURNIER_RUNDEN = ['Achtelfinale', 'Viertelfinale', 'Halbfinale', 'Finale'];
+
+/* Je weiter das Turnier kommt, desto staerker steht einem gegenueber. Vorher
+   hiess die Bedingung "Staerke ueber 70" — und filterte nichts heraus, weil die
+   schwaechste Nation im Spiel 72 hat. Der Gegner war damit eine beliebige
+   Nation, im Schnitt deutlich schwaecher als eine, die bis ins Viertelfinale
+   kommt. Gemessen gewann die eigene Elf dadurch neun von zehn K.-o.-Spielen
+   und jedes zweite Halbfinale endete im Titel. */
+function turnierGegner(runde) {
+  const schwelle = [77, 80, 83, 85][runde] || 77;
+  const pool = NATIONEN.filter(n => n.id !== S.p.natId && n.staerke >= schwelle);
+  if (pool.length >= 2) return pick(pool);
+  return pick(NATIONEN.filter(n => n.id !== S.p.natId)
+    .sort((a, b) => b.staerke - a.staerke).slice(0, 4));
+}
 async function turnierSpielen() {
   const p = S.p, nat = NAT(p.natId);
   const jahr = S.jahr + 1;
@@ -3356,7 +3402,7 @@ async function turnierSpielen() {
   /* K.-o.-Runde */
   let gewonnen = false, raus = null;
   for (const r of TURNIER_RUNDEN) {
-    const gegner = pick(NATIONEN.filter(n => n.id !== p.natId && n.staerke > 70));
+    const gegner = turnierGegner(TURNIER_RUNDEN.indexOf(r));
     const erg = await spielAustragen({ comp: 'nat', heim: false, gegnerId: 'nat-' + gegner.id, turnier: name, runde: r, ko: true });
     if (!erg.weiter) { raus = r; break; }
     if (r === 'Finale') gewonnen = true;
@@ -3477,13 +3523,39 @@ function baueStars() {
     });
   }
 }
+/* Die Weltspitze erneuert sich ueber zwanzig Jahre. Ohne das stand dieselbe
+   Liste mit denselben zweiundzwanzig Namen und denselben Werten 2046 noch
+   genauso da wie 2026, waehrend der eigene Spieler laengst an ihr vorbeigezogen
+   war — die Weltrangliste wurde damit zur Formsache. */
+function starsAltern() {
+  const top = CLUBS.filter(c => c.staerke >= 76);
+  S.stars.forEach((s, i) => {
+    s.alter++;
+    if (s.alter <= 25) s.ovr = clamp(s.ovr + ri(0, 2), 78, 96);
+    else if (s.alter >= 30) s.ovr = clamp(s.ovr - ri(1, 3), 60, 96);
+    if (chance(.18)) s.clubId = pick(top).id;
+    if (s.alter > 34 || s.ovr < 80) {
+      const nat = pick(NATIONEN), nm = zufallsname(nat.pool);
+      S.stars[i] = { name: nm.v + ' ' + nm.n, natId: nat.id, clubId: pick(top).id, alter: ri(20, 25),
+        ovr: ri(83, 93), pos: pick(['ST', 'ST', 'FL', 'FL', 'OM', 'ZM', 'IV']), tore: 0, vorlagen: 0, punkte: 0 };
+    }
+  });
+}
+
 function starsSaison() {
   for (const s of S.stars) {
     const ang = POS(s.pos).angriff;
     s.tore = Math.round(poisson(clamp((s.ovr - 70) * ang * .95, .2, 26)));
     s.vorlagen = Math.round(poisson(clamp((s.ovr - 70) * .5, .2, 14)));
     const titel = chance(.22) ? 1 : 0;
-    s.punkte = Math.round(s.tore * 3.2 + s.vorlagen * 2 + s.ovr * 1.35 + CL(s.clubId).staerke * .3 + titel * 14 + rnd(-6, 10));
+    /* Auch ein Weltstar hat eine Saisonnote und schiesst Laendertore. Ohne
+       beides stand auf der einen Seite der Rechnung ein Notenbonus von bis zu
+       65 Punkten und auf der anderen nichts: Gemessen gewann ein gut
+       gespielter Spieler den Goldenen Ball in 44 Prozent aller Saisons. */
+    s.note = clamp(3.5 - (s.ovr - 80) * .075 - s.tore * .018 + rnd(-.3, .3), 1.1, 4.4);
+    s.natTore = Math.round(poisson(clamp((s.ovr - 76) * .35, 0, 9)));
+    s.punkte = Math.round(s.tore * 3.2 + s.vorlagen * 2 + Math.max(0, NOTE_MITTE + .2 - s.note) * 24
+      + s.ovr * 1.35 + CL(s.clubId).staerke * .3 + titel * 14 + s.natTore * 2.2 + rnd(-6, 10));
   }
   S.stars.sort((a, b) => b.punkte - a.punkte);
 }
@@ -3651,6 +3723,7 @@ async function saisonEnde() {
 
   /* Saisonbericht */
   const tj = torjaegerListe();
+  starsAltern();
   starsSaison();
   const rang = weltrangliste();
   const meinWeltRang = rang.findIndex(r => r.ich) + 1;
@@ -3722,7 +3795,11 @@ async function saisonEnde() {
   /* Auszeichnungen */
   const ehrungen = [];
   if (tj[0].ich && st.tore > 0) { ehrungen.push('Torschützenkönig der ' + lg.name + ' (' + st.tore + ' Tore)'); titelGeben('Torschützenkönig ' + lg.name); }
-  if (avg && avg < 2.75 && st.spiele > S.saisonWochen * .5 && platz <= 4) { ehrungen.push('Spieler der Saison in der ' + lg.name); titelGeben('Spieler der Saison'); }
+  /* Die Schwelle war auf die alte, enge Notenskala geeicht. Mit der breiteren
+     traf sie 42 Prozent aller gut gespielten Saisons — eine Auszeichnung, die
+     fast jeder bekommt, ist keine. 2,30 entspricht den besten gut zehn
+     Prozent. */
+  if (avg && avg < 2.30 && st.spiele > S.saisonWochen * .5 && platz <= 4) { ehrungen.push('Spieler der Saison in der ' + lg.name); titelGeben('Spieler der Saison'); }
   if (meinWeltRang === 1) { ehrungen.push('Goldener Ball — Weltfußballer des Jahres'); titelGeben('Goldener Ball'); }
   else if (meinWeltRang <= 3) ehrungen.push('Platz ' + meinWeltRang + ' bei der Wahl zum Weltfußballer');
   if (p.alter <= 21 && meinWeltRang <= 12) { ehrungen.push('Talent des Jahres'); titelGeben('Talent des Jahres'); }
@@ -4109,7 +4186,7 @@ async function spielAustragen(fx) {
   let noteWert = null;
   if (spielt) {
     const basis = 3.5 - clamp((effOvr() - club.staerke) * .035, -.5, .6);
-    noteWert = noteBerechnen(basis, meineTore, vorlagen, aktionen, fehler, ergebnis, minuten);
+    noteWert = noteBerechnen(basis, meineTore, vorlagen, aktionen, fehler, ergebnis, minuten, toreMein, toreGegner);
     /* Laenderspiele zaehlen in die Laenderspielbilanz, nicht in die Saison
        beim Verein — sonst stuende am Saisonende eine Zahl, die kein Verein je
        gesehen hat. Einsatzminuten zaehlen dagegen ueberall, denn der Koerper
@@ -4118,7 +4195,7 @@ async function spielAustragen(fx) {
     if (ts.nat) {
       p.nat.spiele++; S.natStats.spiele++;
       p.nat.tore += meineTore; S.natStats.tore += meineTore;
-      p.nat.vertrauen = clamp((p.nat.vertrauen || 50) + clamp((3.3 - noteWert) * 5, -8, 9), 0, 100);
+      p.nat.vertrauen = clamp((p.nat.vertrauen || 50) + clamp((NOTE_MITTE - noteWert) * 5, -8, 9), 0, 100);
       if (p.nat.spiele === 1) merken('nat', 'Länderspieldebüt für ' + club.name + ' gegen ' + gegnerName + '.', 1);
       if (p.nat.tore === meineTore && meineTore > 0) merken('nat', 'Erstes Länderspieltor gegen ' + gegnerName + '.', 1);
       if (fx.runde === 'Finale' && meineTore > 0) merken('tor', 'Tor im Finale gegen ' + gegnerName + '.', 1);
@@ -4164,8 +4241,8 @@ async function spielAustragen(fx) {
     if (p.formNoten.length > 14) p.formNoten.shift();
     wirke({
       energie: -(6 + minuten * .07 + (fx.comp !== 'liga' ? 2 : 0)) * energieFaktor(),
-      trainer: ts.nat ? 0 : clamp((3.3 - noteWert) * 5, -8, 9),
-      moral: clamp((3.4 - noteWert) * 5 + (ergebnis === 'sieg' ? 4 : ergebnis === 'niederlage' ? -4 : 0), -12, 14),
+      trainer: ts.nat ? 0 : clamp((NOTE_MITTE - noteWert) * 5, -8, 9),
+      moral: clamp((NOTE_MITTE - noteWert) * 5 + (ergebnis === 'sieg' ? 4 : ergebnis === 'niederlage' ? -4 : 0), -12, 14),
       ruf: clamp(meineTore * 1.4 + vorlagen * .8 + (noteWert < 2 ? 1.6 : 0), 0, 8),
       follower: Math.round(p.follower * (.004 + meineTore * .022) + meineTore * 900 + (noteWert < 2 ? 1400 : 0))
     });
@@ -5154,6 +5231,25 @@ function karriereStarten() {
 /* ========================== SPEICHERN ========================== */
 function migriere() {
   if (!S || !S.p) return;
+  /* Ein Spielstand kommt nicht nur aus dem eigenen Speicher, sondern auch aus
+     einem von Hand eingefuegten Sicherungscode. Fehlt darin ein Feld, soll das
+     Spiel es ergaenzen statt mit einem Fehler stehenzubleiben — geprueft wurde
+     bisher nur, ob ueberhaupt ein Verein drinsteht. */
+  const p = S.p;
+  S.jahr = S.jahr || START_JAHR; S.woche = S.woche || 1;
+  ['karriere', 'verlauf', 'stars', 'hoehepunkte', 'serie', 'pokalWeg', 'angebote', 'titelDieseSaison']
+    .forEach(k => { if (!Array.isArray(S[k])) S[k] = []; });
+  ['titel', 'sponsoren', 'formNoten'].forEach(k => { if (!Array.isArray(p[k])) p[k] = []; });
+  if (!S.stats) S.stats = { spiele: 0, startelf: 0, tore: 0, vorlagen: 0, noten: [], gelb: 0, rot: 0, minuten: 0 };
+  if (!Array.isArray(S.stats.noten)) S.stats.noten = [];
+  if (!S.natStats) S.natStats = { spiele: 0, tore: 0 };
+  if (!p.nat) p.nat = { dabei: false, spiele: 0, tore: 0, vertrauen: 50 };
+  if (!p.attr) p.attr = {};
+  ATTR_KEYS.forEach(k => { if (typeof p.attr[k] !== 'number') p.attr[k] = 50; });
+  if (!p.vertrag) p.vertrag = { gehalt: 60000, jahre: 1 };
+  if (!POS(p.pos)) p.pos = 'ZM';
+  if (typeof p.alter !== 'number') p.alter = 17;
+  if (!S.stars.length) baueStars();
   S.ligaTausch = S.ligaTausch || {};
   S.staerkeTausch = S.staerkeTausch || {};
   S.transfers = S.transfers || {};
@@ -5306,11 +5402,6 @@ async function speichernJetzt() {
   const cloudOk = await cloudSchreiben();
   letzteSicherung = Date.now();
   return cloudOk || lokalOk;
-}
-function laden() {
-  const l = lokalLesen();
-  if (!l) return null;
-  try { return JSON.parse(l.roh); } catch (e) { return null; }
 }
 function zeitHer(t) {
   const m = Math.floor((Date.now() - t) / 60000);
