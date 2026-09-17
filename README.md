@@ -166,6 +166,18 @@ Potenzial, ab 29 baut der Körper ab. Saisonbilanz mit Torschützenkönig, Spiel
 und Goldenem Ball, Weltrangliste, Titelvitrine, Karrieretabelle über alle Saisons.
 Am Schluss: Rücktritt und Legacy-Punkte.
 
+## Bestmarken
+
+Im Profil stehen die Rekorde einer Karriere: meiste Tore in einem Spiel, beste Note, längste
+Serie mit einem Treffer, längste Serie ohne Niederlage, höchster Marktwert — jeweils mit
+Gegner und Saison. Dazu die Saisonbestwerte (Tore, Vorlagen, Notenschnitt, Stärke) und die
+Karriere in Zahlen: Spiele, Tore, Vorlagen, Vereine, Ligen, Titel, Länderspiele.
+
+Mitgeschrieben wird nur, was sich später nicht mehr rekonstruieren lässt — was in einem
+einzelnen Spiel passiert ist und wie lange eine Serie gehalten hat. Alles Übrige rechnet die
+Ansicht aus dem Karriereverlauf aus, statt es ein zweites Mal zu speichern und damit eine
+weitere Stelle zu schaffen, die auseinanderlaufen kann.
+
 ## Nationalmannschaft
 
 Länderspiele laufen über denselben Bildschirm wie Vereinsspiele — mit Schlüsselmomenten, Note,

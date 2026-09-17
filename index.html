@@ -2620,6 +2620,7 @@ function wochenAbschluss() {
   const drift = Math.round(p.follower * .004 + p.ruf * rnd(2, 9));
   p.follower = Math.max(200, Math.round(p.follower + drift - p.follower * .006));
   p.ruf = clamp(p.ruf - .15, 0, 100);
+  rekord('marktwert', marktwert(), 'mit ' + p.alter + ' bei ' + CL(p.clubId).name);
 }
 
 async function wocheVor() {
@@ -3088,6 +3089,19 @@ function titelGeben(name, jahr, wo) {
   S.titelDieseSaison.push(eintrag);
   merken('titel', name + ' mit ' + eintrag.club + '.', /Goldener Ball|Weltmeister|Europapokal|Kontinentalmeister|Meister/.test(name));
   log('Titel gewonnen: ' + name + '.', 'gold');
+}
+
+/* ========================== REKORDE ==========================
+   Mitgeschrieben wird nur, was sich spaeter nicht mehr rekonstruieren laesst:
+   was in einem einzelnen Spiel passiert ist und wie lange eine Serie gehalten
+   hat. Saisonbestwerte rechnet die Ansicht aus dem Karriereverlauf aus, statt
+   sie ein zweites Mal zu speichern. */
+function rekord(schluessel, wert, text, kleiner) {
+  S.rekorde = S.rekorde || {};
+  const alt = S.rekorde[schluessel];
+  if (!alt || (kleiner ? wert < alt.wert : wert > alt.wert)) {
+    S.rekorde[schluessel] = { wert, text, saison: saisonLabel(S.jahr), alter: S.p.alter };
+  }
 }
 
 /* ========================== DER RIVALE ==========================
@@ -3805,6 +3819,14 @@ async function spielAustragen(fx) {
     for (const marke of [100, 200, 300, 400, 500, 600]) {
       if (vorherSpiele < marke && karriereSpiele() >= marke) merken('jubilaeum', marke + '. Pflichtspiel.', marke >= 300);
     }
+    /* Bestmarken aus diesem Spiel. Serien zaehlen nur Spiele mit, in denen du
+       auf dem Platz standest — sonst waere eine Bank-Saison eine Serie. */
+    if (meineTore >= 2) rekord('spielTore', meineTore, 'gegen ' + gegnerName);
+    rekord('note', noteWert, 'gegen ' + gegnerName, true);
+    S.serieTore = meineTore > 0 ? (S.serieTore || 0) + 1 : 0;
+    if (S.serieTore >= 2) rekord('torSerie', S.serieTore, 'zuletzt gegen ' + gegnerName);
+    S.serieUngeschlagen = ergebnis === 'niederlage' ? 0 : (S.serieUngeschlagen || 0) + 1;
+    if (S.serieUngeschlagen >= 3) rekord('ungeschlagen', S.serieUngeschlagen, 'zuletzt gegen ' + gegnerName);
     p.formNoten.push(noteWert);
     if (p.formNoten.length > 14) p.formNoten.shift();
     wirke({
@@ -4275,6 +4297,38 @@ function formChart(noten) {
     + '</svg>';
 }
 
+/* Saisonbestwerte werden aus dem Karriereverlauf gerechnet, die laufende
+   Saison eingerechnet — doppelt speichern waere nur eine weitere Stelle, die
+   auseinanderlaufen kann. */
+function saisonBeste() {
+  const lauf = {
+    saison: saisonLabel(S.jahr), club: CL(S.p.clubId).name, alter: S.p.alter,
+    spiele: S.stats.spiele, tore: S.stats.tore, vorlagen: S.stats.vorlagen,
+    note: S.stats.noten.length ? round1(S.stats.noten.reduce((a, b) => a + b, 0) / S.stats.noten.length) : 0,
+    ovr: OVR()
+  };
+  const alle = S.karriere.concat(S.beendet ? [] : [lauf]);
+  const best = (schl, kleiner) => {
+    const da = alle.filter(k => k[schl]);
+    if (!da.length) return null;
+    return da.reduce((a, b) => ((kleiner ? b[schl] < a[schl] : b[schl] > a[schl]) ? b : a));
+  };
+  return { tore: best('tore'), vorlagen: best('vorlagen'), note: best('note', true), ovr: best('ovr'), spiele: best('spiele') };
+}
+function karriereZahlen() {
+  const k = S.karriere, club = CL(S.p.clubId);
+  const summe = f => k.reduce((a, x) => a + (x[f] || 0), 0);
+  return {
+    /* Die laufende Saison zaehlt mit — sonst stuende in der ersten Saison
+       "0 Saisons" ueber drei bereits gespielten Partien. */
+    saisons: k.length + (S.beendet ? 0 : 1), spiele: karriereSpiele(), tore: karriereTore(),
+    vorlagen: summe('vorlagen') + S.stats.vorlagen,
+    vereine: new Set(k.map(x => x.club).concat([club.name])).size,
+    ligen: new Set(k.map(x => x.liga).concat([LG(club.liga).name])).size,
+    titel: S.p.titel.length, laender: S.p.nat.spiele, laenderTore: S.p.nat.tore
+  };
+}
+
 function renderProfil() {
   const p = S.p, st = S.stats;
   const avg = st.noten.length ? st.noten.reduce((a, b) => a + b, 0) / st.noten.length : 0;
@@ -4314,6 +4368,36 @@ function renderProfil() {
         + '<div class="tiny muted truncate">' + esc(k.club) + ' · ' + k.platz + '.</div></td>'
         + '<td>' + k.spiele + '</td><td>' + k.tore + '</td><td>' + k.vorlagen + '</td><td>' + (k.note ? note(k.note) : '—') + '</td><td>' + k.ovr + '</td></tr>').join('')
       + '</tbody></table></div></section>';
+  }
+
+  /* Bestmarken und Karrierezahlen */
+  {
+    const rk = S.rekorde || {}, sb = saisonBeste(), kz = karriereZahlen();
+    const kachel = (label, wert, zusatz) => '<div class="cond-item"><span class="k">' + label + '</span>'
+      + '<span class="v">' + wert + '</span>'
+      + (zusatz ? '<span class="tiny muted" style="line-height:1.35">' + esc(zusatz) + '</span>' : '') + '</div>';
+    const wann = r => r ? r.text + ' · ' + r.saison : '';
+    const marken = [];
+    if (rk.spielTore) marken.push(kachel('Tore in einem Spiel', rk.spielTore.wert, wann(rk.spielTore)));
+    if (rk.note) marken.push(kachel('Beste Note', note(rk.note.wert), wann(rk.note)));
+    if (rk.torSerie) marken.push(kachel('Spiele in Folge getroffen', rk.torSerie.wert, wann(rk.torSerie)));
+    if (rk.ungeschlagen) marken.push(kachel('Spiele ohne Niederlage', rk.ungeschlagen.wert, wann(rk.ungeschlagen)));
+    if (rk.marktwert) marken.push(kachel('Höchster Marktwert', money(rk.marktwert.wert), wann(rk.marktwert)));
+    if (sb.tore && sb.tore.tore) marken.push(kachel('Tore in einer Saison', sb.tore.tore, sb.tore.club + ' · ' + sb.tore.saison));
+    if (sb.vorlagen && sb.vorlagen.vorlagen) marken.push(kachel('Vorlagen in einer Saison', sb.vorlagen.vorlagen, sb.vorlagen.club + ' · ' + sb.vorlagen.saison));
+    if (sb.note && sb.note.note) marken.push(kachel('Bester Saisonschnitt', note(sb.note.note), sb.note.club + ' · ' + sb.note.saison));
+    if (sb.ovr && sb.ovr.ovr) marken.push(kachel('Höchste Stärke', sb.ovr.ovr, 'mit ' + sb.ovr.alter + ' · ' + sb.ovr.saison));
+
+    if (marken.length) {
+      html += '<section><div class="sect-title"><h3>Bestmarken</h3><span class="small muted">' + marken.length + ' Einträge</span></div>'
+        + '<div class="card cond cond-2">' + marken.join('') + '</div></section>';
+    }
+    html += '<section><div class="sect-title"><h3>Karriere in Zahlen</h3><span class="small muted">'
+      + kz.saisons + ' Saison' + (kz.saisons === 1 ? '' : 'en') + '</span></div><div class="card cond">'
+      + kachel('Spiele', de(kz.spiele)) + kachel('Tore', de(kz.tore)) + kachel('Vorlagen', de(kz.vorlagen))
+      + kachel('Vereine', kz.vereine) + kachel('Ligen', kz.ligen) + kachel('Titel', kz.titel)
+      + (kz.laender ? kachel('Länderspiele', kz.laender) + kachel('Tore für ' + NAT(S.p.natId).kurz, kz.laenderTore) : '')
+      + '</div></section>';
   }
 
   if (S.rivale) {
@@ -4711,6 +4795,7 @@ function migriere() {
   if (!S.saisonZiel) saisonZielSetzen();
   S.serie = S.serie || [];
   S.hoehepunkte = S.hoehepunkte || [];
+  S.rekorde = S.rekorde || {};
   if (typeof S.p.nat.vertrauen !== 'number') S.p.nat.vertrauen = 50;
   if (S.p.nat.dabei && !S.natTrainer) S.natTrainer = natTrainerErzeugen();
   if (!S.natWochen) {
