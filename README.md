@@ -82,7 +82,7 @@ nur auf der Anzeigetafel sichtbar — dem Bildschirm mit der meisten Spielzeit.
 
 ## Was drin ist
 
-**Karriere anlegen** — Name, Nation, Position (7 Positionen von Innenverteidiger bis
+**Karriere anlegen** — Name, Nation, Position (8 Positionen vom Torwart bis zum
 Mittelstürmer), Spielertyp, **Startland** und Herkunftsweg. Aus Land und Weg ergibt sich die
 Startliga, daraus drei vorgeschlagene Vereine.
 
@@ -184,6 +184,42 @@ Länderspieldebüt, Rekordtransfer, schwere Verletzung, jedes 50. Karrieretor un
 Potenzial, ab 29 baut der Körper ab. Saisonbilanz mit Torschützenkönig, Spieler der Saison
 und Goldenem Ball, Weltrangliste, Titelvitrine, Karrieretabelle über alle Saisons.
 Am Schluss: Rücktritt und Legacy-Punkte.
+
+## Der Torwart
+
+Die Positionsauswahl zeigte sieben Felder und kein Tor. Jetzt ist der Torwart die achte
+Position — und die einzige, die nicht mit denselben Augen bewertet wird.
+
+**Dieselben sieben Fächer, anderes Handwerk.** Intern bleiben es die bekannten Attribute,
+angezeigt werden sie im Tor anders: Reflexe, Abschlag, Spielöffnung, Fangsicherheit, Eins
+gegen eins, Strafraum, Mentalität. Damit laufen Training, Stab und Entwicklung unverändert
+weiter — der Abschlusstrainer trainiert beim Torwart eben den Abschlag.
+
+**Eigene Spielertypen:** Der Rückhalt (Reflexe), der mitspielende Torwart (Spielöffnung und
+Abschlag), der Strafraumbeherrscher, der Unerschütterliche, der Komplette.
+
+**Sechzehn eigene Schlüsselmomente,** in denen es nie ums Toreschießen geht: die Flanke in
+den Fünfer, das Eins gegen eins, der abgefälschte Schuss, der Rückpass unter Druck, die
+Mauer beim Freistoß, das Zeitspiel in Führung, die Viererkette, die zu weit auseinander
+steht. Nicht jeder Patzer ist gleich ein Tor: Zwischen Parade und Gegentor liegt der
+Nachschuss, der knapp vorbeigeht. Einen Elfmeter zu halten hat eine eigene, sehr flache
+Kurve — selbst ein Weltklassemann kommt kaum über ein Drittel. Und einmal geht es doch
+nach vorn: In der Nachspielzeit, bei Rückstand, lässt der Schiedsrichter dich mit hoch.
+
+**Die Note rechnet sich anders.** Nicht aus Toren und Vorlagen, sondern aus Paraden,
+Patzern, Gegentoren und der Null. Ein Sechs-zu-null ist seine beste Partie, ein Vier-zu-drei
+trotz fünf Paraden keine gute.
+
+**Er wirkt anders auf das Spiel.** Ein Feldspieler macht seine Mannschaft gefährlicher, ein
+Torwart macht sie schwerer zu bezwingen: Seine Stärke zählt ausschließlich nach hinten.
+Und weil seine Schlüsselmomente genau die Gelegenheiten der anderen Mannschaft sind, gehen
+sie von deren Chancen ab statt obendrauf zu kommen — ohne das kassierte dieselbe Mannschaft
+mit einem Torwart als Spielfigur anderthalb Tore je Spiel statt 1,3.
+
+**Überall, wo sonst Tore stehen, steht bei ihm die Null:** in der Saisonbilanz, in der
+Karrieretabelle, bei den Bestmarken (längste Serie ohne Gegentor), im Vergleich mit deinem
+Rivalen — der für einen Torwart auch ein Torwart ist —, in der Wahl zum Weltfußballer und
+in den Legacy-Punkten. Drei eigene Traineraufträge kommen dazu.
 
 ## Geld
 
@@ -549,6 +585,13 @@ eine durchgespielte Karriere:
   gekauft, 17 bis 33 der 39 Stabstufen besetzt, Kontostand am Ende im Median 1,5 Mio €.
   Genau eine der 30 Karrieren konnte sich alles leisten. Vorher: 29 Mio € Rest auf dem
   Konto, alles gekauft, kompletter Weltklasse-Stab — in jeder einzelnen Karriere.
+- Der Torwart spielt sich wie eine eigene Position, wird aber wie jede andere bewertet.
+  Gemessen über 14 Karrieren und 8.213 Partien: Notenverteilung 8,7 / 21,9 / 44,6 / 20,9 /
+  3,5 / 0,4 Prozent — praktisch deckungsgleich mit der eines Feldspielers (9,6 / 22,4 /
+  43,1 / 21,2 / 3,6 / 0,2). In einer Stammsaison: 34 Spiele, 45 Gegentore (1,32 je Spiel,
+  derselbe Wert wie bei einem Feldspieler im Team), fünfmal zu Null, Rekord 19. Von den
+  Momentausgängen sind 15 Prozent Paraden, 11 Prozent Gegentore, 6 Prozent Nachschüsse.
+  Die Höchststärke liegt im Mittelfeld aller Positionen (68 im Median gegen 67 bis 73).
 - Verletzungen kosten rund ein Zehntel aller Wochen (bei riskanter Trainingswahl ein Siebtel).
 - Alle 44 Zufallsereignisse sind erreichbar — geprüft wird das über einen Lauf, der zählt, wie
   oft die Bedingung jedes Ereignisses überhaupt zutrifft, nicht nur, welches gezogen wurde.

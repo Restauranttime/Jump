@@ -1392,7 +1392,13 @@ function zufallsname(pool) {
 }
 
 /* ------------------------------ Positionen ------------------------------ */
+/* Der Torwart ist die achte Position und die einzige, die nicht mit denselben
+   Augen bewertet wird: Er hat einen eigenen Vorrat an Schluesselmomenten, seine
+   Note rechnet sich aus Paraden, Gegentoren und der Null statt aus Toren, und
+   seine sieben Attribute heißen anders — dieselben Faecher, anderes Handwerk. */
 const POSITIONEN = [
+  { id: 'TW', name: 'Torwart', kurz: 'TW', gruppe: 'Tor',
+    w: { tempo: .26, dribbling: .22, zweikampf: .18, physis: .13, mentalitaet: .11, pass: .07, schuss: .03 }, angriff: 0 },
   { id: 'IV', name: 'Innenverteidiger', kurz: 'IV', gruppe: 'Abwehr',
     w: { zweikampf: .32, physis: .24, mentalitaet: .16, pass: .14, tempo: .10, dribbling: .02, schuss: .02 }, angriff: .10 },
   { id: 'AV', name: 'Außenverteidiger', kurz: 'AV', gruppe: 'Abwehr',
@@ -1411,7 +1417,22 @@ const POSITIONEN = [
 const POS = id => POSITIONEN.find(p => p.id === id);
 const ATTR_LABEL = { tempo: 'Tempo', schuss: 'Abschluss', pass: 'Passspiel', dribbling: 'Dribbling', zweikampf: 'Zweikampf', physis: 'Physis', mentalitaet: 'Mentalität' };
 const ATTR_KEYS = Object.keys(ATTR_LABEL);
+/* Dieselben sieben Faecher, im Tor anders benannt — intern bleibt es ein
+   Schluessel, damit Training, Stab und Archetypen unveraendert weiterlaufen. */
+const ATTR_LABEL_TW = { tempo: 'Reflexe', schuss: 'Abschlag', pass: 'Spielöffnung', dribbling: 'Fangsicherheit',
+  zweikampf: 'Eins gegen eins', physis: 'Strafraum', mentalitaet: 'Mentalität' };
+const AL = (k, pos) => ((pos || (S && S.p && S.p.pos)) === 'TW' ? ATTR_LABEL_TW : ATTR_LABEL)[k];
+const istTW = () => !!(S && S.p && S.p.pos === 'TW');
 
+const ARCHETYPEN_TW = [
+  { id: 'rueckhalt', name: 'Der Rückhalt', text: 'Steht da, wo der Ball hinkommt, bevor er dort ist.', boni: { tempo: 8, dribbling: 5, pass: -4, schuss: -3, physis: -1 } },
+  { id: 'libero', name: 'Der mitspielende Torwart', text: 'Er eröffnet das Spiel, statt es nur zu beenden.', boni: { pass: 8, schuss: 6, tempo: -3, physis: -3, zweikampf: -2 } },
+  { id: 'beherrscher', name: 'Der Strafraumbeherrscher', text: 'Flanken sind seine. Punkt.', boni: { physis: 8, zweikampf: 5, mentalitaet: 2, tempo: -4, pass: -3 } },
+  { id: 'fels', name: 'Der Unerschütterliche', text: 'Nach dem Gegentor steht er da, als wäre nichts gewesen.', boni: { mentalitaet: 8, dribbling: 5, zweikampf: 2, schuss: -4, tempo: -3 } },
+  { id: 'komplett_tw', name: 'Der Komplette', text: 'Keine Schwäche, aber auch kein Zaubertrick.', boni: { tempo: 2, schuss: 2, pass: 2, dribbling: 2, zweikampf: 2, physis: 2, mentalitaet: 2 } }
+];
+const ARCH_LISTE = pos => (pos === 'TW' ? ARCHETYPEN_TW : ARCHETYPEN);
+const ARCH = id => ARCHETYPEN_TW.concat(ARCHETYPEN).find(a => a.id === id);
 const ARCHETYPEN = [
   { id: 'knipser', name: 'Der Knipser', text: 'Lebt im Strafraum, denkt nur ans Tor.', boni: { schuss: 7, mentalitaet: 4, physis: 2, pass: -3, zweikampf: -3 } },
   { id: 'regisseur', name: 'Der Regisseur', text: 'Sieht den Pass, bevor die Lücke da ist.', boni: { pass: 8, mentalitaet: 4, dribbling: 2, physis: -3, tempo: -2 } },
@@ -1541,6 +1562,8 @@ function saisonLabel(j) { return j + '/' + String((j + 1) % 100).padStart(2, '0'
    bleiben dagegen die ganze Karriere erhalten — sie sind am Ende die Geschichte,
    die eine Zahlenreihe nicht erzählen kann. */
 function karriereTore() { return S.karriere.reduce((a, k) => a + k.tore, 0) + S.stats.tore; }
+function karriereZuNull() { return S.karriere.reduce((a, k) => a + (k.zuNull || 0), 0) + (S.stats.zuNull || 0); }
+function karriereGegentore() { return S.karriere.reduce((a, k) => a + (k.gegentore || 0), 0) + (S.stats.gegentore || 0); }
 function karriereSpiele() { return S.karriere.reduce((a, k) => a + k.spiele, 0) + S.stats.spiele; }
 function merken(art, text, gross) {
   S.hoehepunkte = S.hoehepunkte || [];
@@ -1571,7 +1594,7 @@ function wirke(eff) {
       const vor = Math.round(p.attr[k]);
       p.attr[k] = clamp(p.attr[k] + v, 20, 99);
       const diff = Math.round(p.attr[k]) - vor;
-      if (diff) out.push({ t: EFFEKT_LABEL[k] + ' ' + (diff > 0 ? '+' : '') + diff, gut: diff > 0 });
+      if (diff) out.push({ t: AL(k) + ' ' + (diff > 0 ? '+' : '') + diff, gut: diff > 0 });
       continue;
     }
     if (k === 'geld') { p.geld += v; out.push({ t: (v > 0 ? '+' : '−') + money(Math.abs(v)), gut: v > 0 }); continue; }
@@ -1720,9 +1743,11 @@ function besterKonkurrent(clubId) {
    Das Spiel erzaehlt deine Geschichte, nicht seine. */
 const ICH_GEWICHT = 2.9;
 function torschuetze(kader, ichDabei) {
-  const feld = (kader || S.kader || []).filter(k => POS(k.pos));
+  const feld = (kader || S.kader || []).filter(k => POS(k.pos) && k.pos !== 'TW');
   const gew = feld.map(k => ({ k, w: POS(k.pos).angriff * (k.ovr / 80) + .04 }));
-  if (ichDabei) {
+  /* Aus dem Spiel heraus trifft kein Torwart — seine Tore kommen
+     ausschliesslich aus dem einen Schluesselmoment in der Nachspielzeit. */
+  if (ichDabei && S.p.pos !== 'TW') {
     gew.push({
       k: { ich: true, name: S.p.vorname + ' ' + S.p.nachname, pos: S.p.pos },
       w: (POS(S.p.pos).angriff * (effOvr() / 80) + .04) * ICH_GEWICHT
@@ -1833,7 +1858,7 @@ function starteSaison(neueEuroQuali) {
   S.pokal = { drin: true, runde: 0, wochen: [.09, .25, .40, .57, .74, .90].map(W), name: lg.pokal || 'Landespokal' };
   const quali = neueEuroQuali === undefined ? euroQualifiziert(S.p.clubId) : (neueEuroQuali && lg.euro);
   S.euro = { drin: quali, phase: 0, wochen: [.14, .21, .31, .44, .52, .63, .70, .80, .87, .96].map(W) };
-  S.stats = { spiele: 0, startelf: 0, tore: 0, vorlagen: 0, noten: [], gelb: 0, rot: 0, minuten: 0 };
+  S.stats = { spiele: 0, startelf: 0, tore: 0, vorlagen: 0, noten: [], gelb: 0, rot: 0, minuten: 0, zuNull: 0, gegentore: 0 };
   S.natStats = { spiele: 0, tore: 0 };
   S.woche = 1;
   S.winterWoche = Math.round(S.saisonWochen / 2);
@@ -2024,9 +2049,80 @@ function einsatzBestimmen(fx) {
    Momente teilen, traf ein Fluegelspieler ohne diesen Faktor fast so oft wie
    ein Mittelstuermer — gemessen 21 Tore je Stammsaison bei einem Korridor von
    10 bis 18. Dasselbe galt fuer die beiden Verteidigerrollen. */
-const ABSCHLUSS_LAGE = { ST: 1, FL: .74, OM: 1, ZM: .95, DM: .88, AV: .72, IV: .72 };
+const ABSCHLUSS_LAGE = { TW: .35, ST: 1, FL: .74, OM: 1, ZM: .95, DM: .88, AV: .72, IV: .72 };
 
 const MOMENTE = {
+  /* Der Torwart hat einen eigenen Vorrat. Seine Faecher heissen anders —
+     Reflexe, Fangsicherheit, Eins gegen eins, Strafraum, Spielöffnung,
+     Abschlag —, intern sind es dieselben sieben Attribute. Gut geht fast immer
+     eine Parade aus, schlecht fast immer ein Gegentor: Anders als beim
+     Feldspieler entscheidet hier jede einzelne Aktion ueber die Note. */
+  Tor: [
+    { t: 'Die Flanke segelt in den Fünfmeterraum, drei Spieler steigen hoch.', w: [
+      { l: 'Rausgehen und den Ball pflücken', h: 'Strafraum', a: 'physis', s: 62, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Auf der Linie bleiben und reagieren', h: 'Reflexe', a: 'tempo', s: 52, gut: 'aktion', schlecht: 'nachschuss' },
+      { l: 'Mit den Fäusten klären', h: 'Fangsicherheit', a: 'dribbling', s: 50, gut: 'rettung', schlecht: 'ballverlust' } ] },
+    { t: 'Der Stürmer ist durch. Nur noch du stehst zwischen ihm und dem Tor.', w: [
+      { l: 'Lange stehen bleiben und groß machen', h: 'Eins gegen eins', a: 'zweikampf', s: 64, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Früh raussturmen und den Winkel nehmen', h: 'Reflexe · riskant', a: 'tempo', s: 70, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Abwarten und auf den Schuss reagieren', h: 'Fangsicherheit', a: 'dribbling', s: 56, gut: 'aktion', schlecht: 'gegentor' } ] },
+    { t: 'Abschluss aus achtzehn Metern. Zwei Spieler stehen dir in der Sicht.', w: [
+      { l: 'Blind zur Seite abtauchen', h: 'Reflexe · schwer', a: 'tempo', s: 68, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Festhalten statt abklatschen', h: 'Fangsicherheit', a: 'dribbling', s: 62, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Position halten und kurz reagieren', h: 'Mentalität', a: 'mentalitaet', s: 56, gut: 'aktion', schlecht: 'nachschuss' } ] },
+    { t: 'Der Rückpass kommt scharf und ungenau. Der Stürmer ist schon unterwegs.', w: [
+      { l: 'Ruhig mitnehmen und sauber aufbauen', h: 'Spielöffnung', a: 'pass', s: 58, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Sofort lang nach vorn dreschen', h: 'Abschlag · sicher', a: 'schuss', s: 38, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Am Gegner vorbeidribbeln', h: 'Fangsicherheit · Wahnsinn', a: 'dribbling', s: 76, gut: 'aktion', schlecht: 'gegentor' } ] },
+    { t: 'Abstoß. Der Gegner steht hoch und wartet genau darauf.', w: [
+      { l: 'Kurz auf den Innenverteidiger', h: 'Spielöffnung', a: 'pass', s: 54, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Weiter Ball in den Lauf des Flügels', h: 'Abschlag', a: 'schuss', s: 60, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Lang und hoch in den Zweikampf', h: 'Strafraum · sicher', a: 'physis', s: 34, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Ecke von rechts, der Ball kommt mit viel Drall auf den Fünfer.', w: [
+      { l: 'Rausgehen und abfangen', h: 'Strafraum', a: 'physis', s: 64, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Auf der Linie bleiben', h: 'Reflexe', a: 'tempo', s: 50, gut: 'aktion', schlecht: 'nachschuss' },
+      { l: 'Herauslaufen und wegfausten', h: 'Fangsicherheit', a: 'dribbling', s: 56, gut: 'rettung', schlecht: 'ballverlust' } ] },
+    { t: 'Freistoß, zwanzig Meter, halblinks. Du stellst die Mauer.', w: [
+      { l: 'Mauer breit stellen, dein Eck zumachen', h: 'Mentalität', a: 'mentalitaet', s: 58, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Mittig stehen und auf die Reflexe vertrauen', h: 'Reflexe', a: 'tempo', s: 64, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Kurz vor dem Schuss einen Schritt versetzen', h: 'Eins gegen eins · riskant', a: 'zweikampf', s: 72, gut: 'rettung', schlecht: 'gegentor' } ] },
+    { t: 'Der lange Ball geht über deine Abwehr. Du stehst an der Strafraumgrenze.', w: [
+      { l: 'Rauslaufen und klären', h: 'Eins gegen eins', a: 'zweikampf', s: 60, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Zurück ins Tor und die Linie hüten', h: 'Reflexe · sicher', a: 'tempo', s: 46, gut: 'aktion', schlecht: 'nachschuss' },
+      { l: 'Weit vor dem Raum mit dem Kopf klären', h: 'Strafraum · Karte droht', a: 'physis', s: 66, gut: 'rettung', schlecht: 'karte' } ] },
+    { t: 'Der Schuss wird abgefälscht und ändert mitten in der Luft die Richtung.', w: [
+      { l: 'Nachfassen und irgendwie drankommen', h: 'Reflexe · sehr schwer', a: 'tempo', s: 74, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Den Winkel schon vorher verkleinert haben', h: 'Mentalität', a: 'mentalitaet', s: 58, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Weit wegfausten, egal wohin', h: 'Fangsicherheit', a: 'dribbling', s: 54, gut: 'aktion', schlecht: 'nachschuss' } ] },
+    { t: 'Der Gegner baut in Ruhe auf. Deine Viererkette steht zu weit auseinander.', w: [
+      { l: 'Laut dirigieren, bis die Kette steht', h: 'Mentalität', a: 'mentalitaet', s: 46, gut: 'aktion', schlecht: 'nachschuss' },
+      { l: 'Selbst weit aufrücken und mitspielen', h: 'Strafraum · riskant', a: 'physis', s: 62, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Nichts sagen und auf dich vertrauen', h: 'Reflexe', a: 'tempo', s: 60, gut: 'aktion', schlecht: 'nachschuss' } ] },
+    { t: 'Strömender Regen. Der Ball kommt flach, aber unberechenbar durch das Wasser.', w: [
+      { l: 'Sauber nach vorn abklatschen', h: 'Fangsicherheit · sicher', a: 'dribbling', s: 46, gut: 'aktion', schlecht: 'nachschuss' },
+      { l: 'Festhalten — kein Nachschuss', h: 'Fangsicherheit · schwer', a: 'dribbling', s: 68, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Zur Ecke lenken', h: 'Reflexe', a: 'tempo', s: 50, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Ihr führt, es läuft die 88. Minute. Der Abstoß gehört dir — und die Zeit auch.', w: [
+      { l: 'Lange liegen bleiben und behandeln lassen', h: 'Mentalität · Karte droht', a: 'mentalitaet', s: 44, gut: 'aktion', schlecht: 'karte' },
+      { l: 'Schnell abschlagen und den Konter einleiten', h: 'Abschlag · riskant', a: 'schuss', s: 64, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Ganz normal weiterspielen', h: 'Spielöffnung · sicher', a: 'pass', s: 40, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Der Stürmer läuft dich beim Herauslaufen an. Es wird eng und körperlich.', w: [
+      { l: 'Den Körper reinstellen', h: 'Strafraum · Karte droht', a: 'physis', s: 54, gut: 'aktion', schlecht: 'karte' },
+      { l: 'Ball festhalten und dir Zeit nehmen', h: 'Mentalität', a: 'mentalitaet', s: 48, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Ihn überlupfen und selbst eröffnen', h: 'Spielöffnung · riskant', a: 'pass', s: 72, gut: 'aktion', schlecht: 'gegentor' } ] },
+    { t: 'Du gehst mit den Fäusten voran in ein Getümmel aus Beinen und Stollen.', w: [
+      { l: 'Durchziehen, egal was kommt', h: 'Strafraum · Verletzungsgefahr', a: 'physis', s: 60, gut: 'rettung', schlecht: 'eigenverletzung' },
+      { l: 'Kurz zögern', h: 'Mentalität', a: 'mentalitaet', s: 48, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Zurückweichen und die Linie hüten', h: 'Reflexe · sicher', a: 'tempo', s: 52, gut: 'aktion', schlecht: 'nachschuss' } ] },
+    { t: 'Nachspielzeit, ihr liegt zurück, letzte Ecke. Der Schiedsrichter lässt dich mit nach vorn.', w: [
+      { l: 'In den Fünfer stürmen und draufhalten', h: 'Strafraum · schwer', a: 'physis', s: 70, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'An der Strafraumkante lauern', h: 'Abschlag · Wahnsinn', a: 'schuss', s: 80, gut: 'traumtor', schlecht: 'vergeben' },
+      { l: 'Doch lieber im eigenen Tor bleiben', h: 'Mentalität · sicher', a: 'mentalitaet', s: 30, gut: 'aktion', schlecht: 'gegentor' } ] },
+    { t: 'Elfmeter gegen euch. Du gehst auf die Linie, das Stadion pfeift ihn an.', elfer: true, w: [
+      { l: 'Die Ecke ahnen und früh abtauchen', h: 'Mentalität', a: 'mentalitaet', s: 56, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Bis zuletzt stehen bleiben', h: 'Reflexe', a: 'tempo', s: 60, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Ihn vorher aus dem Konzept bringen', h: 'Eins gegen eins', a: 'zweikampf', s: 58, gut: 'rettung', schlecht: 'gegentor' } ] }
+  ],
   Angriff: [
     { t: 'Die Flanke kommt scharf von rechts herein. Du löst dich am Fünfer vom Verteidiger.', w: [
       { l: 'Kopfball nach unten', h: 'Physis', a: 'physis', s: 60, gut: 'tor', schlecht: 'vergeben' },
@@ -2221,8 +2317,11 @@ const TICKER_TEXTE = {
     'Du läufst ein und vollendest.'],
   torMein: ['trifft.', 'schiebt ein — ihr jubelt.', 'trifft aus der Drehung.', 'köpft eine Ecke ins Netz.', 'vollendet einen schönen Angriff.'],
   torGegen: ['trifft.', 'schlägt eiskalt zu.', 'nutzt die Lücke in eurer Kette.', 'trifft nach einem Konter.', 'kommt nach einer Ecke zum Kopfball — drin.'],
-  chance: ['— vergeben.', ' kommt durch, der Abschluss misslingt.', ' scheitert am Torwart.', ' setzt den Ball an den Pfosten.'],
-  gefahr: [' kommt gefährlich vor das Tor.', ' prüft euren Torwart aus der Distanz.', ' zielt aus spitzem Winkel knapp vorbei.', ' trifft nur das Außennetz.']
+  chance: [' — vergeben.', ' kommt durch, der Abschluss misslingt.', ' scheitert am Torwart.', ' setzt den Ball an den Pfosten.'],
+  gefahr: [' kommt gefährlich vor das Tor.', ' prüft euren Torwart aus der Distanz.', ' zielt aus spitzem Winkel knapp vorbei.', ' trifft nur das Außennetz.'],
+  /* Stehst du selbst im Tor, ist „euer Torwart“ ja niemand anders. */
+  gefahrTW: [' kommt gefährlich vor dein Tor.', ' prüft dich aus der Distanz.', ' zielt aus spitzem Winkel knapp vorbei.', ' trifft nur das Außennetz.'],
+  chanceTW: [' — vergeben.', ' kommt durch, der Abschluss misslingt.', ' scheitert am gegnerischen Torwart.', ' setzt den Ball an den Pfosten.']
 };
 const ERGEBNIS_TEXT = {
   tor: ['Du triffst! Der Ball zappelt im Netz.', 'Drin! Das Stadion explodiert.', 'Eiskalt abgeschlossen — Tor!', 'Der Torwart ist chancenlos. Tor für dich.', 'Flach, hart, drin. Dein Tor.'],
@@ -2240,6 +2339,23 @@ const ERGEBNIS_TEXT = {
   karte: ['Der Schiedsrichter zückt Gelb. Du diskutierst nicht mal.', 'Gelb. Verdient, und das weißt du.'],
   eigenverletzung: ['Du bleibst liegen. Die Betreuer winken sofort, für dich ist Schluss.', 'Es reißt im Oberschenkel. Du gehst gestützt vom Platz.', 'Der Zusammenprall war zu heftig. Du kannst nicht weitermachen.']
 };
+/* Dieselben Ergebnisse, aus dem Tor erzählt. */
+const ERGEBNIS_TEXT_TW = {
+  rettung: ['Du bist dran! Der Ball klatscht gegen deine Handfläche und springt ins Aus.', 'Gehalten — und festgehalten. Kein Nachschuss, keine Diskussion.', 'Was für eine Parade. Die Kurve singt deinen Namen.', 'Du machst dich groß, er findet keinen Weg vorbei. Stark.'],
+  aktion: ['Sauber gelöst. Unspektakulär, aber genau so war es gedacht.', 'Kein Applaus von den Rängen, aber deine Abwehr klatscht dich ab.', 'Ruhig geblieben, Gefahr weg. Der Trainer nickt.', 'Nichts passiert — weil du rechtzeitig da warst.'],
+  assist: ['Dein Abschlag findet den Flügel, drei Stationen später liegt der Ball drin. Vorlage für den Torwart!', 'Ein Wurf über vierzig Meter leitet das Tor ein. Vorlage.'],
+  tor: ['Du triffst! Ein Torwart, der in der Nachspielzeit trifft — davon wird man noch reden.', 'Drin! Dein eigener Kasten steht leer, das ist dir gerade völlig egal.'],
+  traumtor: ['Der Torwart trifft — und wie. Das läuft heute Abend auf jedem Kanal.', 'Unhaltbar aus dem Gehäuse eines Torwarts. Das Stadion verliert den Verstand.'],
+  gegentor: ['Der Ball ist drin. Du liegst am Boden und schaust ihm hinterher.', 'Gegentor — und alle schauen auf dich.', 'Das war zu halten. Die Kurve wird still.'],
+  ballverlust: ['Dein Ball landet beim Gegner. Der Trainer an der Seitenlinie wird laut.', 'Zu ungenau eröffnet — und schon rollt es zurück auf dich zu.'],
+  vergeben: ['Vorbei. Du sprintest zurück, so schnell du kannst.', 'Drüber. Und jetzt ganz schnell wieder nach hinten.'],
+  karte: ['Gelb für den Torwart. Der Schiedsrichter zeigt auf die Uhr.', 'Gelb. Du hebst entschuldigend die Hand.'],
+  nachschuss: ['Du kommst nur noch mit den Fingerspitzen hin — der Nachschuss geht knapp vorbei. Glück gehabt.',
+    'Du kannst nur abklatschen. Der Ball trudelt gefährlich durch deinen Fünfer, dann ist er weg.',
+    'Das war nichts. Der Pfosten rettet dich.',
+    'Du greifst daneben — und der Nachschuss landet auf dem Tornetz. Deine Abwehr schaut dich an.']
+};
+const ERG_TEXT = art => ((S.p.pos === 'TW' && ERGEBNIS_TEXT_TW[art]) || ERGEBNIS_TEXT[art] || ['—']);
 
 /* ========================== DER AUFTRAG ==========================
    Der Trainer war bisher vom Spiel abgekoppelt: Seine Spielidee entschied nur,
@@ -2274,7 +2390,16 @@ const AUFTRAEGE = [
     wenn: () => POS(S.p.pos).angriff <= .5, erfuellt: r => r.toreGegner <= 1 },
   { id: 'zweikampf', kurz: 'Dich in die Zweikämpfe werfen', stil: ['defensiv', 'akribisch'],
     text: 'Ich will dich in den Zweikämpfen sehen. Geh dahin, wo es wehtut.',
-    wenn: () => true, erfuellt: r => r.aktionen >= 1.6 },
+    wenn: () => S.p.pos !== 'TW', erfuellt: r => r.aktionen >= 1.6 },
+  { id: 'parade', kurz: 'Den Laden hinten zusammenhalten', stil: ['defensiv', 'akribisch'],
+    text: 'Wenn einer durchkommt, bist du der Letzte. Ich will sehen, dass du da bist.',
+    wenn: () => S.p.pos === 'TW', erfuellt: r => r.aktionen >= 1.6 },
+  { id: 'ruhigAmBall', kurz: 'Auch am Ball ruhig bleiben', stil: ['akribisch', 'talent'],
+    text: 'Kein Nervenflattern. Auf der Linie ruhig — und am Ball genauso.',
+    wenn: () => S.p.pos === 'TW', erfuellt: r => r.fehler < 1 },
+  { id: 'eroeffnen', kurz: 'Das Spiel von hinten eröffnen', stil: ['offensiv', 'talent'],
+    text: 'Du bist heute der elfte Feldspieler. Eröffne das Spiel, wirf es nicht weg.',
+    wenn: () => S.p.pos === 'TW', erfuellt: r => r.aktionen >= 1 && r.fehler < 1 },
   { id: 'ohneFehler', kurz: 'Ohne Fehler bleiben', stil: ['akribisch', 'defensiv'],
     text: 'Keine Geschenke. Kein einziger unnötiger Ballverlust.',
     wenn: () => true, erfuellt: r => r.fehler < 1 },
@@ -2364,14 +2489,24 @@ function baueSpielverlauf(fx, einsatz) {
      Dritter von vier, nur weil der eigene Spieler noch jung war. */
   const gewicht = ts.nat ? clamp((effOvr() - club.staerke) * 0.1, -1.5, 3)
                          : clamp((effOvr() - club.staerke) * 0.2, -3, 6);
-  const meineStr = club.staerke + (fx.heim ? 3 : 0) + (spielt ? gewicht : (ts.nat ? -.5 : -1));
+  /* Ein Torwart wirkt anders auf ein Spiel als ein Feldspieler: Er macht seine
+     Mannschaft nicht gefährlicher, sondern schwerer zu bezwingen. Sein Gewicht
+     zaehlt deshalb ausschliesslich nach hinten — ein Weltklassemann hinter
+     einer Durchschnittsabwehr spart rund ein Drittel der Gegentore. */
+  const torwart = p.pos === 'TW' && spielt;
+  const meineStr = club.staerke + (fx.heim ? 3 : 0) + (spielt ? (torwart ? 0 : gewicht) : (ts.nat ? -.5 : -1));
   const d = meineStr - gegner.staerke;
   const xMein = clamp(1.42 * Math.exp(d * 0.033), 0.22, 4.6);
-  const xGegen = clamp(1.42 * Math.exp(-d * 0.033), 0.22, 4.6);
+  const xGegen = clamp(1.42 * Math.exp(-d * 0.033) * (torwart ? clamp(1 - gewicht * .05, .7, 1.3) : 1), 0.22, 4.6);
   const chancenMein = clamp(Math.round(xMein * 2.3), 1, 9);
   const chancenGegen = clamp(Math.round(xGegen * 2.3), 1, 9);
   const pMein = clamp(xMein / chancenMein, 0.08, 0.7);
-  const pGegen = clamp(xGegen / chancenGegen, 0.08, 0.7);
+  /* Beim Feldspieler gehen seine Momente von den eigenen Chancen ab — beim
+     Torwart muessen sie von denen des Gegners abgehen, denn seine
+     Schluesselmomente sind genau die Gelegenheiten der anderen Mannschaft.
+     Ohne das kamen sie obendrauf: Dieselbe Mannschaft kassierte mit einem
+     Torwart als Spielfigur anderthalb Tore je Spiel statt 1,3. */
+  const pGegen = clamp(xGegen / chancenGegen, 0.08, 0.7) * (torwart ? .85 : 1);
 
   /* Zwei Momente fuer alle. Der Zuschlag fuer Angreifer brachte einen
      Mittelstuermer auf ueber ein Tor pro Spiel — gemessen 115 Tore je hundert
@@ -2411,6 +2546,19 @@ function baueSpielverlauf(fx, einsatz) {
    Ein Fuenf-zu-null geht dem letzten Mann an, ein Viertorespiel schreibt man
    dem Angriff gut. */
 function noteBerechnen(basis, tore, vorlagen, aktionen, fehler, ergebnis, minuten, toreMein, toreGegner) {
+  /* Der Torwart wird nach anderen Dingen beurteilt: Paraden, Patzer,
+     Gegentore — und der Null. Ein Sechs-zu-null ist seine beste Note, ein
+     Vier-zu-drei trotz fünf Paraden keine gute. */
+  if (S.p.pos === 'TW') {
+    let n = basis;
+    n -= aktionen * .34 + tore * 1.3 + vorlagen * .6;
+    n += fehler * .60;
+    n += clamp((toreGegner - 1.15) * .46, -.7, 1.7);
+    if (toreGegner === 0 && minuten >= 60) n -= .35;
+    n += ergebnis === 'sieg' ? -.20 : ergebnis === 'niederlage' ? .20 : 0;
+    if (minuten < 30) n = NOTE_MITTE + (n - NOTE_MITTE) * 0.55;
+    return clamp(round1(n), 1, 6);
+  }
   let n = basis;
   n -= tore * 0.95 + vorlagen * 0.55 + aktionen * 0.34;
   n += fehler * 0.52;
@@ -3835,10 +3983,17 @@ function rivalenWaehlen(pos) {
       jung.push(e);
     }
   }
-  if (!jung.length) return null;
-  const gleich = jung.filter(e => e[1] === pos);
+  let gleich = jung.filter(e => e[1] === pos);
+  /* Junge Torhüter mit diesen Werten gibt es kaum — sonst bekäme ausgerechnet
+     ein Torwart einen Stürmer als lebenslangen Vergleich. */
+  if (!gleich.length && pos === 'TW') {
+    for (const cid of Object.keys(ECHTE_KADER)) {
+      for (const e of ECHTE_KADER[cid]) if (e[1] === 'TW' && e[2] <= 27 && e[4] >= 72) gleich.push(e);
+    }
+  }
+  if (!gleich.length && !jung.length) return null;
   const e = pick(gleich.length ? gleich : jung);
-  return { name: e[0], pos: e[1], spiele: 0, tore: 0, vorlagen: 0, titel: 0, saisons: [] };
+  return { name: e[0], pos: e[1], spiele: 0, tore: 0, vorlagen: 0, zuNull: 0, titel: 0, saisons: [] };
 }
 
 /* Wo er gerade steht. null heisst: Laufbahn beendet. */
@@ -3858,6 +4013,11 @@ function rivaleStand() {
 function rivaleSaison(st) {
   const ang = POS(st.pos).angriff;
   const spiele = clamp(Math.round(rnd(.55, .95) * 34), 6, 38);
+  if (st.pos === 'TW') {
+    const zuNull = Math.round(poisson(clamp((st.ovr - 60) * .38, .5, 22)));
+    const titel = (chance(clamp((st.club.staerke - 72) * .035, .02, .55)) ? 1 : 0) + (zuNull >= 16 ? 1 : 0);
+    return { spiele, tore: 0, vorlagen: 0, zuNull, titel };
+  }
   const tore = Math.round(poisson(clamp((st.ovr - 68) * ang * .9, .1, 28)));
   const vorlagen = Math.round(poisson(clamp((st.ovr - 68) * .42, .1, 15)));
   /* Titelchancen haengen am Verein, nicht am Spieler — wer bei einem Grossen
@@ -3865,7 +4025,7 @@ function rivaleSaison(st) {
      Vergleich fair bleibt: Auf deiner Seite zaehlen Einzelauszeichnungen
      schliesslich auch mit. */
   const titel = (chance(clamp((st.club.staerke - 72) * .035, .02, .55)) ? 1 : 0) + (tore >= 22 ? 1 : 0);
-  return { spiele, tore, vorlagen, titel };
+  return { spiele, tore, vorlagen, zuNull: 0, titel };
 }
 
 function rivaleAbschliessen() {
@@ -3875,7 +4035,8 @@ function rivaleAbschliessen() {
   if (!st) { r.beendet = r.beendet || saisonLabel(S.jahr); return null; }
   const sa = rivaleSaison(st);
   r.spiele += sa.spiele; r.tore += sa.tore; r.vorlagen += sa.vorlagen; r.titel += sa.titel;
-  r.saisons.push({ saison: saisonLabel(S.jahr), club: st.club.kurz, ovr: st.ovr, tore: sa.tore, vorlagen: sa.vorlagen });
+  r.zuNull = (r.zuNull || 0) + (sa.zuNull || 0);
+  r.saisons.push({ saison: saisonLabel(S.jahr), club: st.club.kurz, ovr: st.ovr, tore: sa.tore, vorlagen: sa.vorlagen, zuNull: sa.zuNull || 0 });
   if (r.saisons.length > 26) r.saisons.shift();
   return { st, sa };
 }
@@ -3930,7 +4091,10 @@ function starsSaison() {
 }
 function meinePunkte() {
   const st = S.stats, avg = st.noten.length ? st.noten.reduce((a, b) => a + b, 0) / st.noten.length : 4;
-  return Math.round(st.tore * 3.2 + st.vorlagen * 2 + Math.max(0, 3.7 - avg) * 24 + S.titelDieseSaison.length * 14
+  /* Ein Torwart schießt keine Tore. Ohne eigene Waehrung stuende er in der
+     Wahl zum Weltfußballer chancenlos ganz hinten — bei ihm zaehlt die Null. */
+  const eigen = S.p.pos === 'TW' ? (st.zuNull || 0) * 3.6 : st.tore * 3.2 + st.vorlagen * 2;
+  return Math.round(eigen + Math.max(0, 3.7 - avg) * 24 + S.titelDieseSaison.length * 14
     + OVR() * 1.35 + CL(S.p.clubId).staerke * .3 + S.natStats.tore * 2.2);
 }
 function weltrangliste() {
@@ -4106,7 +4270,8 @@ async function saisonEnde() {
   const zeilen = [
     'Abschlussplatz: ' + platz + '. in der ' + lg.name,
     'Einsätze: ' + st.spiele + ' (' + st.startelf + ' von Beginn) · ' + Math.round(st.minuten) + ' Minuten',
-    'Tore: ' + st.tore + ' · Vorlagen: ' + st.vorlagen,
+    istTW() ? 'Zu Null: ' + (st.zuNull || 0) + ' · Gegentore: ' + (st.gegentore || 0)
+      : 'Tore: ' + st.tore + ' · Vorlagen: ' + st.vorlagen,
     'Notenschnitt: ' + (avg ? note(avg) : '—'),
     'Karten: ' + st.gelb + ' gelb, ' + st.rot + ' rot'
   ];
@@ -4117,22 +4282,35 @@ async function saisonEnde() {
   const rv = rivaleAbschliessen();
   if (rv) {
     const r = S.rivale;
-    const vorherVorn = r.tore - rv.sa.tore > karriereTore() - st.tore;
-    const jetztVorn = karriereTore() > r.tore;
-    if (vorherVorn && jetztVorn) merken('serie', 'Erstmals mehr Karrieretore als ' + r.name + '.', 1);
+    /* Torhueter messen sich an der Null statt an Toren — aber nur, wenn beide
+       im Tor stehen. */
+    const vergleichTW = istTW() && rv.st.pos === 'TW';
+    const meinWert = vergleichTW ? karriereZuNull() : karriereTore();
+    const seinWert = vergleichTW ? (r.zuNull || 0) : r.tore;
+    const vorherVorn = (vergleichTW ? (r.zuNull || 0) - (rv.sa.zuNull || 0) : r.tore - rv.sa.tore)
+      > meinWert - (vergleichTW ? (st.zuNull || 0) : st.tore);
+    if (vorherVorn && meinWert > seinWert) {
+      merken('serie', 'Erstmals mehr ' + (vergleichTW ? 'Spiele ohne Gegentor' : 'Karrieretore') + ' als ' + r.name + '.', 1);
+    }
     await sagen({
       eyebrow: 'Dein Jahrgang', titel: r.name,
       text: [
         r.name + ' · ' + rv.st.alter + ' Jahre · ' + rv.st.club.name + ' · Stärke ' + rv.st.ovr,
         '',
-        'Diese Saison: ' + rv.sa.tore + ' Tore, ' + rv.sa.vorlagen + ' Vorlagen in ' + rv.sa.spiele + ' Spielen'
-          + (rv.sa.titel ? ' · ein Titel' : ''),
-        'Du:           ' + st.tore + ' Tore, ' + st.vorlagen + ' Vorlagen in ' + st.spiele + ' Spielen'
-          + (S.titelDieseSaison.length ? ' · ' + S.titelDieseSaison.length + ' Titel' : ''),
+        rv.st.pos === 'TW'
+          ? 'Diese Saison: ' + (rv.sa.zuNull || 0) + ' mal zu Null in ' + rv.sa.spiele + ' Spielen' + (rv.sa.titel ? ' · ein Titel' : '')
+          : 'Diese Saison: ' + rv.sa.tore + ' Tore, ' + rv.sa.vorlagen + ' Vorlagen in ' + rv.sa.spiele + ' Spielen' + (rv.sa.titel ? ' · ein Titel' : ''),
+        istTW()
+          ? 'Du:           ' + (st.zuNull || 0) + ' mal zu Null in ' + st.spiele + ' Spielen'
+            + (S.titelDieseSaison.length ? ' · ' + S.titelDieseSaison.length + ' Titel' : '')
+          : 'Du:           ' + st.tore + ' Tore, ' + st.vorlagen + ' Vorlagen in ' + st.spiele + ' Spielen'
+            + (S.titelDieseSaison.length ? ' · ' + S.titelDieseSaison.length + ' Titel' : ''),
         '',
-        'Karriere: ' + karriereTore() + ' zu ' + r.tore + ' Toren, ' + p.titel.length + ' zu ' + r.titel + ' Titeln'
+        vergleichTW
+          ? 'Karriere: ' + karriereZuNull() + ' zu ' + (r.zuNull || 0) + ' mal zu Null, ' + p.titel.length + ' zu ' + r.titel + ' Titeln'
+          : 'Karriere: ' + karriereTore() + ' zu ' + r.tore + ' Toren, ' + p.titel.length + ' zu ' + r.titel + ' Titeln'
       ].join('\n'),
-      effekte: [{ t: karriereTore() >= r.tore ? 'Du führst' : 'Er führt', gut: karriereTore() >= r.tore }]
+      effekte: [{ t: meinWert >= seinWert ? 'Du führst' : 'Er führt', gut: meinWert >= seinWert }]
     });
   }
 
@@ -4193,7 +4371,8 @@ async function saisonEnde() {
         + (platz === 1 ? 'Als Erster. Der Platz vor dem Stadion ist voll, bevor der Bus überhaupt da ist.'
           : 'Die Fans stehen schon auf dem Rasen, bevor der Schiedsrichter den Ball unter den Arm geklemmt hat.')
         + '\n\nDeine Bilanz in dieser Saison: ' + zahlwort(st.spiele, 'Spiel', 'Spiele') + ', '
-          + zahlwort(st.tore, 'Tor', 'Tore') + ', ' + zahlwort(st.vorlagen, 'Vorlage', 'Vorlagen') + '.',
+          + (istTW() ? de(st.zuNull || 0) + ' mal zu Null, ' + zahlwort(st.gegentore || 0, 'Gegentor', 'Gegentore')
+                     : zahlwort(st.tore, 'Tor', 'Tore') + ', ' + zahlwort(st.vorlagen, 'Vorlage', 'Vorlagen')) + '.',
       effekte: eff, knopf: 'Feiern'
     });
   }
@@ -4225,6 +4404,7 @@ async function saisonEnde() {
   S.karriere.push({
     saison: saisonLabel(S.jahr), club: club.name, kurz: club.kurz, farbe: club.farbe, liga: lg.name, platz,
     spiele: st.spiele, tore: st.tore, vorlagen: st.vorlagen, note: avg ? round1(avg) : 0, ovr: OVR(),
+    zuNull: st.zuNull || 0, gegentore: st.gegentore || 0, pos: p.pos,
     titel: S.titelDieseSaison.map(t => t.name), alter: p.alter, leihe: S.leihe ? 1 : 0
   });
 
@@ -4313,7 +4493,10 @@ function legacyPunkte() {
   const titel = p.titel.length;
   const gross = p.titel.filter(t => /Goldener Ball|Weltmeister|Europapokal|Kontinentalmeister/.test(t.name)).length;
   const vermaechtnis = BESITZ.filter(b => b.legacy && hatBesitz(b.id)).reduce((a, b) => a + b.legacy, 0);
-  return Math.round(ges.t * 3 + ges.v * 1.6 + ges.s * .4 + titel * 22 + gross * 55 + p.nat.spiele * 1.2 + p.nat.tore * 3 + vermaechtnis + Math.max(...S.karriere.map(k => k.ovr), 40) * 3);
+  /* Ein Torwart schießt keine Tore. Ohne die Null als eigene Währung käme er
+     bei gleicher Laufbahn auf ein Drittel der Punkte eines Stürmers. */
+  const eigen = p.pos === 'TW' ? karriereZuNull() * 4.5 : ges.t * 3 + ges.v * 1.6;
+  return Math.round(eigen + ges.s * .4 + titel * 22 + gross * 55 + p.nat.spiele * 1.2 + p.nat.tore * 3 + vermaechtnis + Math.max(...S.karriere.map(k => k.ovr), 40) * 3);
 }
 async function karriereEnde(grund) {
   S.beendet = true;
@@ -4324,23 +4507,27 @@ async function karriereEnde(grund) {
     : punkte > 280 ? 'Solider Profi' : 'Ein ehrlicher Arbeiter';
   await sagen({
     eyebrow: 'Karriereende · ' + saisonLabel(S.jahr), titel: stufe,
-    text: grund + '\n\n' + ges.s + ' Pflichtspiele · ' + ges.t + ' Tore · ' + ges.v + ' Vorlagen\n'
+    text: grund + '\n\n' + ges.s + ' Pflichtspiele · '
+      + (p.pos === 'TW' ? karriereZuNull() + ' mal zu Null · ' + karriereGegentore() + ' Gegentore'
+                        : ges.t + ' Tore · ' + ges.v + ' Vorlagen') + '\n'
       + p.nat.spiele + ' Länderspiele (' + p.nat.tore + ' Tore) für ' + NAT(p.natId).name + '\n'
       + p.titel.length + ' Titel · Kontostand ' + money(p.geld),
     effekte: p.titel.slice(0, 8).map(t => ({ t: t.name, gut: true }))
   });
   if (S.rivale && S.rivale.spiele) {
     const r = S.rivale;
-    const meineTore = S.karriere.reduce((a, k) => a + k.tore, 0);
-    const besser = meineTore > r.tore, mehrTitel = p.titel.length > r.titel;
+    const twVergleich = p.pos === 'TW' && r.pos === 'TW';
+    const meineTore = twVergleich ? karriereZuNull() : S.karriere.reduce((a, k) => a + k.tore, 0);
+    const seine = twVergleich ? (r.zuNull || 0) : r.tore;
+    const besser = meineTore > seine, mehrTitel = p.titel.length > r.titel;
     const urteil = besser && mehrTitel ? 'Von euch beiden hast du mehr aus dem Jahrgang gemacht.'
       : !besser && !mehrTitel ? 'Er ist der geblieben, an dem du dich messen musstest.'
-      : besser ? 'Du hast öfter getroffen, er hat mehr gewonnen.'
-      : 'Er hat öfter getroffen, du hast mehr gewonnen.';
+      : besser ? (twVergleich ? 'Du hast öfter die Null gehalten, er hat mehr gewonnen.' : 'Du hast öfter getroffen, er hat mehr gewonnen.')
+      : (twVergleich ? 'Er hat öfter die Null gehalten, du hast mehr gewonnen.' : 'Er hat öfter getroffen, du hast mehr gewonnen.');
     await sagen({
       eyebrow: 'Dein Jahrgang', titel: r.name,
       text: 'Ihr habt am selben Tag angefangen.\n\n'
-        + 'Tore: ' + meineTore + ' zu ' + r.tore + '\n'
+        + (twVergleich ? 'Zu Null: ' : 'Tore: ') + meineTore + ' zu ' + seine + '\n'
         + 'Titel: ' + p.titel.length + ' zu ' + r.titel + '\n'
         + 'Spiele: ' + S.karriere.reduce((a, k) => a + k.spiele, 0) + ' zu ' + r.spiele + '\n\n' + urteil
     });
@@ -4535,12 +4722,12 @@ async function spielAustragen(fx) {
           } else {
             tickerEintrag(e.min, 'Tor ' + club.kurz, sch ? sch.name + ' ' + pick(TICKER_TEXTE.torMein) : 'Dein Team trifft.', 'ev-goal');
           }
-        } else { tickerEintrag(e.min, 'Chance', club.name + pick(TICKER_TEXTE.chance), ''); continue; }
+        } else { tickerEintrag(e.min, 'Chance', club.name + pick(p.pos === 'TW' ? TICKER_TEXTE.chanceTW : TICKER_TEXTE.chance), ''); continue; }
       } else {
         if (e.tor) {
           toreGegner++; stand(toreMein, toreGegner, fx.heim);
           tickerEintrag(e.min, 'Gegentor', gegner.name + ' ' + pick(TICKER_TEXTE.torGegen), 'ev-bad');
-        } else { tickerEintrag(e.min, 'Gefahr', gegner.name + pick(TICKER_TEXTE.gefahr), ''); continue; }
+        } else { tickerEintrag(e.min, 'Gefahr', gegner.name + pick(p.pos === 'TW' && spielt ? TICKER_TEXTE.gefahrTW : TICKER_TEXTE.gefahr), ''); continue; }
       }
       if (spielt) await warteKnopf('Weiter');
       continue;
@@ -4570,15 +4757,21 @@ async function spielAustragen(fx) {
     const steig = torWahl ? .014 : assistWahl ? .016 : .019;
     let pErfolg = clamp(basis + (attrWert + bonus - wahl.s) * steig, .06, deckel);
     if (torWahl) pErfolg *= (ABSCHLUSS_LAGE[p.pos] || 1);
+    /* Einen Elfmeter zu halten ist die Ausnahme, nicht die Regel: Selbst ein
+       Weltklassetorwart kommt kaum über ein Drittel. Deshalb eine eigene, sehr
+       flache Kurve statt der allgemeinen. */
+    if (m.elfer && p.pos === 'TW') pErfolg = clamp(.16 + (attrWert + bonus - wahl.s) * .0072, .04, .33);
     const gut = chance(pErfolg);
     const art = gut ? wahl.gut : wahl.schlecht;
-    const txt = pick(ERGEBNIS_TEXT[art] || ['—']);
+    const txt = pick(ERG_TEXT(art));
     if (art === 'tor' || art === 'traumtor') { toreMein++; meineTore++; stand(toreMein, toreGegner, fx.heim); }
     if (art === 'assist') { toreMein++; vorlagen++; stand(toreMein, toreGegner, fx.heim); }
     if (art === 'aktion' || art === 'rettung' || art === 'foulok') aktionen += art === 'rettung' ? 1.6 : 1;
-    if (art === 'vergeben' || art === 'ballverlust') fehler++;
+    if (art === 'vergeben' || art === 'ballverlust' || art === 'nachschuss') fehler++;
     if (art === 'elferfehl') fehler += 2;
-    if (art === 'gegentor') { toreGegner++; fehler += 1.6; stand(toreMein, toreGegner, fx.heim); }
+    /* Beim Torwart schlaegt das Gegentor schon ueber die Gegentorzahl auf die
+       Note durch — als Fehler nochmal voll zu zaehlen waere doppelt. */
+    if (art === 'gegentor') { toreGegner++; fehler += p.pos === 'TW' ? .7 : 1.6; stand(toreMein, toreGegner, fx.heim); }
     if (art === 'karte') { gelb++; fehler += .6; if (chance(.08)) { rot++; minuten = Math.min(minuten, e.min); ausgewechselt = true; } }
     if (art === 'strafstoss') { toreMein++; vorlagen++; stand(toreMein, toreGegner, fx.heim); }
     if (art === 'abseits') fehler += .7;
@@ -4589,7 +4782,7 @@ async function spielAustragen(fx) {
       fehler += .3;
     }
     const kl = (art === 'tor' || art === 'traumtor' || art === 'assist' || art === 'strafstoss') ? 'ev-goal'
-      : (art === 'gegentor' || art === 'elferfehl' || art === 'karte' || art === 'eigenverletzung') ? 'ev-bad' : 'ev-you';
+      : (art === 'gegentor' || art === 'elferfehl' || art === 'karte' || art === 'eigenverletzung' || art === 'nachschuss') ? 'ev-bad' : 'ev-you';
     tickerEintrag(e.min, gut ? 'Gelungen' : 'Daneben', txt, kl);
     await warteKnopf('Weiter');
   }
@@ -4629,7 +4822,10 @@ async function spielAustragen(fx) {
         toreGegner, ergebnis, note: noteWert, minuten
       });
       noteWert = clamp(round1(noteWert + (auftragErfuellt ? -.35 : .2)), 1, 6);
-      tickerEintrag(90, auftragErfuellt ? 'Auftrag erfüllt' : 'Auftrag verfehlt',
+      /* Nach dem letzten Ereignis, nicht davor: Sonst stand hinter einem Tor
+         in der 91. Minute die Auftragsmeldung der 90. */
+      const abpfiff = Math.max(90, verlauf.length ? verlauf[verlauf.length - 1].min : 90);
+      tickerEintrag(abpfiff, auftragErfuellt ? 'Auftrag erfüllt' : 'Auftrag verfehlt',
         auftrag.kurz + (auftragErfuellt ? ' — der Trainer nickt.' : ' — der Trainer verschränkt die Arme.'),
         auftragErfuellt ? 'ev-goal' : 'ev-bad');
     }
@@ -4649,6 +4845,8 @@ async function spielAustragen(fx) {
       S.stats.spiele++;
       if (einsatz.status === 'startelf') S.stats.startelf++;
       S.stats.tore += meineTore; S.stats.vorlagen += vorlagen;
+      S.stats.gegentore = (S.stats.gegentore || 0) + toreGegner;
+      if (toreGegner === 0 && minuten >= 60) S.stats.zuNull = (S.stats.zuNull || 0) + 1;
       S.stats.gelb += gelb; S.stats.rot += rot;
       S.stats.minuten += minuten;
       S.stats.noten.push(noteWert);
@@ -4681,6 +4879,14 @@ async function spielAustragen(fx) {
     rekord('note', noteWert, 'gegen ' + gegnerName, true);
     S.serieTore = meineTore > 0 ? (S.serieTore || 0) + 1 : 0;
     if (S.serieTore >= 2) rekord('torSerie', S.serieTore, 'zuletzt gegen ' + gegnerName);
+    /* Die Serie des Torwarts: Spiele hintereinander ohne Gegentor. */
+    if (p.pos === 'TW' && minuten >= 60) {
+      S.serieZuNull = toreGegner === 0 ? (S.serieZuNull || 0) + 1 : 0;
+      if (S.serieZuNull >= 2) rekord('zuNullSerie', S.serieZuNull, 'zuletzt gegen ' + gegnerName);
+      /* Nicht jede Null ist ein Höhepunkt — sonst stünden dort dreihundert.
+         Erst die fünfte in Folge ist eine Geschichte. */
+      if (S.serieZuNull === 5) merken('zunull', 'Fünf Spiele in Folge ohne Gegentor.', 1);
+    }
     S.serieUngeschlagen = ergebnis === 'niederlage' ? 0 : (S.serieUngeschlagen || 0) + 1;
     if (S.serieUngeschlagen >= 3) rekord('ungeschlagen', S.serieUngeschlagen, 'zuletzt gegen ' + gegnerName);
     p.formNoten.push(noteWert);
@@ -4864,7 +5070,8 @@ function renderHome() {
 
   if (S.beendet) {
     html += '<div class="next-card"><p class="eyebrow">Karriere beendet</p><h2 style="font-family:var(--font-display);font-size:26px;margin-top:6px">' + esc(p.vorname + ' ' + p.nachname) + '</h2>'
-      + '<p class="small ink2" style="margin-top:8px">' + S.karriere.length + ' Saisons · ' + S.karriere.reduce((a, k) => a + k.tore, 0) + ' Tore · ' + p.titel.length + ' Titel</p>'
+      + '<p class="small ink2" style="margin-top:8px">' + S.karriere.length + ' Saisons · '
+      + (istTW() ? karriereZuNull() + ' mal zu Null' : S.karriere.reduce((a, k) => a + k.tore, 0) + ' Tore') + ' · ' + p.titel.length + ' Titel</p>'
       + '<div class="legacy" style="margin-top:10px">' + de(legacyPunkte()) + '</div><p class="eyebrow">Legacy-Punkte</p></div>'
       + '<button class="btn" data-act="neustart">Neue Karriere beginnen</button>';
   } else {
@@ -4901,7 +5108,7 @@ function renderHome() {
         + '</div>';
       if (PLAN(S.plan) && PLAN(S.plan).train && !PLAN(S.plan).athletik) {
         html += '<div class="sect-title" style="margin-top:14px"><h3>Schwerpunkt</h3></div><div class="chips">'
-          + ATTR_KEYS.map(k => '<button class="chip" data-fokus="' + k + '" aria-pressed="' + (S.trainFokus === k) + '">' + ATTR_LABEL[k] + ' ' + Math.round(p.attr[k]) + '</button>').join('')
+          + ATTR_KEYS.map(k => '<button class="chip" data-fokus="' + k + '" aria-pressed="' + (S.trainFokus === k) + '">' + AL(k) + ' ' + Math.round(p.attr[k]) + '</button>').join('')
           + '</div>';
       }
       html += '</section>';
@@ -5097,7 +5304,7 @@ function renderMarkt() {
         const lohn = st ? STAB_STUFEN[st - 1].kosten : 0;
         const naechste = st < 3 ? STAB_STUFEN[st] : null;
         const wirkung = x.attr
-          ? 'Training auf ' + ATTR_LABEL[x.attr] + (st ? ' +' + Math.round((trainerFaktor(x.attr) - 1) * 100) + ' %' : ' — niemand da')
+          ? 'Training auf ' + AL(x.attr) + (st ? ' +' + Math.round((trainerFaktor(x.attr) - 1) * 100) + ' %' : ' — niemand da')
           : x.text + (st ? ' · ' + STAB_STUFEN[st - 1].name : ' — niemand da');
         return '<div class="stab"><div class="stab-kopf">'
           + '<span class="pips">' + [0, 1, 2].map(i => '<i class="' + (i < st ? 'an' : '') + '"></i>').join('') + '</span>'
@@ -5228,7 +5435,7 @@ function formChart(noten) {
 function saisonBeste() {
   const lauf = {
     saison: saisonLabel(S.jahr), club: CL(S.p.clubId).name, alter: S.p.alter,
-    spiele: S.stats.spiele, tore: S.stats.tore, vorlagen: S.stats.vorlagen,
+    spiele: S.stats.spiele, tore: S.stats.tore, vorlagen: S.stats.vorlagen, zuNull: S.stats.zuNull || 0,
     note: S.stats.noten.length ? round1(S.stats.noten.reduce((a, b) => a + b, 0) / S.stats.noten.length) : 0,
     ovr: OVR()
   };
@@ -5238,7 +5445,7 @@ function saisonBeste() {
     if (!da.length) return null;
     return da.reduce((a, b) => ((kleiner ? b[schl] < a[schl] : b[schl] > a[schl]) ? b : a));
   };
-  return { tore: best('tore'), vorlagen: best('vorlagen'), note: best('note', true), ovr: best('ovr'), spiele: best('spiele') };
+  return { tore: best('tore'), vorlagen: best('vorlagen'), zuNull: best('zuNull'), note: best('note', true), ovr: best('ovr'), spiele: best('spiele') };
 }
 function karriereZahlen() {
   const k = S.karriere, club = CL(S.p.clubId);
@@ -5263,10 +5470,10 @@ function renderProfil() {
     + '<div class="small muted">' + NAT(p.natId).flag + ' ' + esc(NAT(p.natId).name) + ' · ' + POS(p.pos).name + ' · ' + p.fuss + 'er Fuß · ' + p.alter + ' Jahre</div>'
     + '</div><div class="hud-ovr"><b>' + OVR() + '</b><span>Stärke</span></div></div>'
     + '<div class="row" style="margin-top:12px;gap:8px"><span class="pill">Entwicklung ' + ('★'.repeat(sterne) + '☆'.repeat(5 - sterne)) + '</span>'
-    + '<span class="pill">' + esc(ARCHETYPEN.find(a => a.id === p.archetyp).name) + '</span></div></div>';
+    + '<span class="pill">' + esc((ARCH(p.archetyp) || { name: 'Spielertyp' }).name) + '</span></div></div>';
 
   html += '<section><div class="sect-title"><h3>Attribute</h3></div><div class="card attrs">'
-    + ATTR_KEYS.map(k => '<div class="attr"><span class="k">' + ATTR_LABEL[k] + '</span>' + meter(p.attr[k], p.attr[k] >= 78 ? 'good' : p.attr[k] >= 40 ? '' : 'warn')
+    + ATTR_KEYS.map(k => '<div class="attr"><span class="k">' + AL(k) + '</span>' + meter(p.attr[k], p.attr[k] >= 78 ? 'good' : p.attr[k] >= 40 ? '' : 'warn')
       + '<span class="v">' + Math.round(p.attr[k]) + '</span></div>').join('')
     + '<div class="attr" style="margin-top:4px;padding-top:9px;border-top:1px solid var(--line-soft)">'
     + '<span class="k">Ausdauer</span>' + meter(kondi(), kondi() >= 65 ? 'good' : kondi() >= 30 ? '' : 'warn')
@@ -5279,8 +5486,11 @@ function renderProfil() {
 
   html += '<section><div class="sect-title"><h3>Saison ' + saisonLabel(S.jahr) + '</h3></div><div class="card cond">'
     + '<div class="cond-item"><span class="k">Spiele</span><span class="v">' + st.spiele + '</span></div>'
-    + '<div class="cond-item"><span class="k">Tore</span><span class="v">' + st.tore + '</span></div>'
-    + '<div class="cond-item"><span class="k">Vorlagen</span><span class="v">' + st.vorlagen + '</span></div>'
+    + (istTW()
+      ? '<div class="cond-item"><span class="k">Zu Null</span><span class="v">' + (st.zuNull || 0) + '</span></div>'
+        + '<div class="cond-item"><span class="k">Gegentore</span><span class="v">' + (st.gegentore || 0) + '</span></div>'
+      : '<div class="cond-item"><span class="k">Tore</span><span class="v">' + st.tore + '</span></div>'
+        + '<div class="cond-item"><span class="k">Vorlagen</span><span class="v">' + st.vorlagen + '</span></div>')
     + '<div class="cond-item"><span class="k">Ø Note</span><span class="v">' + (avg ? note(avg) : '—') + '</span></div>'
     + '<div class="cond-item"><span class="k">Startelf</span><span class="v">' + st.startelf + '</span></div>'
     + '<div class="cond-item"><span class="k">Karten</span><span class="v">' + st.gelb + '/' + st.rot + '</span></div>'
@@ -5288,10 +5498,14 @@ function renderProfil() {
 
   if (S.karriere.length) {
     html += '<section><div class="sect-title"><h3>Karriere</h3></div><div class="card tablewrap">'
-      + '<table class="tbl"><thead><tr><th class="pos"></th><th>Saison</th><th>Sp</th><th>T</th><th>V</th><th>Ø</th><th>Stk</th></tr></thead><tbody>'
+      + '<table class="tbl"><thead><tr><th class="pos"></th><th>Saison</th><th>Sp</th>'
+      + (istTW() ? '<th>Null</th><th>GT</th>' : '<th>T</th><th>V</th>') + '<th>Ø</th><th>Stk</th></tr></thead><tbody>'
       + S.karriere.slice().reverse().map(k => '<tr><td class="pos"></td><td><span class="truncate">' + esc(k.saison) + '</span>'
         + '<div class="tiny muted truncate">' + esc(k.club) + (k.leihe ? ' (Leihe)' : '') + ' · ' + k.platz + '.</div></td>'
-        + '<td>' + k.spiele + '</td><td>' + k.tore + '</td><td>' + k.vorlagen + '</td><td>' + (k.note ? note(k.note) : '—') + '</td><td>' + k.ovr + '</td></tr>').join('')
+        + '<td>' + k.spiele + '</td>'
+        + (istTW() ? '<td>' + (k.zuNull || 0) + '</td><td>' + (k.gegentore || 0) + '</td>'
+                   : '<td>' + k.tore + '</td><td>' + k.vorlagen + '</td>')
+        + '<td>' + (k.note ? note(k.note) : '—') + '</td><td>' + k.ovr + '</td></tr>').join('')
       + '</tbody></table></div></section>';
   }
 
@@ -5306,8 +5520,10 @@ function renderProfil() {
     if (rk.spielTore) marken.push(kachel('Tore in einem Spiel', rk.spielTore.wert, wann(rk.spielTore)));
     if (rk.note) marken.push(kachel('Beste Note', note(rk.note.wert), wann(rk.note)));
     if (rk.torSerie) marken.push(kachel('Spiele in Folge getroffen', rk.torSerie.wert, wann(rk.torSerie)));
+    if (rk.zuNullSerie) marken.push(kachel('Spiele in Folge ohne Gegentor', rk.zuNullSerie.wert, wann(rk.zuNullSerie)));
     if (rk.ungeschlagen) marken.push(kachel('Spiele ohne Niederlage', rk.ungeschlagen.wert, wann(rk.ungeschlagen)));
     if (rk.marktwert) marken.push(kachel('Höchster Marktwert', money(rk.marktwert.wert), wann(rk.marktwert)));
+    if (sb.zuNull && sb.zuNull.zuNull) marken.push(kachel('Zu Null in einer Saison', sb.zuNull.zuNull, sb.zuNull.club + ' · ' + sb.zuNull.saison));
     if (sb.tore && sb.tore.tore) marken.push(kachel('Tore in einer Saison', sb.tore.tore, sb.tore.club + ' · ' + sb.tore.saison));
     if (sb.vorlagen && sb.vorlagen.vorlagen) marken.push(kachel('Vorlagen in einer Saison', sb.vorlagen.vorlagen, sb.vorlagen.club + ' · ' + sb.vorlagen.saison));
     if (sb.note && sb.note.note) marken.push(kachel('Bester Saisonschnitt', note(sb.note.note), sb.note.club + ' · ' + sb.note.saison));
@@ -5319,7 +5535,9 @@ function renderProfil() {
     }
     html += '<section><div class="sect-title"><h3>Karriere in Zahlen</h3><span class="small muted">'
       + kz.saisons + ' Saison' + (kz.saisons === 1 ? '' : 'en') + '</span></div><div class="card cond">'
-      + kachel('Spiele', de(kz.spiele)) + kachel('Tore', de(kz.tore)) + kachel('Vorlagen', de(kz.vorlagen))
+      + kachel('Spiele', de(kz.spiele))
+      + (istTW() ? kachel('Zu Null', de(karriereZuNull())) + kachel('Gegentore', de(karriereGegentore()))
+                 : kachel('Tore', de(kz.tore)) + kachel('Vorlagen', de(kz.vorlagen)))
       + kachel('Vereine', kz.vereine) + kachel('Ligen', kz.ligen) + kachel('Titel', kz.titel)
       + (kz.laender ? kachel('Länderspiele', kz.laender) + kachel('Tore für ' + NAT(S.p.natId).kurz, kz.laenderTore) : '')
       + '</div></section>';
@@ -5349,8 +5567,10 @@ function renderProfil() {
           + '<span class="k"></span><span class="k" style="text-align:right">du</span>'
           + '<span class="k" style="text-align:right">er</span></div>'
           + zeile('Spiele', karriereSpiele(), r.spiele)
-          + zeile('Tore', karriereTore(), r.tore)
-          + zeile('Vorlagen', S.karriere.reduce((a, k) => a + k.vorlagen, 0) + S.stats.vorlagen, r.vorlagen)
+          + (istTW() && r.pos === 'TW'
+            ? zeile('Zu Null', karriereZuNull(), r.zuNull || 0)
+            : zeile('Tore', karriereTore(), r.tore)
+              + zeile('Vorlagen', S.karriere.reduce((a, k) => a + k.vorlagen, 0) + S.stats.vorlagen, r.vorlagen))
           + zeile('Titel', p.titel.length, r.titel)
           + '</div>'
         : '<p class="small muted" style="margin-top:11px">Ihr habt am selben Tag angefangen. Am Ende jeder Saison siehst du hier, wer weiter ist.</p>')
@@ -5665,12 +5885,14 @@ function renderCreate() {
     html += '<div class="field"><label>Position</label><div class="chips">'
       + POSITIONEN.map(p => '<button class="chip" data-set="pos:' + p.id + '" aria-pressed="' + (NEU.pos === p.id) + '">' + p.kurz + '</button>').join('')
       + '</div><p class="small muted">' + esc(POS(NEU.pos).name) + ' · '
-      + Object.keys(POS(NEU.pos).w).sort((a, b) => POS(NEU.pos).w[b] - POS(NEU.pos).w[a]).slice(0, 3).map(k => ATTR_LABEL[k]).join(', ')
-      + ' zählen am meisten.</p></div>'
+      + Object.keys(POS(NEU.pos).w).sort((a, b) => POS(NEU.pos).w[b] - POS(NEU.pos).w[a]).slice(0, 3).map(k => AL(k, NEU.pos)).join(', ')
+      + ' zählen am meisten.'
+      + (NEU.pos === 'TW' ? ' Im Tor heißen dieselben Fächer anders — und die Note rechnet sich aus Paraden, Gegentoren und der Null.' : '')
+      + '</p></div>'
       + '<div class="field"><label>Spielertyp</label><div class="stack-sm">'
-      + ARCHETYPEN.map(a => '<button class="opt" data-set="archetyp:' + a.id + '" aria-pressed="' + (NEU.archetyp === a.id) + '"><div class="grow">'
+      + ARCH_LISTE(NEU.pos).map(a => '<button class="opt" data-set="archetyp:' + a.id + '" aria-pressed="' + (NEU.archetyp === a.id) + '"><div class="grow">'
         + '<div class="opt-t">' + esc(a.name) + '</div><div class="opt-d">' + esc(a.text) + '</div>'
-        + '<div class="opt-m">' + Object.keys(a.boni).filter(k => a.boni[k] > 0).map(k => ATTR_LABEL[k] + ' +' + a.boni[k]).join(' · ') + '</div></div></button>').join('')
+        + '<div class="opt-m">' + Object.keys(a.boni).filter(k => a.boni[k] > 0).map(k => AL(k, NEU.pos) + ' +' + a.boni[k]).join(' · ') + '</div></div></button>').join('')
       + '</div></div>';
   }
   if (s === 3) {
@@ -5703,7 +5925,7 @@ function renderCreate() {
 
 function karriereStarten() {
   const weg = STARTWEGE.find(w => w.id === NEU.weg);
-  const arch = ARCHETYPEN.find(a => a.id === NEU.archetyp);
+  const arch = ARCH(NEU.archetyp) || ARCH_LISTE(NEU.pos)[ARCH_LISTE(NEU.pos).length - 1];
   const club = CL(NEU.clubId);
   const gew = POS(NEU.pos).w;
   const top2 = Object.keys(gew).sort((a, b) => gew[b] - gew[a]).slice(0, 2);
@@ -5747,6 +5969,8 @@ function migriere() {
     .forEach(k => { if (!Array.isArray(S[k])) S[k] = []; });
   ['titel', 'sponsoren', 'formNoten'].forEach(k => { if (!Array.isArray(p[k])) p[k] = []; });
   if (!S.stats) S.stats = { spiele: 0, startelf: 0, tore: 0, vorlagen: 0, noten: [], gelb: 0, rot: 0, minuten: 0 };
+  if (typeof S.stats.zuNull !== 'number') S.stats.zuNull = 0;
+  if (typeof S.stats.gegentore !== 'number') S.stats.gegentore = 0;
   if (!Array.isArray(S.stats.noten)) S.stats.noten = [];
   if (!S.natStats) S.natStats = { spiele: 0, tore: 0 };
   if (!p.nat) p.nat = { dabei: false, spiele: 0, tore: 0, vertrauen: 50 };
@@ -6088,6 +6312,11 @@ function verdrahten() {
       const n = zufallsname(NAT(NEU.natId).pool);
       NEU.vorname = n.v; NEU.nachname = n.n;
     } else NEU[k] = v;
+    /* Torwart und Feldspieler haben verschiedene Spielertypen — beim Wechsel
+       der Position darf keiner stehenbleiben, den es dort nicht gibt. */
+    if (k === 'pos' && !ARCH_LISTE(NEU.pos).some(a => a.id === NEU.archetyp)) {
+      NEU.archetyp = ARCH_LISTE(NEU.pos)[ARCH_LISTE(NEU.pos).length - 1].id;
+    }
     renderCreate();
   });
   el('create-back').addEventListener('click', () => { namenSync(); NEU.schritt = Math.max(1, NEU.schritt - 1); renderCreate(); });
