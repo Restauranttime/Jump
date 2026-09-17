@@ -83,9 +83,8 @@ nur auf der Anzeigetafel sichtbar — dem Bildschirm mit der meisten Spielzeit.
 ## Was drin ist
 
 **Karriere anlegen** — Name, Nation, Position (7 Positionen von Innenverteidiger bis
-Mittelstürmer), starker Fuß, Spielertyp (5 Archetypen mit eigenen Stärken) und der
-Herkunftsweg: Straßenkicker (3. Liga, härtester Weg, höchstes Potenzial),
-Nachwuchsleistungszentrum (2. Bundesliga) oder Wunderkind (Bundesliga, viel Erwartungsdruck).
+Mittelstürmer), Spielertyp, **Startland** und Herkunftsweg. Aus Land und Weg ergibt sich die
+Startliga, daraus drei vorgeschlagene Vereine.
 
 **Wochenrhythmus** — Jede Woche wählst du einen Plan: gezieltes Techniktraining auf ein
 Attribut, Doppelschichten (schneller besser, höheres Verletzungsrisiko), Ausdauertraining,
@@ -227,6 +226,41 @@ spielt, kommt auf 51 % statt 41 %** — ein spürbarer, aber kein überwältigen
 ist Absicht: Ein Versuch mit doppelter Wirkung machte die Sache schlechter, weil ein Stürmer,
 der nur noch den Auftrag im Kopf hat, weniger Tore schießt und am Ende die schlechtere Note
 bekommt. Der Auftrag soll gutes Fußballspielen würzen, nicht ersetzen.
+
+## Ligen und Startländer
+
+Dreiundzwanzig Ligen in acht Ländern, 442 Vereine. Sieben Länder haben einen Unterbau und sind
+damit als Startland wählbar:
+
+| Land | Ligen | Spieltage |
+|---|---|---|
+| 🇩🇪 Deutschland | Bundesliga · 2. Bundesliga · 3. Liga | 34 / 34 / 38 |
+| 🏴󠁧󠁢󠁥󠁮󠁧󠁿 England | Premier League · Championship · League One · League Two | 38 / 46 / 46 / 46 |
+| 🇪🇸 Spanien | LaLiga · LaLiga Hypermotion · Primera Federación | 38 / 42 / 38 |
+| 🇮🇹 Italien | Serie A · Serie B · Serie C | 38 / 38 / 38 |
+| 🇫🇷 Frankreich | Ligue 1 · Ligue 2 · Championnat National | 34 / 34 / 34 |
+| 🇦🇹 Österreich | Bundesliga · 2. Liga · Regionalliga Ost | 22 / 30 / 30 |
+| 🇳🇱 Niederlande | Eredivisie · Eerste Divisie · Tweede Divisie | 34 / 38 / 34 |
+
+Dazu die Saudi Pro League als Ziel für späte Karrierejahre, ohne Unterbau und darum kein
+Startland. Auf- und Abstieg laufen in jedem Land durch die ganze Pyramide — in England über
+vier Stufen.
+
+**Der Weg bestimmt die Stufe, nicht die Liga.** Wunderkind startet ganz oben, das
+Nachwuchsleistungszentrum eine Stufe darunter, der Straßenkicker ganz unten. In England heißt
+das League Two, in Österreich die Regionalliga Ost, in Italien die Serie C. Danach kommen wie
+bisher drei Vereinsvorschläge aus den schwächeren siebzig Prozent dieser Liga. Wohin du später
+wechselst, bleibt offen: Gemessen über alle einundzwanzig Kombinationen aus Land und Weg
+erreicht ein Spieler aus der Tweede Divisie oder der Regionalliga im Lauf einer Karriere die
+Premier League oder die Serie A.
+
+Weil die Spielzeiten jetzt zwischen 22 und 46 Spieltagen liegen, ist „Tore pro Saison" kein
+vergleichbares Maß mehr — der Abschnitt Balance zählt deshalb Tore pro Spiel.
+
+Die Vereinslisten der dritten Ligen (Serie C, Primera Federación, Regionalliga Ost,
+Championnat National, Tweede Divisie) sind der ungenaueste Teil der Daten: Dort spielen zum
+Teil Halbprofis in regionalen Gruppen, und die Zusammensetzung wechselt jedes Jahr. Die Namen
+sind echt, die Gruppen aber zusammengestellt statt abgebildet.
 
 ## Leihe
 
@@ -400,18 +434,19 @@ eine durchgespielte Karriere:
 - Die Note dreht um **3,5**. Derselbe Wert gilt für Trainer-Vertrauen, Moral, Form und den
   Kurzeinsatz — wandert einer dieser Drehpunkte, schiebt sich das ganze Spiel unbemerkt in
   eine Richtung.
-- Torquoten je Position, gemessen über je 30 Karrieren und rund 700 Saisons, gezählt in
-  Stammsaisons ab 25 Spielen (Spanne: überlegt gewählt bis immer abgeschlossen):
+- Torquoten je Position, gemessen über je 30 Karrieren und rund 400 Stammsaisons (ab 25
+  Spielen). In Toren pro Spiel, weil die Spielzeiten je nach Land 22 bis 46 Spieltage haben.
+  Die Spanne reicht von überlegt gewählt bis immer abgeschlossen:
 
-  | Position | Tore je Saison | Vorlagen | Rekordsaison |
+  | Position | Tore je Spiel | Tore je Stammsaison | Vorlagen |
   |---|---|---|---|
-  | Mittelstürmer | 25–28 | 1–2 | 50 |
-  | Flügelstürmer | 15–19 | 2–16 | 39 |
-  | Offensives Mittelfeld | 5–6 | 5–14 | 16 |
-  | Zentrales Mittelfeld | 3–4 | 5–14 | 12 |
-  | Defensives Mittelfeld | 2–3 | 1–5 | 11 |
-  | Außenverteidiger | 2–3 | 0–3 | 11 |
-  | Innenverteidiger | 1–3 | 0–4 | 10 |
+  | Mittelstürmer | 0,82–0,89 | 28–30 | 0,6–1,4 |
+  | Flügelstürmer | 0,51–0,65 | 18–22 | 2,8–18,5 |
+  | Offensives Mittelfeld | 0,22–0,29 | 7–10 | 5,3–15,1 |
+  | Zentrales Mittelfeld | 0,14–0,18 | 5–6 | 6,7–15,5 |
+  | Defensives Mittelfeld | 0,08–0,12 | 3–4 | 2,2–9,1 |
+  | Außenverteidiger | 0,08–0,13 | 3–4 | 0–4,3 |
+  | Innenverteidiger | 0,06–0,10 | 2–3 | 0,1–4,7 |
 - Marktwert auf dem Höhepunkt: zweistellige Millionen, mit Weltklasse deutlich darüber.
 - Energie eines Stammspielers: Ø 48–60, je nach Umgang mit Regenerationswochen. Wer nicht
   spielt, bleibt naturgemäß frisch — der Karriereschnitt über alle Wochen liegt deshalb höher.

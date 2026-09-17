@@ -552,18 +552,50 @@ function poisson(lambda) {
 }
 
 /* ------------------------------ Ligen ------------------------------ */
+/* Nach Land geordnet, oben nach unten. Der Unterbau macht den Aufstieg zu
+   einer Geschichte statt zu einem Startwert: Wer in der League Two anfaengt,
+   hat vier Stufen vor sich. */
 const LEAGUES = [
-  { id: 'de3', name: '3. Liga',          land: 'Deutschland', flag: '🇩🇪', tier: 3, euro: false, pokal: 'DFB-Pokal' },
-  { id: 'de2', name: '2. Bundesliga',    land: 'Deutschland', flag: '🇩🇪', tier: 2, euro: false, pokal: 'DFB-Pokal' },
   { id: 'de1', name: 'Bundesliga',       land: 'Deutschland', flag: '🇩🇪', tier: 1, euro: true, pokal: 'DFB-Pokal', meister: 'Deutscher Meister' },
+  { id: 'de2', name: '2. Bundesliga',    land: 'Deutschland', flag: '🇩🇪', tier: 2, euro: false, pokal: 'DFB-Pokal' },
+  { id: 'de3', name: '3. Liga',          land: 'Deutschland', flag: '🇩🇪', tier: 3, euro: false, pokal: 'DFB-Pokal' },
   { id: 'en1', name: 'Premier League',   land: 'England',     flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', tier: 1, euro: true, pokal: 'FA Cup', meister: 'Englischer Meister' },
+  { id: 'en2', name: 'Championship',     land: 'England',     flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', tier: 2, euro: false, pokal: 'FA Cup' },
+  { id: 'en3', name: 'League One',       land: 'England',     flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', tier: 3, euro: false, pokal: 'FA Cup' },
+  { id: 'en4', name: 'League Two',       land: 'England',     flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', tier: 4, euro: false, pokal: 'FA Cup' },
   { id: 'es1', name: 'LaLiga',           land: 'Spanien',     flag: '🇪🇸', tier: 1, euro: true, pokal: 'Copa del Rey', meister: 'Spanischer Meister' },
+  { id: 'es2', name: 'LaLiga Hypermotion', land: 'Spanien',   flag: '🇪🇸', tier: 2, euro: false, pokal: 'Copa del Rey' },
+  { id: 'es3', name: 'Primera Federación', land: 'Spanien',   flag: '🇪🇸', tier: 3, euro: false, pokal: 'Copa del Rey' },
   { id: 'it1', name: 'Serie A',          land: 'Italien',     flag: '🇮🇹', tier: 1, euro: true, pokal: 'Coppa Italia', meister: 'Italienischer Meister' },
+  { id: 'it2', name: 'Serie B',          land: 'Italien',     flag: '🇮🇹', tier: 2, euro: false, pokal: 'Coppa Italia' },
+  { id: 'it3', name: 'Serie C',          land: 'Italien',     flag: '🇮🇹', tier: 3, euro: false, pokal: 'Coppa Italia' },
   { id: 'fr1', name: 'Ligue 1',          land: 'Frankreich',  flag: '🇫🇷', tier: 1, euro: true, pokal: 'Coupe de France', meister: 'Französischer Meister' },
+  { id: 'fr2', name: 'Ligue 2',          land: 'Frankreich',  flag: '🇫🇷', tier: 2, euro: false, pokal: 'Coupe de France' },
+  { id: 'fr3', name: 'Championnat National', land: 'Frankreich', flag: '🇫🇷', tier: 3, euro: false, pokal: 'Coupe de France' },
   { id: 'at1', name: 'Österreichische Bundesliga', land: 'Österreich', flag: '🇦🇹', tier: 1, euro: true, pokal: 'ÖFB-Cup', meister: 'Österreichischer Meister' },
+  { id: 'at2', name: '2. Liga',          land: 'Österreich',  flag: '🇦🇹', tier: 2, euro: false, pokal: 'ÖFB-Cup' },
+  { id: 'at3', name: 'Regionalliga Ost', land: 'Österreich',  flag: '🇦🇹', tier: 3, euro: false, pokal: 'ÖFB-Cup' },
   { id: 'nl1', name: 'Eredivisie',       land: 'Niederlande', flag: '🇳🇱', tier: 1, euro: true, pokal: 'KNVB-Beker', meister: 'Niederländischer Meister' },
+  { id: 'nl2', name: 'Eerste Divisie',   land: 'Niederlande', flag: '🇳🇱', tier: 2, euro: false, pokal: 'KNVB-Beker' },
+  { id: 'nl3', name: 'Tweede Divisie',   land: 'Niederlande', flag: '🇳🇱', tier: 3, euro: false, pokal: 'KNVB-Beker' },
   { id: 'sa1', name: 'Saudi Pro League', land: 'Saudi-Arabien', flag: '🇸🇦', tier: 1, euro: false, pokal: 'Königspokal', meister: 'Saudischer Meister' }
 ];
+
+/* Die Auf- und Abstiegskette je Land. Fruehere Fassungen kannten nur die
+   deutsche. */
+const PYRAMIDEN = {
+  'Deutschland': ['de1', 'de2', 'de3'],
+  'England': ['en1', 'en2', 'en3', 'en4'],
+  'Spanien': ['es1', 'es2', 'es3'],
+  'Italien': ['it1', 'it2', 'it3'],
+  'Frankreich': ['fr1', 'fr2', 'fr3'],
+  'Österreich': ['at1', 'at2', 'at3'],
+  'Niederlande': ['nl1', 'nl2', 'nl3'],
+  'Saudi-Arabien': ['sa1']
+};
+const pyramideVon = ligaId => (LG(ligaId) && PYRAMIDEN[LG(ligaId).land]) || [ligaId];
+/* Die Laender, in denen eine Karriere beginnen kann: alle mit Unterbau. */
+const START_LAENDER = ['Deutschland', 'England', 'Spanien', 'Italien', 'Frankreich', 'Österreich', 'Niederlande'];
 const LG = id => LEAGUES.find(l => l.id === id);
 
 /* Vereine: [Name, Kürzel, Stärke, Farbe 1, Farbe 2, Trikotmuster]
@@ -618,6 +650,27 @@ const CLUBS_RAW = {
         ['Getafe CF','GET',72,'#005999','#FFFFFF','s'],['Deportivo Alavés','ALA',71,'#0761AF','#FFFFFF','v'],
         ['RCD Espanyol','ESP',71,'#FFFFFF','#0067B1','v'],['Levante UD','LEV',69,'#A50044','#004D98','v'],
         ['Elche CF','ELC',69,'#FFFFFF','#00843D','v'],['Real Oviedo','OVI',68,'#0055A5','#FFFFFF','s']],
+  es2: [['UD Almería','ALM',65,'#FFFFFF','#E4002B','v'],['Racing Santander','RAC',64,'#FFFFFF','#009639','h'],
+        ['Deportivo La Coruña','DEP',63,'#0A4EA2','#FFFFFF','v'],['Cádiz CF','CAD',63,'#FFD700','#005BAA','s'],
+        ['UD Las Palmas','LPA',63,'#FFDD00','#005BAA','s'],['Sporting Gijón','SPG',62,'#E4002B','#FFFFFF','v'],
+        ['Granada CF','GRA',62,'#E4002B','#FFFFFF','h'],['CD Leganés','LEG',62,'#005BAA','#FFFFFF','v'],
+        ['Real Valladolid','VLL',61,'#7B2D8B','#FFFFFF','v'],['SD Eibar','EIB',60,'#005BAA','#E4002B','v'],
+        ['SD Huesca','HUE',59,'#005BAA','#E4002B','v'],['Málaga CF','MAL',59,'#005BAA','#FFFFFF','v'],
+        ['Real Zaragoza','ZAR',58,'#FFFFFF','#005BAA','s'],['Burgos CF','BUR',58,'#FFFFFF','#000000','s'],
+        ['CD Mirandés','MIR',57,'#E4002B','#000000','v'],['Córdoba CF','COR',57,'#00A651','#FFFFFF','v'],
+        ['Albacete Balompié','ALB',57,'#FFFFFF','#005BAA','s'],['CD Castellón','CAS',57,'#000000','#FFFFFF','v'],
+        ['Real Sociedad B','RSB',57,'#005BAA','#FFFFFF','v'],['FC Andorra','AND',56,'#E4002B','#FFDD00','s'],
+        ['Cultural Leonesa','CUL',56,'#FFFFFF','#E4002B','s'],['AD Ceuta','CEU',55,'#FFFFFF','#005BAA','s']],
+  es3: [['CD Tenerife','TEN',53,'#FFFFFF','#005BAA','s'],['FC Barcelona Atlètic','BAT',52,'#004D98','#A50044','v'],
+        ['Real Madrid Castilla','CAT',52,'#FFFFFF','#FEBE10','h'],['SD Ponferradina','PON',51,'#005BAA','#FFFFFF','v'],
+        ['Racing de Ferrol','FER',50,'#00A651','#FFFFFF','v'],['Gimnàstic Tarragona','NAS',50,'#E4002B','#FFFFFF','v'],
+        ['Osasuna Promesas','OSP',49,'#D91A21','#0A346F','s'],['Celta Fortuna','CFO',49,'#8AC3EE','#FFFFFF','s'],
+        ['AD Alcorcón','ALC',49,'#FFDD00','#005BAA','s'],['UD Ibiza','IBI',48,'#E4002B','#FFFFFF','s'],
+        ['Betis Deportivo','BED',48,'#00A650','#FFFFFF','v'],['CE Sabadell','SAB',47,'#FFFFFF','#005BAA','s'],
+        ['Atlético Madrileño','ATM',47,'#CB3524','#FFFFFF','v'],['AD Mérida','MER',46,'#E4002B','#000000','v'],
+        ['Unionistas Salamanca','UNI',46,'#000000','#FFFFFF','v'],['CD Arenteiro','ARE',45,'#FFFFFF','#E4002B','s'],
+        ['CD Guadalajara','GUA',45,'#E4002B','#FFFFFF','s'],['Marbella FC','MAR',45,'#FFFFFF','#005BAA','s'],
+        ['Antequera CF','ANT',44,'#00A651','#FFFFFF','s'],['Algeciras CF','ALG',44,'#E4002B','#FFFFFF','v']],
   it1: [['Inter Mailand','INT',88,'#0068A8','#000000','v'],['SSC Neapel','NAP',87,'#12A0D7','#FFFFFF','s'],
         ['Atalanta Bergamo','ATA',84,'#1D71B8','#000000','v'],['AC Mailand','MIL',84,'#FB090B','#000000','v'],
         ['Juventus Turin','JUV',84,'#FFFFFF','#000000','v'],['AS Rom','ROM',81,'#8E1F2F','#F0BC42','s'],
@@ -628,6 +681,26 @@ const CLUBS_RAW = {
         ['Parma Calcio','PAR',70,'#FFD200','#004C97','v'],['Cagliari Calcio','CAG',71,'#B2022F','#001B4E','v'],
         ['Hellas Verona','VER',70,'#FFD700','#004B87','s'],['US Lecce','LEC',69,'#FFE600','#D2122E','v'],
         ['Pisa SC','PIS',68,'#0055A5','#000000','s'],['US Cremonese','CRE',68,'#E2001A','#FFFFFF','v']],
+  it2: [['AC Monza','MON',64,'#E4002B','#FFFFFF','s'],['Palermo FC','PAL',64,'#EC7BA0','#000000','v'],
+        ['Venezia FC','VEN',63,'#000000','#FF6600','s'],['Sampdoria Genua','SAM',62,'#143C8C','#FFFFFF','h'],
+        ['FC Empoli','EMP',62,'#005BAA','#FFFFFF','s'],['Spezia Calcio','SPE',61,'#FFFFFF','#000000','v'],
+        ['SSC Bari','BAI',60,'#E4002B','#FFFFFF','h'],['Frosinone Calcio','FRO',59,'#FFDD00','#005BAA','v'],
+        ['US Catanzaro','CTZ',58,'#FFF200','#E4002B','v'],['Cesena FC','CES',57,'#FFFFFF','#000000','s'],
+        ['Modena FC','MOD',57,'#FFDD00','#005BAA','s'],['AC Reggiana','REG',56,'#E4002B','#FFFFFF','s'],
+        ['FC Südtirol','SUD',56,'#FFFFFF','#E4002B','s'],['US Avellino','AVE',56,'#00A651','#FFFFFF','s'],
+        ['Calcio Padova','PAD',55,'#FFFFFF','#E4002B','s'],['SS Juve Stabia','JUS',55,'#FFDD00','#005BAA','v'],
+        ['Carrarese Calcio','CAR',55,'#FFDD00','#005BAA','s'],['Mantova 1911','MNT',54,'#E4002B','#FFFFFF','s'],
+        ['Virtus Entella','ENT',54,'#005BAA','#FFF200','v'],['Delfino Pescara','PES',54,'#005BAA','#FFFFFF','v']],
+  it3: [['LR Vicenza','VIC',52,'#FFFFFF','#E4002B','s'],['Benevento Calcio','BEN',51,'#FFDD00','#E4002B','v'],
+        ['Catania FC','CAT',50,'#005BAA','#E4002B','v'],['Ternana Calcio','TER',50,'#E4002B','#00A651','v'],
+        ['AC Perugia','PER',49,'#E4002B','#FFFFFF','s'],['FC Crotone','CRO',49,'#E4002B','#005BAA','v'],
+        ['Audace Cerignola','CER',48,'#FFDD00','#005BAA','s'],['FC Trapani','TRA',47,'#00A651','#FFFFFF','s'],
+        ['SS Monopoli','MOP',47,'#00A651','#FFFFFF','s'],['Foggia Calcio','FOG',46,'#E4002B','#000000','v'],
+        ['Casertana FC','CSR',46,'#E4002B','#005BAA','v'],['Potenza Calcio','POT',46,'#E4002B','#005BAA','v'],
+        ['Latina Calcio','LAT',45,'#005BAA','#FFFFFF','s'],['AZ Picerno','PIC',45,'#E4002B','#005BAA','s'],
+        ['Novara FC','NOV',45,'#005BAA','#FFFFFF','s'],['US Triestina','TRI',44,'#E4002B','#FFFFFF','s'],
+        ['Pro Vercelli','PVC',44,'#FFFFFF','#E4002B','s'],['FC Giugliano','GIU',44,'#FFDD00','#005BAA','s'],
+        ['Sorrento Calcio','SOR',43,'#E4002B','#FFFFFF','s'],['Cavese 1919','CAV',43,'#005BAA','#FFFFFF','s']],
   fr1: [['Paris Saint-Germain','PSG',92,'#004170','#DA291C','h'],['Olympique Marseille','OM',82,'#2FAEE0','#FFFFFF','s'],
         ['AS Monaco','ASM',81,'#E63946','#FFFFFF','d'],['Olympique Lyon','OL',79,'#FFFFFF','#DA291C','h'],
         ['LOSC Lille','LIL',78,'#E01E13','#FFFFFF','s'],['OGC Nizza','NIC',77,'#E2001A','#000000','v'],
@@ -637,12 +710,46 @@ const CLUBS_RAW = {
         ['AJ Auxerre','AUX',70,'#0069B4','#FFFFFF','s'],['Paris FC','PFC',69,'#0055A5','#FFFFFF','s'],
         ['Angers SCO','SCO',68,'#000000','#FFFFFF','v'],['Le Havre AC','HAC',68,'#87CEEB','#001B4E','v'],
         ['FC Metz','MET',68,'#7B0F1B','#FFFFFF','s'],['FC Lorient','FCL',68,'#F58220','#000000','s']],
+  fr2: [['AS Saint-Étienne','ASSE',64,'#00A651','#FFFFFF','s'],['Stade Reims','REI',63,'#E4002B','#FFFFFF','v'],
+        ['Montpellier HSC','MHSC',62,'#F58220','#005BAA','v'],['ESTAC Troyes','TRO',60,'#005BAA','#FFFFFF','s'],
+        ['EA Guingamp','GUI',58,'#E4002B','#000000','v'],['Clermont Foot','CLE',58,'#E4002B','#005BAA','v'],
+        ['USL Dunkerque','DUN',58,'#E4002B','#005BAA','v'],['Amiens SC','AMI',57,'#FFFFFF','#005BAA','v'],
+        ['Grenoble Foot','GRE',57,'#005BAA','#FFFFFF','s'],['SC Bastia','BAS',56,'#005BAA','#FFFFFF','s'],
+        ['Stade Lavallois','LAV',56,'#FF6600','#FFFFFF','s'],['FC Annecy','ANN',56,'#E4002B','#FFFFFF','s'],
+        ['Rodez AF','ROD',55,'#E4002B','#FFFFFF','s'],['Pau FC','PAU',55,'#FFDD00','#005BAA','s'],
+        ['Red Star FC','RED',55,'#00A651','#FFFFFF','s'],['Le Mans FC','LMA',55,'#FFDD00','#E4002B','s'],
+        ['US Boulogne','BOU',54,'#E4002B','#000000','v'],['AS Nancy-Lorraine','NAN',54,'#E4002B','#FFFFFF','s']],
+  fr3: [['FC Sochaux','SOC',53,'#FFDD00','#005BAA','s'],['Nîmes Olympique','NIM',52,'#E4002B','#FFFFFF','v'],
+        ['Dijon FCO','DIJ',51,'#E4002B','#FFFFFF','s'],['US Orléans','ORL',49,'#E4002B','#FFFFFF','s'],
+        ['FC Versailles','VER',49,'#005BAA','#FFFFFF','s'],['US Concarneau','CON',48,'#005BAA','#FFFFFF','s'],
+        ['LB Châteauroux','CHR',48,'#E4002B','#FFFFFF','s'],['FC Rouen','ROU',48,'#E4002B','#FFFFFF','v'],
+        ['Quevilly-Rouen','QRM',47,'#E4002B','#FFFFFF','s'],['Villefranche Beaujolais','VIL',47,'#005BAA','#FFFFFF','s'],
+        ['FC Martigues','MTG',46,'#FFDD00','#000000','s'],['Aubagne FC','AUB',46,'#005BAA','#FFFFFF','s'],
+        ['Le Puy Foot','PUY',45,'#E4002B','#000000','v'],['Marignane Gignac','MAG',45,'#005BAA','#FFFFFF','s'],
+        ['FC Fleury 91','FLE',45,'#E4002B','#FFFFFF','s'],['GOAL FC','GOA',44,'#005BAA','#FFDD00','s'],
+        ['US Avranches','AVR',44,'#E4002B','#FFFFFF','s'],['Les Herbiers VF','HER',44,'#00A651','#FFFFFF','s']],
   at1: [['FC Red Bull Salzburg','RBS',72,'#FFFFFF','#D4021D','h'],['SK Sturm Graz','STU',69,'#000000','#FFFFFF','v'],
         ['SK Rapid Wien','RAP',67,'#00A650','#FFFFFF','h'],['FK Austria Wien','FAK',65,'#5B2C83','#FFFFFF','v'],
         ['LASK','LSK',65,'#000000','#FFFFFF','v'],['Wolfsberger AC','WAC',63,'#FFFFFF','#000000','v'],
         ['TSV Hartberg','HAR',59,'#0057B8','#FFFFFF','s'],['WSG Tirol','WSG',58,'#00843D','#FFFFFF','s'],
         ['SCR Altach','ALT',58,'#FFFFFF','#000000','h'],['FC Blau-Weiß Linz','BWL',57,'#0057B8','#FFFFFF','v'],
         ['SV Ried','RIE',56,'#00843D','#000000','v'],['Grazer AK','GAK',56,'#E2001A','#FFFFFF','s']],
+  at2: [['SKN St. Pölten','SKN',56,'#FFFFFF','#005BAA','s'],['SC Austria Lustenau','ALU',55,'#00A651','#FFFFFF','v'],
+        ['FC Admira Wacker','ADM',55,'#FFFFFF','#000000','v'],['First Vienna FC','VIE',54,'#005BAA','#FFDD00','s'],
+        ['FC Liefering','LIE',53,'#E4002B','#FFFFFF','s'],['Kapfenberger SV','KSV',51,'#005BAA','#FFFFFF','v'],
+        ['Floridsdorfer AC','FAC',50,'#005BAA','#FFFFFF','s'],['SK Sturm Graz II','ST2',50,'#000000','#FFFFFF','v'],
+        ['SK Rapid Wien II','RA2',50,'#00A650','#FFFFFF','h'],['SV Horn','HOR',49,'#E4002B','#FFFFFF','s'],
+        ['DSV Leoben','LEO',49,'#005BAA','#FFFFFF','s'],['SW Bregenz','BRZ',48,'#FFFFFF','#000000','s'],
+        ['SKU Amstetten','AMS',48,'#FFFFFF','#005BAA','s'],['ASK Voitsberg','VOI',47,'#E4002B','#FFFFFF','s'],
+        ['FC Dornbirn 1913','DOR',47,'#E4002B','#FFFFFF','s'],['SV Stripfing','STR',46,'#00A651','#FFFFFF','s']],
+  at3: [['Wiener Sport-Club','WSC',46,'#FFFFFF','#000000','v'],['SV Leobendorf','LDF',44,'#00A651','#FFFFFF','s'],
+        ['ASK Ebreichsdorf','EBR',44,'#E4002B','#FFFFFF','s'],['SC Wiener Viktoria','WVI',43,'#005BAA','#FFFFFF','s'],
+        ['FCM Traiskirchen','TRA',43,'#FFDD00','#000000','s'],['SC Neusiedl am See','NEU',42,'#00A651','#FFFFFF','s'],
+        ['SV Donau Wien','DON',42,'#005BAA','#FFFFFF','s'],['ASV Draßburg','DRA',41,'#E4002B','#FFFFFF','v'],
+        ['SC Retz','RET',41,'#FFFFFF','#00A651','s'],['1. Wiener Neustädter SC','WNS',41,'#005BAA','#FFFFFF','s'],
+        ['Favoritner AC','FAV',40,'#FFDD00','#000000','v'],['SV Oberwart','OBW',40,'#E4002B','#FFFFFF','s'],
+        ['USV Scheiblingkirchen','SCH',39,'#005BAA','#FFDD00','s'],['SV Gerasdorf','GER',39,'#00A651','#000000','s'],
+        ['SR Donaufeld','DFD',38,'#E4002B','#005BAA','v'],['ASV Siegendorf','SIE',37,'#FFDD00','#005BAA','s']],
   nl1: [['PSV Eindhoven','PSV',79,'#ED1C24','#FFFFFF','v'],['Ajax Amsterdam','AJA',78,'#FFFFFF','#D2122E','h'],
         ['Feyenoord Rotterdam','FEY',77,'#FFFFFF','#E2001A','h'],['AZ Alkmaar','AZ',74,'#E2001A','#FFFFFF','s'],
         ['FC Utrecht','UTR',72,'#E2001A','#FFFFFF','s'],['FC Twente','TWE',72,'#E2001A','#FFFFFF','s'],
@@ -652,6 +759,61 @@ const CLUBS_RAW = {
         ['Heracles Almelo','HER',64,'#000000','#FFFFFF','v'],['Fortuna Sittard','FOR',64,'#FFDD00','#00843D','s'],
         ['NAC Breda','NAC',63,'#FFDD00','#000000','v'],['FC Volendam','VOL',61,'#F58220','#000000','s'],
         ['Excelsior Rotterdam','EXC',61,'#E2001A','#000000','v'],['Telstar','TEL',60,'#FFFFFF','#001B4E','h']],
+  en2: [['Leicester City','LEI',68,'#003090','#FFFFFF','s'],['Ipswich Town','IPS',67,'#0044A9','#FFFFFF','s'],
+        ['Southampton','SOU',66,'#D71920','#FFFFFF','v'],['Middlesbrough','MID',64,'#E21C38','#FFFFFF','s'],
+        ['West Bromwich Albion','WBA',63,'#122F67','#FFFFFF','v'],['Coventry City','COV',63,'#78D0F3','#FFFFFF','s'],
+        ['Birmingham City','BIR',62,'#2536A0','#FFFFFF','s'],['Norwich City','NOR',62,'#FFF200','#00A650','s'],
+        ['Sheffield United','SHU',62,'#EE2737','#FFFFFF','v'],['Bristol City','BRC',61,'#E21C38','#FFFFFF','s'],
+        ['Millwall','MIL',60,'#001D5C','#FFFFFF','s'],['Watford','WAT',60,'#FBEE23','#ED2127','s'],
+        ['Blackburn Rovers','BLB',59,'#009EE0','#FFFFFF','h'],['Derby County','DER',59,'#FFFFFF','#000000','s'],
+        ['Preston North End','PNE',58,'#FFFFFF','#002E5F','s'],['Queens Park Rangers','QPR',58,'#FFFFFF','#1D5BA4','h'],
+        ['Stoke City','STK',58,'#E03A3E','#FFFFFF','v'],['Swansea City','SWA',58,'#FFFFFF','#000000','s'],
+        ['Wrexham','WRE',58,'#DA291C','#FFFFFF','s'],['Hull City','HUL',57,'#F5A12D','#000000','v'],
+        ['Sheffield Wednesday','SHW',57,'#0066B3','#FFFFFF','v'],['Portsmouth','POR',57,'#001489','#FFFFFF','s'],
+        ['Charlton Athletic','CHA',57,'#E31B23','#FFFFFF','s'],['Oxford United','OXF',56,'#FFE500','#003C71','s']],
+  en3: [['Cardiff City','CAR',56,'#0070B5','#FFFFFF','s'],['Luton Town','LUT',56,'#F78F1E','#002D62','s'],
+        ['Plymouth Argyle','PLY',55,'#007B5F','#FFFFFF','s'],['Huddersfield Town','HUD',54,'#0E63AD','#FFFFFF','v'],
+        ['Bolton Wanderers','BOL',54,'#FFFFFF','#1A3A6B','s'],['Barnsley','BAR',53,'#E4121C','#FFFFFF','s'],
+        ['Wigan Athletic','WIG',52,'#1D5BA4','#FFFFFF','v'],['Blackpool','BLA',52,'#F68712','#FFFFFF','s'],
+        ['Reading','REA',52,'#004494','#FFFFFF','v'],['Rotherham United','ROT',51,'#E4002B','#FFFFFF','s'],
+        ['Peterborough United','PET',51,'#0072CE','#FFFFFF','s'],['Stockport County','STO',51,'#005CA9','#FFFFFF','s'],
+        ['Wycombe Wanderers','WYC',51,'#003DA5','#7BAFD4','v'],['Lincoln City','LIN',50,'#E4002B','#FFFFFF','v'],
+        ['Mansfield Town','MAN',50,'#FFF200','#003399','s'],['Leyton Orient','LEY',50,'#E4002B','#FFFFFF','s'],
+        ['Stevenage','STE',50,'#E4002B','#FFFFFF','s'],['Bristol Rovers','BRR',49,'#003DA5','#FFFFFF','h'],
+        ['Doncaster Rovers','DON',49,'#E4002B','#FFFFFF','h'],['Northampton Town','NOT',48,'#7A1C3F','#FFFFFF','s'],
+        ['Exeter City','EXE',48,'#E4002B','#FFFFFF','v'],['Port Vale','PVA',48,'#FFFFFF','#000000','s'],
+        ['Burton Albion','BUR',47,'#FFF200','#000000','v'],['Shrewsbury Town','SHR',46,'#005CA9','#F7C11E','s']],
+  en4: [['Bradford City','BRA',47,'#FFB81C','#6C1D45','v'],['Walsall','WAL',46,'#E4002B','#FFFFFF','s'],
+        ['AFC Wimbledon','WIM',45,'#005CA9','#FFF200','s'],['Notts County','NTC',45,'#FFFFFF','#000000','v'],
+        ['Chesterfield','CHE',44,'#005CA9','#FFFFFF','s'],['Grimsby Town','GRI',44,'#000000','#FFFFFF','v'],
+        ['Milton Keynes Dons','MKD',44,'#FFFFFF','#000000','s'],['Oldham Athletic','OLD',44,'#005CA9','#FFFFFF','s'],
+        ['Swindon Town','SWI',43,'#E4002B','#FFFFFF','s'],['Crewe Alexandra','CRE',43,'#E4002B','#FFFFFF','s'],
+        ['Salford City','SAL',43,'#E4002B','#FFFFFF','s'],['Gillingham','GIL',43,'#005CA9','#FFFFFF','s'],
+        ['Cambridge United','CAM',43,'#F5A12D','#000000','v'],['Colchester United','COL',42,'#005CA9','#FFFFFF','v'],
+        ['Newport County','NEW',42,'#F5A12D','#000000','s'],['Tranmere Rovers','TRA',42,'#FFFFFF','#005CA9','s'],
+        ['Fleetwood Town','FLE',42,'#E4002B','#FFFFFF','s'],['Barnet','BNT',42,'#F5A12D','#000000','v'],
+        ['Barrow','BRW',41,'#005CA9','#FFFFFF','s'],['Bromley','BRO',41,'#FFFFFF','#000000','s'],
+        ['Crawley Town','CRA',41,'#E4002B','#FFFFFF','s'],['Harrogate Town','HAR',40,'#FFF200','#000000','s'],
+        ['Accrington Stanley','ACC',40,'#E4002B','#FFFFFF','s'],['Cheltenham Town','CHT',40,'#E4002B','#FFFFFF','v']],
+  nl2: [['Vitesse Arnheim','VIT',60,'#FFDD00','#000000','h'],['Willem II Tilburg','WIL',59,'#E4002B','#005BAA','v'],
+        ['RKC Waalwijk','RKC',58,'#FFDD00','#005BAA','s'],['Almere City FC','ALM',58,'#E4002B','#000000','s'],
+        ['ADO Den Haag','ADO',57,'#FFDD00','#00A651','s'],['SC Cambuur','CAM',57,'#FFDD00','#005BAA','v'],
+        ['Roda JC Kerkrade','ROD',56,'#FFDD00','#000000','v'],['De Graafschap','GRA',56,'#005BAA','#FFFFFF','v'],
+        ['FC Emmen','EMM',55,'#E4002B','#FFFFFF','s'],['VVV-Venlo','VVV',55,'#FFDD00','#000000','h'],
+        ['MVV Maastricht','MVV',54,'#E4002B','#FFFFFF','s'],['FC Eindhoven','EIN',54,'#005BAA','#FFFFFF','s'],
+        ['Jong Ajax','JAJ',54,'#FFFFFF','#D2122E','h'],['Jong PSV','JPS',54,'#ED1C24','#FFFFFF','v'],
+        ['Jong AZ','JAZ',53,'#E4002B','#FFFFFF','s'],['TOP Oss','TOP',52,'#E4002B','#000000','v'],
+        ['Helmond Sport','HEL',52,'#E4002B','#FFFFFF','s'],['FC Dordrecht','DOR',52,'#00A651','#FFFFFF','s'],
+        ['FC Den Bosch','DBO',51,'#005BAA','#FFFFFF','s'],['Jong FC Utrecht','JUT',51,'#E4002B','#FFFFFF','s']],
+  nl3: [['IJsselmeervogels','IJV',49,'#E4002B','#000000','v'],['SV Spakenburg','SPA',48,'#005BAA','#FFFFFF','v'],
+        ['VV Katwijk','KAT',48,'#FFDD00','#000000','s'],['Quick Boys','QUI',47,'#E4002B','#FFFFFF','s'],
+        ['Koninklijke HFC','HFC',46,'#E4002B','#FFFFFF','s'],['Rijnsburgse Boys','RIJ',46,'#005BAA','#FFFFFF','s'],
+        ['VV Noordwijk','NOO',45,'#FFDD00','#000000','s'],['SV Scheveningen','SCV',45,'#00A651','#FFFFFF','s'],
+        ['Kozakken Boys','KOZ',44,'#E4002B','#FFFFFF','v'],['ASWH Ambacht','ASW',44,'#00A651','#FFFFFF','s'],
+        ['De Treffers','TRE',43,'#005BAA','#FFFFFF','s'],['TEC Tiel','TEC',43,'#FFDD00','#000000','s'],
+        ['Excelsior Maassluis','EXM',42,'#E4002B','#000000','v'],['VV Barendrecht','BAD',42,'#00A651','#FFFFFF','s'],
+        ['Jong Sparta','JSP',42,'#FFFFFF','#E4002B','h'],['HHC Hardenberg','HHC',41,'#005BAA','#FFFFFF','s'],
+        ['VV Goes','GOE',41,'#00A651','#FFFFFF','s'],['Sparta Nijkerk','SNI',40,'#E4002B','#FFFFFF','s']],
   sa1: [['Al-Hilal','HIL',82,'#0055A5','#FFFFFF','v'],['Al-Nassr','NAS',80,'#FFD700','#0055A5','v'],
         ['Al-Ittihad','ITT',79,'#FFD700','#000000','v'],['Al-Ahli Dschidda','AHL',79,'#00843D','#FFFFFF','v'],
         ['Al-Qadsiah','QAD',72,'#FFD700','#0055A5','s'],['Al-Shabab','SHA',71,'#FFFFFF','#000000','v'],
@@ -1264,13 +1426,25 @@ const ARCHETYPEN = [
    Satz "hoechstes Potenzial" schlicht falsch. Die Zuschlaege sind jetzt gross
    genug, um den geerbten Attributbonus zu ueberwiegen. */
 const STARTWEGE = [
-  { id: 'strasse', name: 'Straßenkicker', liga: 'de3', text: 'Kein Verein wollte dich im Nachwuchs. Du hast es dir auf dem Bolzplatz beigebracht — und ein Drittligist gibt dir eine Chance.',
-    meta: 'Start in der 3. Liga · härtester Weg · höchstes Potenzial', attr: -4, potenzial: 12, moral: 5 },
-  { id: 'nlz', name: 'Nachwuchsleistungszentrum', liga: 'de2', text: 'Seit du zehn bist im Internat. Sauber ausgebildet, taktisch geschult, jetzt der Sprung zu den Profis.',
-    meta: 'Start in der 2. Bundesliga · ausgeglichen', attr: 0, potenzial: 0, moral: 0 },
-  { id: 'wunderkind', name: 'Wunderkind', liga: 'de1', text: 'Die Zeitungen kennen deinen Namen, bevor du ein Profispiel gemacht hast. Der Druck kommt gratis dazu.',
-    meta: 'Start in der Bundesliga · viel Erwartung, wenig Geduld', attr: 5, potenzial: -6, moral: -5, ruf: 12 }
+  { id: 'strasse', name: 'Straßenkicker', stufe: 'unten', attr: -4, potenzial: 12, moral: 5,
+    text: 'Kein Verein wollte dich im Nachwuchs. Du hast es dir auf dem Bolzplatz beigebracht — und ganz unten gibt dir jemand eine Chance.',
+    meta: 'härtester Weg · höchstes Potenzial' },
+  { id: 'nlz', name: 'Nachwuchsleistungszentrum', stufe: 'mitte', attr: 0, potenzial: 0, moral: 0,
+    text: 'Seit du zehn bist im Internat. Sauber ausgebildet, taktisch geschult, jetzt der Sprung zu den Profis.',
+    meta: 'ausgeglichen' },
+  { id: 'wunderkind', name: 'Wunderkind', stufe: 'oben', attr: 5, potenzial: -6, moral: -5, ruf: 12,
+    text: 'Die Zeitungen kennen deinen Namen, bevor du ein Profispiel gemacht hast. Der Druck kommt gratis dazu.',
+    meta: 'viel Erwartung, wenig Geduld' }
 ];
+/* In welcher Liga ein Weg beginnt, haengt jetzt am gewaehlten Land: ganz oben,
+   eine Stufe darunter, oder ganz unten in der Pyramide. In England sind das
+   vier Stufen, sonst drei. */
+function startLiga(wegId, land) {
+  const pyr = PYRAMIDEN[land || NEU.land] || PYRAMIDEN['Deutschland'];
+  if (wegId === 'wunderkind') return pyr[0];
+  if (wegId === 'nlz') return pyr[Math.min(1, pyr.length - 1)];
+  return pyr[pyr.length - 1];
+}
 
 /* ========================== SPIELSTAND ========================== */
 const SAVE_KEY = 'flutlicht.karriere.v1';
@@ -1421,7 +1595,10 @@ function wirke(eff) {
    passend erzeugten Ergänzungen. Entscheidend fürs Spiel ist die
    Rangfolge auf deiner Position: Gegen die spielst du um den Platz. */
 const KADER_PLAN = [['TW', 3], ['IV', 4], ['AV', 4], ['DM', 2], ['ZM', 3], ['OM', 3], ['FL', 3], ['ST', 3]];
-const LIGA_NATION = { de1: 'DE', de2: 'DE', de3: 'DE', en1: 'EN', es1: 'ES', it1: 'IT', fr1: 'FR', nl1: 'NL', at1: 'AT' };
+/* Aus welchem Land die erzeugten Kaderspieler ueberwiegend stammen. */
+const LIGA_NATION = {};
+LEAGUES.forEach(l => { LIGA_NATION[l.id] = { Deutschland: 'DE', England: 'EN', Spanien: 'ES',
+  Italien: 'IT', Frankreich: 'FR', Niederlande: 'NL', 'Österreich': 'AT' }[l.land]; });
 
 function natFuerLiga(liga) {
   const heim = LIGA_NATION[liga];
@@ -3667,16 +3844,15 @@ function torjaegerListe() {
 }
 
 /* ---------- Auf- und Abstieg des eigenen Vereins ---------- */
-const PYRAMIDE = ['de1', 'de2', 'de3'];
 function ligaTauschen(clubId, hoch) {
-  const c = CL(clubId), idx = PYRAMIDE.indexOf(c.liga);
+  const c = CL(clubId), pyr = pyramideVon(c.liga), idx = pyr.indexOf(c.liga);
   if (idx < 0) return null;
   const zielIdx = hoch ? idx - 1 : idx + 1;
-  if (zielIdx < 0 || zielIdx >= PYRAMIDE.length) return null;
-  const ziel = PYRAMIDE[zielIdx];
+  if (zielIdx < 0 || zielIdx >= pyr.length) return null;
+  const ziel = pyr[zielIdx];
   const gegenueber = ligaClubs(ziel).slice().sort((a, b) => hoch ? a.staerke - b.staerke : b.staerke - a.staerke)[0];
   c.liga = ziel;
-  gegenueber.liga = PYRAMIDE[idx];
+  gegenueber.liga = pyr[idx];
   c.staerke = clamp(c.staerke + (hoch ? 5 : -5), 25, 95);
   gegenueber.staerke = clamp(gegenueber.staerke + (hoch ? -5 : 5), 25, 95);
   S.ligaTausch[c.id] = c.liga;
@@ -5039,7 +5215,11 @@ function tabelleHtml(ligaId, eigene) {
   return '<div class="tablewrap"><table class="tbl"><thead><tr><th class="pos">#</th><th>Verein</th><th>Sp</th><th>Diff</th><th>Pkt</th></tr></thead><tbody>'
     + liste.map((t, i) => {
       const c = CL(t.id);
-      const zone = i < 4 && lg.euro ? 'zone-cl' : (i < 6 && lg.euro ? 'zone-el' : (i >= n - 2 && lg.tier < 3 ? 'zone-ab' : ''));
+      /* Abstiegsplaetze nur dort, wo es darunter noch etwas gibt — frueher hing
+         das an der Ligastufe und traf mit dem Unterbau nicht mehr zu. */
+      const pyr = pyramideVon(ligaId);
+      const hatUnten = pyr.indexOf(ligaId) >= 0 && pyr.indexOf(ligaId) < pyr.length - 1;
+      const zone = i < 4 && lg.euro ? 'zone-cl' : (i < 6 && lg.euro ? 'zone-el' : (i >= n - 2 && hatUnten ? 'zone-ab' : ''));
       return '<tr class="' + (t.id === S.p.clubId ? 'me ' : '') + zone + '"><td class="pos">' + (i + 1) + '</td>'
         + '<td><div class="row" style="gap:7px">' + badgeHtml(c, 'badge-sm') + '<span class="truncate">' + esc(c.name) + '</span></div></td>'
         + '<td>' + t.s + '</td><td>' + (t.diff > 0 ? '+' : '') + t.diff + '</td><td><b>' + t.p + '</b></td></tr>';
@@ -5048,11 +5228,25 @@ function tabelleHtml(ligaId, eigene) {
 function renderWelt() {
   const p = S.p, eigene = S.liga.id;
   const auswahl = S.weltAuswahl || eigene;
+  /* Mit dem Unterbau waeren es vierundzwanzig Reiter nebeneinander — gemessen
+     3.194 Pixel breit auf einem 361 Pixel schmalen Bildschirm, also neun
+     Bildschirme Wischen bis zur letzten Liga. Darum zweistufig: oben das Land,
+     darunter dessen zwei bis vier Ligen. */
+  const laender = [];
+  LEAGUES.forEach(l => { if (laender.indexOf(l.land) < 0) laender.push(l.land); });
+  const land = auswahl === 'euro' ? (S.weltLand || LG(eigene).land) : LG(auswahl).land;
   let html = '<section><div class="chips chips-quer">'
-    + LEAGUES.map(l => '<button class="chip" data-welt="' + l.id + '" aria-pressed="' + (auswahl === l.id) + '" style="flex:none">'
-      + l.flag + ' ' + esc(l.name) + '</button>').join('')
+    + laender.map(l => '<button class="chip" data-weltland="' + l + '" aria-pressed="'
+      + (auswahl !== 'euro' && land === l) + '" style="flex:none">'
+      + LEAGUES.find(x => x.land === l).flag + ' ' + esc(l) + '</button>').join('')
     + '<button class="chip" data-welt="euro" aria-pressed="' + (auswahl === 'euro') + '" style="flex:none">★ Europapokal</button>'
-    + '</div></section>';
+    + '</div>'
+    + (auswahl === 'euro' ? '' : '<div class="chips chips-quer" style="margin-top:7px">'
+      + LEAGUES.filter(l => l.land === land).map(l => '<button class="chip" data-welt="' + l.id + '" aria-pressed="'
+        + (auswahl === l.id) + '" style="flex:none">' + esc(l.name)
+        + (l.id === eigene ? ' ·' : '') + '</button>').join('')
+      + '</div>')
+    + '</section>';
 
   if (auswahl === 'euro') {
     const e = S.welt && S.welt.euro;
@@ -5125,6 +5319,13 @@ function renderWelt() {
       }).join('') + '</div></section>';
   }
   el('view-world').innerHTML = html;
+  /* Den gewaehlten Reiter ins Bild holen. Bei vier Stufen stand die eigene Liga
+     sonst rechts ausserhalb des sichtbaren Bereichs. scrollLeft statt
+     scrollIntoView, damit nie die ganze Seite mitspringt. */
+  el('view-world').querySelectorAll('.chips-quer').forEach(reihe => {
+    const aktiv = reihe.querySelector('[aria-pressed="true"]');
+    if (aktiv) reihe.scrollLeft = Math.max(0, aktiv.offsetLeft - reihe.clientWidth / 2 + aktiv.offsetWidth / 2);
+  });
 }
 
 function setzeAnsicht(name) {
@@ -5243,7 +5444,8 @@ async function sicherungscode() {
 }
 
 /* ========================== KARRIERE ANLEGEN ========================== */
-const NEU = { vorname: '', nachname: '', natId: 'DE', fuss: 'rechts', pos: 'ST', archetyp: 'komplett', weg: null, clubId: null, schritt: 1 };
+const NEU = { vorname: '', nachname: '', natId: 'DE', fuss: 'rechts', pos: 'ST', archetyp: 'komplett',
+  land: 'Deutschland', weg: null, clubId: null, schritt: 1 };
 
 function namenSync() {
   const a = el('in-vorname'), b = el('in-nachname');
@@ -5251,9 +5453,8 @@ function namenSync() {
   if (b) NEU.nachname = b.value.slice(0, 20);
 }
 function startClubs() {
-  const weg = STARTWEGE.find(w => w.id === NEU.weg);
-  if (!weg) return [];
-  const pool = ligaClubs(weg.liga).slice().sort((a, b) => a.staerke - b.staerke);
+  if (!NEU.weg || !NEU.land) return [];
+  const pool = ligaClubs(startLiga(NEU.weg)).slice().sort((a, b) => a.staerke - b.staerke);
   return shuffle(pool.slice(0, Math.ceil(pool.length * .7))).slice(0, 3);
 }
 
@@ -5290,13 +5491,23 @@ function renderCreate() {
       + '</div></div>';
   }
   if (s === 3) {
+    html += '<div class="field"><label>Startland</label><div class="chips">'
+      + START_LAENDER.map(l => {
+        const lg = LEAGUES.find(x => x.land === l);
+        return '<button class="chip" data-set="land:' + l + '" aria-pressed="' + (NEU.land === l) + '">'
+          + lg.flag + ' ' + esc(l) + '</button>';
+      }).join('')
+      + '</div><p class="small muted">' + PYRAMIDEN[NEU.land].length + ' Ligen: '
+      + PYRAMIDEN[NEU.land].map(id => esc(LG(id).name)).join(' · ')
+      + '. Wechseln kannst du später überallhin.</p></div>';
     html += '<div class="field"><label>Herkunftsweg</label><div class="stack-sm">'
       + STARTWEGE.map(w => '<button class="opt" data-set="weg:' + w.id + '" aria-pressed="' + (NEU.weg === w.id) + '"><div class="grow">'
         + '<div class="opt-t">' + esc(w.name) + '</div><div class="opt-d">' + esc(w.text) + '</div>'
-        + '<div class="opt-m">' + esc(w.meta) + '</div></div></button>').join('')
+        + '<div class="opt-m">Start in der ' + esc(LG(startLiga(w.id)).name) + ' · ' + esc(w.meta) + '</div></div></button>').join('')
       + '</div></div>';
     if (NEU.weg) {
-      if (!NEU._clubs || NEU._weg !== NEU.weg) { NEU._clubs = startClubs(); NEU._weg = NEU.weg; NEU.clubId = null; }
+      const schluessel = NEU.weg + '|' + NEU.land;
+      if (!NEU._clubs || NEU._weg !== schluessel) { NEU._clubs = startClubs(); NEU._weg = schluessel; NEU.clubId = null; }
       html += '<div class="field"><label>Dein erster Profivertrag</label><div class="stack-sm">'
         + NEU._clubs.map(c => '<button class="opt" data-set="clubId:' + c.id + '" aria-pressed="' + (NEU.clubId === c.id) + '">'
           + badgeHtml(c) + '<div class="grow"><div class="opt-t">' + esc(c.name) + '</div>'
@@ -5705,8 +5916,18 @@ function verdrahten() {
   el('main').addEventListener('click', e => {
     const plan = e.target.closest('[data-plan]');
     if (plan) { S.plan = plan.dataset.plan; speichern(); render(); return; }
+    const weltLand = e.target.closest('[data-weltland]');
+    if (weltLand) {
+      S.weltLand = weltLand.dataset.weltland;
+      S.weltAuswahl = LEAGUES.find(l => l.land === S.weltLand).id;
+      render(); return;
+    }
     const welt = e.target.closest('[data-welt]');
-    if (welt) { S.weltAuswahl = welt.dataset.welt; render(); return; }
+    if (welt) {
+      S.weltAuswahl = welt.dataset.welt;
+      if (welt.dataset.welt !== 'euro') S.weltLand = LG(welt.dataset.welt).land;
+      render(); return;
+    }
     const fokus = e.target.closest('[data-fokus]');
     if (fokus) { S.trainFokus = fokus.dataset.fokus; speichern(); render(); return; }
     const act = e.target.closest('[data-act]');
