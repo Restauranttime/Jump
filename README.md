@@ -164,7 +164,18 @@ Echte Kader liegen für 108 der 182 Vereine vor — rund 1.300 Spieler, Stand de
 
 Für alle übrigen Vereine erzeugt das Spiel Kader mit zur Liga passenden Nationalitäten;
 angefangene echte Kader werden nach demselben Verfahren aufgefüllt, statt unsichere Namen zu
-erfinden. Über die Jahre wächst der Anteil erzeugter Spieler, weil der Kader altert.
+erfinden.
+
+**Die Welt altert mit.** Der Datenstand ist 2025/26, eine Karriere läuft aber über zwanzig
+Jahre — ohne Fortschreibung stünde 2041 noch derselbe 39-jährige Torwart im Tor und die
+Torjägerliste führte Saison für Saison derselbe Name an. Deshalb werden die echten Kader auf
+die laufende Saison umgerechnet: Spieler werden älter, bis etwa 27 stärker, ab 30 schwächer und
+beenden mit 36 ihre Laufbahn. Wer dann fehlt, wird durch einen erzeugten Nachfolger ersetzt.
+
+Die Umrechnung läuft bewusst ohne Zufall, damit dieselbe Abfrage innerhalb einer Saison immer
+dasselbe Ergebnis liefert. Bei Bayern sind 2026 noch 20 Spieler namentlich echt, 2036 elf und
+ab 2046 keiner mehr. Saison 1 entspricht dabei exakt der Vorlage — geprüft über alle 1.315
+Einträge.
 
 Die Kaderdaten werden beim Start gegen Vereins-IDs, Positionen, Nationen, Altersspannen und
 Doppeleinträge geprüft (`scratchpad`-Testskript im Entwicklungsablauf) — Nationen ohne eigenen

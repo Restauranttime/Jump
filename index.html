@@ -1386,10 +1386,51 @@ function kaderAuffuellen(liste, club) {
   }
   return liste;
 }
+/* ---------------------------------------------------------------------
+   Die echten Kader haben den Stand 2025/26. Ueber eine zwanzigjaehrige
+   Karriere darf die Welt daneben nicht stehenbleiben: Spieler werden aelter,
+   erst besser, dann schwaecher, und hoeren irgendwann auf. Sonst steht 2041
+   immer noch derselbe 39-jaehrige Torwart im Tor und die Torjaegerliste
+   fuehrt Saison fuer Saison derselbe Name an.
+
+   Die Entwicklung ist bewusst ohne Zufall gerechnet: Dieselbe Abfrage muss
+   innerhalb einer Saison immer dasselbe ergeben, sonst schwankt die Angabe
+   zur Konkurrenz auf deiner Position von Aufruf zu Aufruf.
+   --------------------------------------------------------------------- */
+const START_JAHR = 2026;
+const saisonsSeitStart = () => clamp((S.jahr || START_JAHR) - START_JAHR, 0, 40);
+
+function ovrNachJahren(ovr, alter, jahre) {
+  let v = ovr;
+  for (let i = 0; i < jahre; i++) {
+    const a = alter + i;
+    if (a <= 22) v += 1.5;
+    else if (a <= 25) v += 0.7;
+    else if (a <= 28) v += 0.1;
+    else if (a <= 30) v -= 0.5;
+    else if (a <= 33) v -= 1.7;
+    else v -= 3;
+  }
+  return clamp(Math.round(v), 38, 95);
+}
+/* Der echte Kader eines Vereins, fortgeschrieben auf die laufende Saison.
+   Wer zu alt geworden ist, hat aufgehoert und faellt heraus — die Luecke fuellt
+   kaderAuffuellen mit einem passenden Nachfolger. Die Grenze liegt bei 36, aber
+   nie unter dem Startalter plus zwei: Sonst waeren die dreizehn Spieler, die
+   schon 2025/26 aelter sind, von der ersten Saison an verschwunden. */
+function echterKaderStand(clubId) {
+  const jahre = saisonsSeitStart();
+  const out = [];
+  for (const e of (ECHTE_KADER[clubId] || [])) {
+    const alter = e[2] + jahre;
+    if (alter > Math.max(36, e[2] + 2)) continue;
+    out.push({ name: e[0], pos: e[1], alter, natId: e[3], ovr: ovrNachJahren(e[4], e[2], jahre), echt: 1 });
+  }
+  return out;
+}
+
 function kaderErzeugen(clubId) {
-  const club = CL(clubId);
-  const echt = (ECHTE_KADER[clubId] || []).map(e => ({ name: e[0], pos: e[1], alter: e[2], natId: e[3], ovr: e[4], echt: 1 }));
-  return kaderAuffuellen(echt, club);
+  return kaderAuffuellen(echterKaderStand(clubId), CL(clubId));
 }
 function kaderAltern() {
   const club = CL(S.p.clubId);
@@ -1409,9 +1450,11 @@ function platzInRangfolge() {
   return konkurrenten().filter(k => k.ovr > effOvr()).length + 1;
 }
 function besterKonkurrent(clubId) {
-  const echt = (ECHTE_KADER[clubId] || []).filter(e => e[1] === S.p.pos);
-  if (echt.length) return Math.max.apply(null, echt.map(e => e[4]));
-  return Math.round(CL(clubId).staerke + 1);
+  const auf = echterKaderStand(clubId).filter(k => k.pos === S.p.pos);
+  const echt = auf.length ? Math.max.apply(null, auf.map(k => k.ovr)) : 0;
+  /* Nie unter dem Niveau des Vereins: Auch wenn die namentlich bekannten
+     Spieler aufgehoert haben, steht dort ein Nachfolger. */
+  return Math.max(echt, Math.round(CL(clubId).staerke + 1));
 }
 function torschuetze() {
   const feld = (S.kader || []).filter(k => POS(k.pos));
@@ -2822,9 +2865,11 @@ function weltrangliste() {
    Woche fortgeschrieben — sonst würfelte die Liste bei jedem Aufruf neu. */
 function torjaegerAufsetzen() {
   S.torjaeger = ligaClubs(S.liga.id).filter(c => c.id !== S.p.clubId).map(c => {
-    const echt = (ECHTE_KADER[c.id] || []).filter(e => e[1] === 'ST' || e[1] === 'FL').sort((x, y) => y[4] - x[4]);
+    const echt = echterKaderStand(c.id).filter(k => k.pos === 'ST' || k.pos === 'FL').sort((x, y) => y.ovr - x.ovr);
     let name, staerke;
-    if (echt.length) { name = echt[0][0]; staerke = echt[0][4]; }
+    /* Ist der bekannte Angreifer inzwischen im Abstieg seiner Laufbahn, fuehrt
+       nicht mehr er die Liste an, sondern ein Nachfolger auf Vereinsniveau. */
+    if (echt.length && echt[0].ovr >= c.staerke - 1) { name = echt[0].name; staerke = echt[0].ovr; }
     else { const nat = natFuerLiga(c.liga); const nm = zufallsname(nat.pool); name = nm.v + ' ' + nm.n; staerke = c.staerke + 3; }
     return { name, clubId: c.id, tore: 0, rate: clamp((staerke - 60) / 42, .04, .72) };
   });
