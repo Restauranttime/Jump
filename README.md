@@ -125,12 +125,20 @@ Vereinsstärke. Der Kader altert über die Jahre, Spieler gehen und kommen.
 
 **Spieltag** — 34 bis 38 Ligaspieltage plus Pokal und Europapokal. Ob du spielst, entscheidet sich
 aus deiner Stärke im Vergleich zum Kader, dem Trainer-Vertrauen, deiner Form und deiner
-Energie. Im Spiel bekommst du zwei bis drei **Schlüsselmomente** aus einem Vorrat von
-45 Situationen mit je drei Optionen — Kopfball, Volley oder ablegen; grätschen, leiten oder
-Tempoduell. Der Ausgang hängt am passenden Attribut, an der Schwierigkeit und am Zufall und
-reicht vom Traumtor über Abseits und herausgeholten Elfmeter bis zur eigenen Verletzung, die
-dich vom Platz holt. Am Ende steht eine Note von 1,0 bis 6,0 nach deutscher
-Sportpresse-Skala.
+Energie. Als Startelfspieler bekommst du zwei **Schlüsselmomente**, als Einwechselspieler
+einen — aus einem Vorrat von 45 Situationen mit je drei Optionen: Kopfball, Volley oder
+ablegen; grätschen, leiten oder Tempoduell. Der Ausgang hängt am passenden Attribut, an der
+Schwierigkeit und am Zufall und reicht vom Traumtor über Abseits und herausgeholten Elfmeter
+bis zur eigenen Verletzung, die dich vom Platz holt. Nicht alle Ausgänge sind gleich
+wahrscheinlich: Ein Querpass gelingt bis zu 86 %, eine Vorlage höchstens 68 %, ein Torschuss
+58 % und ein Traumtor 42 % — Abschließen ist die schwerste Aktion im Fußball und darf sich
+nicht anfühlen wie ein Rückpass. Dazu kommt, aus welcher Lage du schießt: Vom Flügel und aus
+der Abwehr ist der Winkel schlechter als aus dem Zentrum.
+
+Die Tore deiner Mannschaft im übrigen Spielverlauf werden unter allen Feldspielern
+ausgelost, nach Position und Stärke gewichtet — du stehst dabei mit drin, wenn du auf dem
+Platz bist. Für einen Stürmer sind das rund 15 % seiner Tore, für einen Sechser fast alle.
+Am Ende steht eine Note von 1,0 bis 6,0 nach deutscher Sportpresse-Skala.
 
 **Stab** — Du stellst Personal an und bezahlst es jede Woche, statt es einmal zu kaufen:
 sieben Trainer (je einer pro Attribut), drei medizinische Kräfte und drei fürs Umfeld, jeweils
@@ -324,7 +332,18 @@ eine durchgespielte Karriere:
 
 - Ohne Plan gespielt: Stärke um 65–72, wenige oder keine Titel, solider Profi.
 - Gezielt trainiert und regeneriert: Stärke 80–86, Torschützenkönig, Goldener Ball möglich.
-- Ein Mittelstürmer landet bei etwa 0,6–0,7 Toren pro Spiel, ein Innenverteidiger bei 0,1.
+- Torquoten je Position, gemessen über je 30 Karrieren und rund 700 Saisons, gezählt in
+  Stammsaisons ab 25 Spielen (Spanne: überlegt gewählt bis immer abgeschlossen):
+
+  | Position | Tore je Saison | Vorlagen | Rekordsaison |
+  |---|---|---|---|
+  | Mittelstürmer | 25–28 | 1–2 | 50 |
+  | Flügelstürmer | 15–19 | 2–16 | 39 |
+  | Offensives Mittelfeld | 5–6 | 5–14 | 16 |
+  | Zentrales Mittelfeld | 3–4 | 5–14 | 12 |
+  | Defensives Mittelfeld | 2–3 | 1–5 | 11 |
+  | Außenverteidiger | 2–3 | 0–3 | 11 |
+  | Innenverteidiger | 1–3 | 0–4 | 10 |
 - Marktwert auf dem Höhepunkt: zweistellige Millionen, mit Weltklasse deutlich darüber.
 - Energie eines Stammspielers: Ø 48–60, je nach Umgang mit Regenerationswochen. Wer nicht
   spielt, bleibt naturgemäß frisch — der Karriereschnitt über alle Wochen liegt deshalb höher.

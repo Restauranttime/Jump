@@ -1494,13 +1494,26 @@ function besterKonkurrent(clubId) {
      Spieler aufgehoert haben, steht dort ein Nachfolger. */
   return Math.max(echt, Math.round(CL(clubId).staerke + 1));
 }
-function torschuetze(kader) {
+/* Wer trifft, wenn die Mannschaft aus dem Spiel heraus ein Tor macht.
+   Stehst du auf dem Platz, bist du mit in der Auslosung — vorher konnte so ein
+   Tor nie deins sein, und ein Sechser kam damit ueber eine ganze Karriere auf
+   null Tore, weil die Schluesselmomente seiner Position kaum Abschluesse
+   anbieten. Dein Gewicht liegt hoeher als das eines gleichwertigen Mitspielers:
+   Das Spiel erzaehlt deine Geschichte, nicht seine. */
+const ICH_GEWICHT = 2.9;
+function torschuetze(kader, ichDabei) {
   const feld = (kader || S.kader || []).filter(k => POS(k.pos));
-  if (!feld.length) return null;
   const gew = feld.map(k => ({ k, w: POS(k.pos).angriff * (k.ovr / 80) + .04 }));
+  if (ichDabei) {
+    gew.push({
+      k: { ich: true, name: S.p.vorname + ' ' + S.p.nachname, pos: S.p.pos },
+      w: (POS(S.p.pos).angriff * (effOvr() / 80) + .04) * ICH_GEWICHT
+    });
+  }
+  if (!gew.length) return null;
   let r = Math.random() * gew.reduce((a, x) => a + x.w, 0);
   for (const x of gew) { r -= x.w; if (r <= 0) return x.k; }
-  return feld[0];
+  return gew[gew.length - 1].k;
 }
 
 /* ========================== TRAINER UND SAISONZIEL ==========================
@@ -1772,6 +1785,14 @@ function einsatzBestimmen(fx) {
   return { status: 'bank', ab: 0 };
 }
 
+/* Aus welcher Lage ein Abschluss faellt, entscheidet mit. Vom Fluegel ist der
+   Winkel schlechter als aus dem Zentrum, aus der Abwehr kommt ein Torschuss
+   fast nur nach einem Standard. Weil sich Fluegel und Mittelstuermer dieselben
+   Momente teilen, traf ein Fluegelspieler ohne diesen Faktor fast so oft wie
+   ein Mittelstuermer — gemessen 21 Tore je Stammsaison bei einem Korridor von
+   10 bis 18. Dasselbe galt fuer die beiden Verteidigerrollen. */
+const ABSCHLUSS_LAGE = { ST: 1, FL: .74, OM: 1, ZM: .95, DM: .88, AV: .72, IV: .72 };
+
 const MOMENTE = {
   Angriff: [
     { t: 'Die Flanke kommt scharf von rechts herein. Du löst dich am Fünfer vom Verteidiger.', w: [
@@ -1841,7 +1862,7 @@ const MOMENTE = {
   ],
   Mittelfeld: [
     { t: 'Der Ball tropft dir 25 Meter vor dem Tor vor die Füße. Die Schusslinie ist frei.', w: [
-      { l: 'Fernschuss ziehen', h: 'Abschluss · schwer', a: 'schuss', s: 72, gut: 'traumtor', schlecht: 'vergeben' },
+      { l: 'Fernschuss ziehen', h: 'Abschluss · schwer', a: 'schuss', s: 64, gut: 'traumtor', schlecht: 'vergeben' },
       { l: 'Steilpass in die Schnittstelle', h: 'Passspiel', a: 'pass', s: 56, gut: 'assist', schlecht: 'ballverlust' },
       { l: 'Ruhig quer und neu aufbauen', h: 'Sicher', a: 'pass', s: 32, gut: 'aktion', schlecht: 'ballverlust' } ] },
     { t: 'Der Gegner presst dich im eigenen Sechzehner an. Zwei Mann kommen.', w: [
@@ -1853,7 +1874,7 @@ const MOMENTE = {
       { l: 'Taktisches Foul ziehen', h: 'Mentalität · Karte droht', a: 'mentalitaet', s: 40, gut: 'foulok', schlecht: 'karte' },
       { l: 'Passwege zustellen', h: 'Mentalität', a: 'mentalitaet', s: 54, gut: 'aktion', schlecht: 'gegentor' } ] },
     { t: 'Freistoß, 22 Meter, halbrechts. Der Trainer schaut zu dir herüber.', w: [
-      { l: 'Selbst schießen', h: 'Abschluss · schwer', a: 'schuss', s: 74, gut: 'traumtor', schlecht: 'vergeben' },
+      { l: 'Selbst schießen', h: 'Abschluss · schwer', a: 'schuss', s: 66, gut: 'traumtor', schlecht: 'vergeben' },
       { l: 'Flanke auf den Kopf des Innenverteidigers', h: 'Passspiel', a: 'pass', s: 56, gut: 'assist', schlecht: 'vergeben' },
       { l: 'Kurz abspielen und den Angriff neu ordnen', h: 'Sicher', a: 'pass', s: 34, gut: 'aktion', schlecht: 'ballverlust' } ] },
     { t: 'Zweikampf an der Mittellinie, beide gehen voll rein.', w: [
@@ -1863,7 +1884,7 @@ const MOMENTE = {
     { t: 'Du hast Raum vor dir, der Gegner steht tief und wartet ab.', w: [
       { l: 'Mit Tempo auf die Kette zulaufen', h: 'Dribbling', a: 'dribbling', s: 60, gut: 'assist', schlecht: 'ballverlust' },
       { l: 'Verlagern auf die andere Seite', h: 'Passspiel', a: 'pass', s: 46, gut: 'aktion', schlecht: 'ballverlust' },
-      { l: 'Selbst in den Sechzehner ziehen', h: 'Tempo · riskant', a: 'tempo', s: 66, gut: 'tor', schlecht: 'vergeben' } ] },
+      { l: 'Selbst in den Sechzehner ziehen', h: 'Tempo · riskant', a: 'tempo', s: 60, gut: 'tor', schlecht: 'vergeben' } ] },
     { t: 'Ballgewinn im Zentrum! Die gegnerische Ordnung ist für drei Sekunden offen.', w: [
       { l: 'Sofort den ersten Pass nach vorn', h: 'Passspiel', a: 'pass', s: 60, gut: 'assist', schlecht: 'ballverlust' },
       { l: 'Selbst andribbeln und Tempo aufnehmen', h: 'Dribbling', a: 'dribbling', s: 58, gut: 'aktion', schlecht: 'ballverlust' },
@@ -1962,6 +1983,9 @@ const MOMENTE = {
 };
 
 const TICKER_TEXTE = {
+  torIch: ['Du bist zur Stelle und triffst.', 'Der Ball kommt zu dir — und du machst ihn rein.',
+    'Du stehst richtig und drückst ihn über die Linie.', 'Abgefälscht, unhaltbar — dein Tor.',
+    'Du läufst ein und vollendest.'],
   torMein: ['trifft.', 'schiebt ein — ihr jubelt.', 'trifft aus der Drehung.', 'köpft eine Ecke ins Netz.', 'vollendet einen schönen Angriff.'],
   torGegen: ['trifft.', 'schlägt eiskalt zu.', 'nutzt die Lücke in eurer Kette.', 'trifft nach einem Konter.', 'kommt nach einer Ecke zum Kopfball — drin.'],
   chance: ['— vergeben.', ' kommt durch, der Abschluss misslingt.', ' scheitert am Torwart.', ' setzt den Ball an den Pfosten.'],
@@ -2003,10 +2027,13 @@ function baueSpielverlauf(fx, einsatz) {
   const pMein = clamp(xMein / chancenMein, 0.08, 0.7);
   const pGegen = clamp(xGegen / chancenGegen, 0.08, 0.7);
 
+  /* Zwei Momente fuer alle. Der Zuschlag fuer Angreifer brachte einen
+     Mittelstuermer auf ueber ein Tor pro Spiel — gemessen 115 Tore je hundert
+     Spiele. Ihre Treffer kommen jetzt zum Teil aus dem Spielfluss statt
+     ausschliesslich aus den Momenten. */
   let anzMomente = 0;
-  if (einsatz.status === 'startelf') anzMomente = 2 + (POS(p.pos).angriff > .7 ? 1 : 0);
+  if (einsatz.status === 'startelf') anzMomente = 2;
   if (einsatz.status === 'einwechslung') anzMomente = 1;
-  anzMomente = clamp(anzMomente, 0, 3);
 
   const ev = [];
   const autoChancen = Math.max(1, Math.round(chancenMein - anzMomente * .7));
@@ -3792,8 +3819,14 @@ async function spielAustragen(fx) {
       if (e.mein) {
         if (e.tor) {
           toreMein++; stand(toreMein, toreGegner, fx.heim);
-          const sch = torschuetze(ts.kader);
-          tickerEintrag(e.min, 'Tor ' + club.kurz, sch ? sch.name + ' ' + pick(TICKER_TEXTE.torMein) : 'Dein Team trifft.', 'ev-goal');
+          const aufDemPlatz = spielt && !ausgewechselt && e.min >= einsatz.ab;
+          const sch = torschuetze(ts.kader, aufDemPlatz);
+          if (sch && sch.ich) {
+            meineTore++;
+            tickerEintrag(e.min, 'Dein Tor', pick(TICKER_TEXTE.torIch), 'ev-goal');
+          } else {
+            tickerEintrag(e.min, 'Tor ' + club.kurz, sch ? sch.name + ' ' + pick(TICKER_TEXTE.torMein) : 'Dein Team trifft.', 'ev-goal');
+          }
         } else { tickerEintrag(e.min, 'Chance', club.name + pick(TICKER_TEXTE.chance), ''); continue; }
       } else {
         if (e.tor) {
@@ -3812,7 +3845,23 @@ async function spielAustragen(fx) {
     const wahl = m.w[idx];
     const attrWert = p.attr[wahl.a];
     const bonus = formWert() * .8 + (p.energie < 45 ? -7 : 0) + (p.moral - 60) * .07;
-    const pErfolg = clamp(.5 + (attrWert + bonus - wahl.s) * .019, .06, .86);
+    /* Ein Abschluss aus dem Spiel ist die schwerste Aktion im Fussball und
+       darf nicht so sicher gelingen wie ein Querpass. Mit dem einheitlichen
+       Deckel von .86 traf ein ausgereifter Stuermer in vier von fuenf
+       Momenten — gemessene Spitze: 70 Tore in einer Saison. Sichere und
+       defensive Aktionen behalten die alte Kurve, Torschuesse bekommen eine
+       flachere mit niedrigerem Deckel. Der Elfmeter bleibt aussen vor: der
+       gehoert zu den Aktionen, die fast immer sitzen. */
+    const torWahl = (wahl.gut === 'tor' || wahl.gut === 'traumtor') && !m.elfer;
+    /* Eine Vorlage ist ein gelungener Pass UND ein Mitspieler, der ihn
+       verwertet — also auch keine Selbstverstaendlichkeit. Mit dem alten
+       Deckel stand ein Zehner im Schnitt bei zwanzig Vorlagen je Stammsaison. */
+    const assistWahl = wahl.gut === 'assist' || wahl.gut === 'strafstoss';
+    const basis = torWahl ? (wahl.gut === 'traumtor' ? .26 : .38) : assistWahl ? .44 : .5;
+    const deckel = torWahl ? (wahl.gut === 'traumtor' ? .42 : .58) : assistWahl ? .68 : .86;
+    const steig = torWahl ? .014 : assistWahl ? .016 : .019;
+    let pErfolg = clamp(basis + (attrWert + bonus - wahl.s) * steig, .06, deckel);
+    if (torWahl) pErfolg *= (ABSCHLUSS_LAGE[p.pos] || 1);
     const gut = chance(pErfolg);
     const art = gut ? wahl.gut : wahl.schlecht;
     const txt = pick(ERGEBNIS_TEXT[art] || ['—']);
