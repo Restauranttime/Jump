@@ -227,6 +227,38 @@ ist Absicht: Ein Versuch mit doppelter Wirkung machte die Sache schlechter, weil
 der nur noch den Auftrag im Kopf hat, weniger Tore schießt und am Ende die schlechtere Note
 bekommt. Der Auftrag soll gutes Fußballspielen würzen, nicht ersetzen.
 
+## Der Weg nach oben
+
+Auf- und Abstieg passieren gut dreimal pro Karriere — das war bisher eine Zeile im
+Saisonbericht. Jetzt hängt daran ein Bogen.
+
+**Vor dem Anpfiff** steht die Zuschauerzahl. Sie folgt der Stärke des Heimvereins und macht
+den Unterschied zwischen den Stufen erst spürbar: gemessen im Median 25.300 in der ersten
+Liga, 11.900 in der zweiten, 4.300 in der dritten und 1.400 in der vierten. In der
+Regionalliga stehen tausend Leute am Zaun, in München sitzen fünfzigtausend.
+
+**Auf den letzten fünf Spieltagen** sagt der Ticker, worum es geht: „Platz 1. Ihr steht auf
+einem Aufstiegsplatz — heute geht es darum, ihn zu verteidigen." oder „Nur zwei Punkte trennen
+euch vom Abstiegsplatz." Eine erste Fassung zeigte das über die letzten vierzig Prozent der
+Saison und kam damit auf 1.827 Meldungen in 483 Saisons — so oft nutzt es sich ab. Jetzt sind
+es gut eine pro Saison, und ein entscheidender letzter Spieltag kommt in gut jeder vierten vor.
+
+**Aufstieg und Abstieg** bekommen einen eigenen Bildschirm am Saisonende, mit Platz, Zielliga
+und deiner Bilanz. Der Aufstieg bringt Moral, Ruf und Follower, der Abstieg kostet Moral und
+Trainer-Vertrauen — und lässt offen, ob du mit hinuntergehst.
+
+**Die Pokalsensation.** Wirfst du einen Verein aus dem Pokal, der zwölf Stärkepunkte über
+deinem liegt, wird das ein Höhepunkt für die ganze Laufbahn. Gemessen passiert das etwa einmal
+pro Karriere — selten genug, dass es eine Geschichte bleibt.
+
+**Presse nach Ligastufe.** In der Regionalliga wartet keine Journalistin im Spielertunnel:
+Die Wahrscheinlichkeit eines Interviews fällt von 34 % in der ersten Liga auf 11 % in der
+vierten.
+
+**Die österreichische Bundesliga** spielt jetzt dreifach statt doppelt: 33 statt 22 Spieltage.
+Mit zwölf Vereinen hatte sie vorher weniger Spiele als ihre eigene zweite Liga mit dreißig —
+wer aufstieg, spielte dadurch weniger, und das ist offensichtlich verkehrt herum.
+
 ## Ligen und Startländer
 
 Dreiundzwanzig Ligen in acht Ländern, 442 Vereine. Sieben Länder haben einen Unterbau und sind

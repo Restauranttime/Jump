@@ -509,6 +509,8 @@ const chance = p => Math.random() < p;
 const round1 = v => Math.round(v * 10) / 10;
 const shuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = ri(0, i); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const de = n => n.toLocaleString('de-DE');
+/* "1 Spiele" liest sich falsch. */
+const zahlwort = (n, ein, mehr) => de(n) + ' ' + (n === 1 ? ein : mehr);
 const note = v => v.toFixed(1).replace('.', ',');
 function money(v) {
   const minus = v < 0, a = Math.abs(v);
@@ -1783,7 +1785,12 @@ function roundRobin(ids) {
     hin.push(tag);
     liste.unshift(liste.pop());
   }
-  return hin.concat(hin.map(t => t.map(m => [m[1], m[0]])));
+  const rueck = hin.map(t => t.map(m => [m[1], m[0]]));
+  /* Kleine Ligen spielen dreifach gegeneinander. Die oesterreichische
+     Bundesliga kam mit zwoelf Vereinen sonst auf 22 Spieltage — weniger als
+     ihre eigene zweite Liga mit dreissig. Wer aufstieg, spielte dadurch
+     weniger, und das ist offensichtlich verkehrt herum. */
+  return ids.length <= 12 ? hin.concat(rueck, rueck) : hin.concat(rueck);
 }
 
 function euroQualifiziert(clubId) {
@@ -2276,6 +2283,52 @@ function auftragWaehlen(ts) {
   let r = Math.random() * gew.reduce((sum, x) => sum + x.w, 0);
   for (const x of gew) { r -= x.w; if (r <= 0) return x.a; }
   return moeglich[moeglich.length - 1];
+}
+
+/* Wie viele Menschen zusehen. Reine Stimmung, aber sie macht den Unterschied
+   zwischen den Ligastufen erst spuerbar: In der Regionalliga stehen tausend
+   Leute am Zaun, in der Allianz Arena sitzen fuenfzigtausend. Gerechnet aus
+   der Staerke des Heimvereins, also zaehlt beim Auswaertsspiel die des
+   Gegners. */
+/* Was fuer deinen Verein auf dem Spiel steht. Auf- und Abstieg entscheiden
+   sich am Tabellenplatz, also laesst sich vor dem Anpfiff sagen, worum es
+   geht — und nach dem Abpfiff, ob es gereicht hat. */
+function ligaLage() {
+  if (!S.liga) return null;
+  const pyr = pyramideVon(S.liga.id), stufe = pyr.indexOf(S.liga.id);
+  const n = ligaClubs(S.liga.id).length, platz = tabellenPlatz(S.p.clubId);
+  const liste = tabellenListe();
+  const ich = liste.find(x => x.id === S.p.clubId) || { p: 0 };
+  const abstand = (rang) => liste[rang - 1] ? liste[rang - 1].p - ich.p : 0;
+  return {
+    platz, n, stufe, pyr,
+    kannAuf: stufe > 0,
+    kannAb: stufe >= 0 && stufe < pyr.length - 1,
+    aufPlatz: platz <= 2,
+    abPlatz: platz >= n - 1,
+    zumAufstieg: abstand(2),        /* Punkte, die zum zweiten Platz fehlen */
+    ueberAbstieg: ich.p - (liste[n - 2] ? liste[n - 2].p : 0)
+  };
+}
+
+function lageText(lage, letzter) {
+  if (!lage) return null;
+  const wann = letzter ? 'Letzter Spieltag' : 'Endspurt';
+  if (lage.kannAuf && lage.aufPlatz)
+    return { tag: wann, text: 'Platz ' + lage.platz + '. Ihr steht auf einem Aufstiegsplatz — heute geht es darum, ihn zu verteidigen.' };
+  if (lage.kannAuf && lage.zumAufstieg > 0 && lage.zumAufstieg <= 6)
+    return { tag: wann, text: 'Platz ' + lage.platz + '. ' + lage.zumAufstieg + ' Punkte fehlen zum Aufstieg. Es ist noch alles drin.' };
+  if (lage.kannAb && lage.abPlatz)
+    return { tag: wann, text: 'Platz ' + lage.platz + ' von ' + lage.n + '. Ihr steht auf einem Abstiegsplatz. Heute muss etwas passieren.' };
+  if (lage.kannAb && lage.ueberAbstieg >= 0 && lage.ueberAbstieg <= 5)
+    return { tag: wann, text: 'Platz ' + lage.platz + ' von ' + lage.n + '. Nur ' + lage.ueberAbstieg + ' Punkte trennen euch vom Abstiegsplatz.' };
+  return null;
+}
+
+function zuschauer(fx, heimClub) {
+  const basis = clamp(Math.round(Math.pow(Math.max(2, heimClub.staerke - 30), 2.1) * 9), 300, 82000);
+  const wettbewerb = fx.comp === 'euro' ? 1.12 : fx.comp === 'nat' ? 1.35 : fx.comp === 'pokal' ? .92 : 1;
+  return Math.round(basis * wettbewerb * rnd(.86, 1.12) / 100) * 100;
 }
 
 function baueSpielverlauf(fx, einsatz) {
@@ -3947,8 +4000,15 @@ async function saisonEnde() {
 
   /* Auf- und Abstieg */
   let aufstieg = null;
-  if (lg.tier > 1 && platz <= 2) aufstieg = ligaTauschen(p.clubId, true);
-  else if (lg.tier < 3 && platz >= ligaClubs(S.liga.id).length - 1) aufstieg = ligaTauschen(p.clubId, false) ? 'ab' : null;
+  /* Ob es nach unten geht, haengt daran, ob es unten noch etwas gibt — nicht
+     an der Ligastufe. Mit dem Unterbau stimmte das nicht mehr: Die League One
+     ist Stufe drei und konnte deshalb nicht absteigen, obwohl die League Two
+     darunterliegt. */
+  const pyr = pyramideVon(S.liga.id), stufe = pyr.indexOf(S.liga.id);
+  if (stufe > 0 && platz <= 2) aufstieg = ligaTauschen(p.clubId, true);
+  else if (stufe >= 0 && stufe < pyr.length - 1 && platz >= ligaClubs(S.liga.id).length - 1) {
+    aufstieg = ligaTauschen(p.clubId, false) ? 'ab' : null;
+  }
 
   /* Saisonbericht */
   const tj = torjaegerListe();
@@ -4034,6 +4094,35 @@ async function saisonEnde() {
   if (p.alter <= 21 && meinWeltRang <= 12) { ehrungen.push('Talent des Jahres'); titelGeben('Talent des Jahres'); }
   if (aufstieg && aufstieg !== 'ab') { ehrungen.push('Aufstieg in die ' + LG(aufstieg).name + ' mit ' + club.name); merken('auf', 'Aufstieg in die ' + LG(aufstieg).name + ' mit ' + club.name + '.', 1); }
   if (aufstieg === 'ab') { ehrungen.push('Abstieg mit ' + club.name); merken('ab', 'Abstieg mit ' + club.name + '.', 1); }
+
+  /* Auf- und Abstieg standen bisher als eine Zeile zwischen den Auszeichnungen.
+     Gemessen ueber einundzwanzig Karrieren passiert beides gut dreimal je
+     Laufbahn — dafuer lohnt ein eigener Bildschirm. */
+  if (aufstieg && aufstieg !== 'ab') {
+    const eff = wirke({ moral: 16, ruf: 6, follower: Math.round(p.follower * .25 + 4000) });
+    await sagen({
+      eyebrow: 'Aufstieg · ' + saisonLabel(S.jahr), titel: club.name + ' ist oben',
+      text: 'Platz ' + platz + ' in der ' + lg.name + ' — das reicht. Nächste Saison spielt ihr in der '
+        + LG(aufstieg).name + '.\n\n'
+        + (platz === 1 ? 'Als Erster. Der Platz vor dem Stadion ist voll, bevor der Bus überhaupt da ist.'
+          : 'Die Fans stehen schon auf dem Rasen, bevor der Schiedsrichter den Ball unter den Arm geklemmt hat.')
+        + '\n\nDeine Bilanz in dieser Saison: ' + zahlwort(st.spiele, 'Spiel', 'Spiele') + ', '
+          + zahlwort(st.tore, 'Tor', 'Tore') + ', ' + zahlwort(st.vorlagen, 'Vorlage', 'Vorlagen') + '.',
+      effekte: eff, knopf: 'Feiern'
+    });
+  }
+  if (aufstieg === 'ab') {
+    const eff = wirke({ moral: -18, trainer: -6 });
+    const runter = pyramideVon(CL(p.clubId).liga);
+    await sagen({
+      eyebrow: 'Abstieg · ' + saisonLabel(S.jahr), titel: club.name + ' steigt ab',
+      text: 'Platz ' + platz + ' von ' + ligaClubs(S.liga.id).length + '. Nächste Saison eine Liga tiefer, in der '
+        + LG(CL(p.clubId).liga).name + '.\n\n'
+        + 'In der Kabine sagt lange niemand etwas. Draußen warten Fans, die nicht pfeifen — das ist fast schlimmer.'
+        + '\n\nDein Vertrag läuft weiter. Ob du mit hinuntergehst, entscheidet sich im Sommer.',
+      effekte: eff, knopf: 'Weiter'
+    });
+  }
   if (meinWeltRang <= 3 && meinWeltRang > 1) merken('award', 'Platz ' + meinWeltRang + ' bei der Wahl zum Weltfußballer.', 1);
   if (st.tore >= 15) merken('award', st.tore + ' Tore in der Saison ' + saisonLabel(S.jahr) + '.', st.tore >= 25);
 
@@ -4317,7 +4406,16 @@ async function spielAustragen(fx) {
   let auftragErfuellt = null;
   let minuten = spielt ? (einsatz.status === 'startelf' ? 90 : 90 - einsatz.ab) : 0;
 
-  tickerEintrag(0, 'Anpfiff', heimClub.name + ' gegen ' + gastClub.name + ' — ' + wettbewerbName(fx) + '.', '');
+  const publikum = zuschauer(fx, heimClub);
+  tickerEintrag(0, 'Anpfiff', heimClub.name + ' gegen ' + gastClub.name + ' — ' + wettbewerbName(fx)
+    + '. ' + de(publikum) + ' Zuschauer.', '');
+  /* Auf den letzten fuenf Spieltagen steht dazu, worum es geht. Ueber die
+     letzten vierzig Prozent der Saison gerechnet kam die Meldung 1.827-mal in
+     483 Saisons — so oft nutzt sie sich ab. */
+  if (fx.comp === 'liga' && fx.spieltag >= S.saisonWochen - 4) {
+    const lt = lageText(ligaLage(), fx.spieltag === S.saisonWochen);
+    if (lt) tickerEintrag(0, lt.tag, lt.text, 'ev-you');
+  }
   if (einsatz.status === 'bank') tickerEintrag(0, 'Aufstellung', 'Du sitzt auf der Bank und schaust zu.', '');
   if (einsatz.status === 'verletzt') tickerEintrag(0, 'Aufstellung', 'Du fällst aus: ' + p.verletzung.name + '. Von der Tribüne aus fühlt sich jeder Fehlpass schlimmer an.', '');
   if (einsatz.status === 'startelf') tickerEintrag(0, 'Aufstellung', 'Du beginnst als ' + POS(p.pos).name + '.', 'ev-you');
@@ -4535,6 +4633,13 @@ async function spielAustragen(fx) {
       runde: POKAL_RUNDEN[Math.min(fx.runde, 5)], gegner: CL(fx.gegnerId).name,
       tore: fx.heim ? toreMein : toreGegner, gegentore: fx.heim ? toreGegner : toreMein, weiter
     });
+    /* Wer einen deutlich Groesseren aus dem Pokal wirft, hat eine Geschichte
+       fuer den Rest seiner Laufbahn. */
+    if (weiter && gegner.staerke - club.staerke >= 12) {
+      tickerEintrag(95, 'Sensation', club.name + ' wirft ' + gegner.name + ' aus dem ' + S.pokal.name + '. Das wird man noch lange erzählen.', 'ev-goal');
+      merken('titel', 'Pokalsensation: ' + club.name + ' schlägt ' + gegner.name + '.', 1);
+      wirke({ moral: 10, ruf: 4, follower: Math.round(p.follower * .18 + 2500) });
+    }
     if (weiter) {
       if (S.pokal.runde >= 5) { titelGeben(S.pokal.name); S.pokal.drin = false; }
       else S.pokal.runde++;
@@ -4602,7 +4707,9 @@ async function spielAustragen(fx) {
   }
 
   /* Presse */
-  if (spielt && chance(.3)) await presseInterview(ergebnis, meineTore, noteWert);
+  /* In der Regionalliga wartet keine Journalistin im Spielertunnel. */
+  const presseChance = ts.nat ? .34 : [.34, .26, .16, .11][clamp(LG(CL(p.clubId).liga).tier, 1, 4) - 1];
+  if (spielt && chance(presseChance)) await presseInterview(ergebnis, meineTore, noteWert);
 
   return { ergebnis, toreMein, toreGegner, meineTore, vorlagen, noteWert, einsatz,
     weiter: ergebnis === 'sieg' || elfer === true };
