@@ -172,10 +172,14 @@ Transferfenster im Winter und Sommer mit Vertragsverhandlung, Nationalmannschaft
 mit Länderspielpausen und Turnieren, Auf- und Abstieg mit dem eigenen Verein,
 Investitionen vom verdienten Geld.
 
-**Welt** — Ein eigener Reiter mit den Tabellen aller zehn Ligen, die Woche für Woche
+**Welt** — Ein eigener Reiter mit den Tabellen aller 23 Ligen, die Woche für Woche
 mitlaufen, der laufenden Torjägerliste deiner Liga mit echten Spielernamen, dem Europapokal
 als vollständigem Wettbewerb (24 Teilnehmer, Ligaphase mit Tabelle, K.-o.-Baum bis zum
-Finale), deinem Pokalweg und den Titelträgern der vergangenen Saisons.
+Finale), deinem Pokalweg, den Titelträgern der vergangenen Saisons und dem Saisonrückblick
+zum Nachlesen.
+
+**Die Saison in Europa** — Am Ende jeder Saison ein eigener Bildschirm mit allen 23 Ligen:
+Meister, Torschützenkönig, Auf- und Absteiger. Eigener Abschnitt weiter unten.
 
 **Höhepunkte** — Der Verlauf ist ein Ringspeicher und vergisst nach 60 Einträgen. Besondere
 Momente bleiben dagegen dauerhaft: Profidebüt, erstes Tor, Dreierpack, Traumnote, Titel,
@@ -186,6 +190,46 @@ Länderspieldebüt, Rekordtransfer, schwere Verletzung, jedes 50. Karrieretor un
 Potenzial, ab 29 baut der Körper ab. Saisonbilanz mit Torschützenkönig, Spieler der Saison
 und Goldenem Ball, Weltrangliste, Titelvitrine, Karrieretabelle über alle Saisons.
 Am Schluss: Rücktritt und Legacy-Punkte.
+
+## Die Saison in Europa
+
+Am Ende jeder Saison steht ein Bildschirm, der durch alle 23 Ligen geht: **Meister,
+Torschützenkönig, Aufsteiger, Absteiger** — nach Ländern geordnet, die eigene Liga
+hervorgehoben, der eigene Name farbig, wenn du selbst die Torjägerkrone geholt hast. Die
+letzten sechs Saisons lassen sich im Welt-Reiter jederzeit nachlesen.
+
+Dafür mussten zwei Dinge überhaupt erst entstehen:
+
+**Auf- und Abstieg gibt es jetzt in allen Ligen.** Vorher bewegte sich zwischen zwei Ligen
+nur dein eigener Verein, und der tauschte mit dem schwächsten beziehungsweise stärksten der
+Nachbarliga den Platz. Ausserhalb deiner eigenen Pyramidenstufe stand die Welt still — die
+Frage „wer ist wo aufgestiegen“ hatte gar keine Antwort. Jetzt steigen in jedem Land und auf
+jeder Stufe die ersten zwei auf und die letzten zwei ab, nach der Abschlusstabelle; pro
+Saison bewegen sich damit rund sechzig Vereine statt einem.
+
+Geprüft, ob das die Pyramide zerlegt: nein. Nach 22 Saisons steht der Median der Bundesliga
+bei 73 (Start 71), der 2. Bundesliga bei 60 (60), der 3. Liga bei 45 (46) — und kein
+einziger Verein einer unteren Liga ist stärker als der Median der Liga darüber. 22 Prozent
+der Aufsteiger gehen direkt wieder runter, was ungefähr der Wirklichkeit entspricht.
+
+**Die Torjägerlisten stimmten nicht.** Die Trefferquote eines Ligatorjägers hing an der
+absoluten Vereinsstärke gegen eine feste Schwelle von 60. Unterhalb der ersten Liga lag
+damit die halbe bis ganze Liga auf dem Mindestwert:
+
+| Liga | bester Torjäger, alte Formel | Vereine auf dem Mindestwert | jetzt (Median) |
+|---|---|---|---|
+| Bundesliga | 24,5 Tore | 0 von 18 | 26 |
+| 2. Bundesliga | 5,7 | 6 von 18 | 22 |
+| 3. Liga | **1,5** | **20 von 20** | 21 |
+| League Two | **1,8** | **24 von 24** | 20 |
+| Regionalliga Ost | **1,2** | **16 von 16** | 20 |
+
+Nach siebzehn Spieltagen standen in der 3. Liga **51 Prozent aller Vereine bei null Toren**.
+Und weil dein eigener Stürmer selbst dort auf fünfzehn Tore kommt, wurde er fast
+zwangsläufig Torschützenkönig. Jetzt zählt, wie ein Stürmer zu **seiner eigenen** Liga
+steht: Ein Torjäger der dritten Liga trifft in seiner Liga genauso oft wie einer der ersten,
+und die Krone gewinnt ein gierig gespielter Stürmer in 32 Prozent seiner Saisons statt in
+fast allen.
 
 ## Die schwere Verletzung
 
@@ -640,6 +684,10 @@ eine durchgespielte Karriere:
   derselbe Wert wie bei einem Feldspieler im Team), fünfmal zu Null, Rekord 19. Von den
   Momentausgängen sind 15 Prozent Paraden, 11 Prozent Gegentore, 6 Prozent Nachschüsse.
   Die Höchststärke liegt im Mittelfeld aller Positionen (68 im Median gegen 67 bis 73).
+- Torschützenkönig je Liga, gemessen über 230 Saisons: Median 20 bis 26 Tore in jeder
+  einzelnen der 23 Ligen, Spanne 8 bis 49. Der eigene Spieler holt die Krone in 32 % seiner
+  Saisons — vorher in fast jeder, weil die Konkurrenz unterhalb der ersten Liga bei ein bis
+  zwei Toren pro Saison stand.
 - Verletzungen kosten rund ein Zehntel aller Wochen (bei riskanter Trainingswahl ein Siebtel).
   Gemessen über 20 Karrieren: 21 Verletzungen je Laufbahn, davon vier ab acht Wochen; 18 von
   20 Karrieren erleben mindestens eine lange, acht von 20 eine ab zwanzig Wochen. Ein

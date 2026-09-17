@@ -261,6 +261,16 @@ table.tbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-
 .stab-text{font-size:12px;color:var(--muted);line-height:1.35}
 .stab-knoepfe{display:flex;gap:7px;margin-top:7px}
 .stab-knoepfe .btn{min-height:36px;font-size:12.5px;padding:6px 11px;width:auto}
+.saisonliga{padding:10px 0;border-top:1px solid var(--line-soft)}
+.saisonliga:first-of-type{border-top:0}
+.saisonliga.meine{background:var(--accent-dim);border-radius:10px;padding:10px;margin:2px -8px;border-top-color:transparent}
+.sl-name{font-family:var(--font-data);font-weight:700;font-size:13.5px;margin-bottom:4px}
+.saisonliga.meine .sl-name{color:var(--accent-2)}
+.sl-zeile{display:flex;gap:10px;align-items:baseline;font-size:12.5px;line-height:1.45}
+.sl-zeile>span{font-family:var(--font-data);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);min-width:96px;flex:none}
+.sl-zeile>b{font-weight:600;color:var(--ink-2);min-width:0}
+.sl-zeile em{font-style:normal;color:var(--accent-2)}
 .bilanz{display:flex;flex-direction:column;gap:7px}
 .bilanz div{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
 .bilanz .summe{border-top:1px solid var(--line);padding-top:8px;margin-top:1px}
@@ -1885,12 +1895,18 @@ function tabelleSortiert(T) {
    und den Europapokal ansehen kann, laufen die anderen Ligen jede Woche mit —
    ohne echten Spielplan, aber mit vollständiger, plausibler Tabelle. */
 function weltAufsetzen() {
-  S.welt = { ligen: {}, euro: null, meister: S.welt && S.welt.meister ? S.welt.meister : {} };
+  /* Meister und Saisonrückblick überleben den Neuaufbau — alles andere gehört
+     zur laufenden Saison und wird frisch aufgesetzt. */
+  S.welt = { ligen: {}, euro: null, meister: (S.welt && S.welt.meister) || {}, saison: (S.welt && S.welt.saison) || {} };
   for (const lg of LEAGUES) {
     const clubs = ligaClubs(lg.id);
     const tabelle = {};
     clubs.forEach(c => tabelle[c.id] = leereZeile());
-    S.welt.ligen[lg.id] = { tabelle, spieltag: 0, max: 2 * (clubs.length - 1) };
+    /* Kleine Ligen spielen dreifach — dieselbe Regel wie im eigenen Spielplan,
+       sonst haette die österreichische Bundesliga in der Weltansicht 22 statt
+       33 Spieltage. */
+    const max = (clubs.length <= 12 ? 3 : 2) * (clubs.length - 1);
+    S.welt.ligen[lg.id] = { tabelle, spieltag: 0, max, tj: torjaegerFuer(lg.id, 6) };
   }
   euroAufsetzen();
 }
@@ -4222,21 +4238,62 @@ function weltrangliste() {
   liste.push({ name: S.p.vorname + ' ' + S.p.nachname, club: CL(S.p.clubId).name, punkte: meinePunkte(), tore: S.stats.tore, ovr: OVR(), ich: true });
   return liste.sort((a, b) => b.punkte - a.punkte);
 }
-/* Torjäger der eigenen Liga: einmal pro Saison festgelegt, danach Woche für
-   Woche fortgeschrieben — sonst würfelte die Liste bei jedem Aufruf neu. */
-function torjaegerAufsetzen() {
-  S.torjaeger = ligaClubs(S.liga.id).filter(c => c.id !== S.p.clubId).map(c => {
+/* Torjäger: einmal pro Saison festgelegt, danach Woche für Woche
+   fortgeschrieben — sonst würfelte die Liste bei jedem Aufruf neu.
+
+   Die Trefferquote hing frueher an der absoluten Vereinsstaerke gegen eine
+   feste Schwelle von 60. In jeder Liga unterhalb der ersten lag damit die halbe
+   bis ganze Liga auf dem Mindestwert: Gemessen kam der beste Torjaeger der
+   3. Liga auf 1,5 Tore in einer ganzen Saison, in der League Two auf 1,8, und
+   nach siebzehn Spieltagen standen dort 51 Prozent aller Vereine bei null. Der
+   eigene Spieler wurde dadurch fast zwangslaeufig Torschuetzenkoenig. Jetzt
+   zaehlt, wie ein Stuermer zu seiner eigenen Liga steht — ein Torjaeger der
+   dritten Liga trifft in seiner Liga genauso oft wie einer der ersten. */
+function torjaegerFuer(ligaId, nurTop) {
+  const clubs = ligaClubs(ligaId);
+  if (!clubs.length) return [];
+  const sortiert = clubs.slice().sort((a, b) => b.staerke - a.staerke);
+  const mitte = sortiert[Math.floor(sortiert.length / 2)].staerke;
+  return (nurTop ? sortiert.slice(0, nurTop) : clubs).map(c => {
     const echt = echterKaderStand(c.id).filter(k => k.pos === 'ST' || k.pos === 'FL').sort((x, y) => y.ovr - x.ovr);
     let name, staerke;
     /* Ist der bekannte Angreifer inzwischen im Abstieg seiner Laufbahn, fuehrt
        nicht mehr er die Liste an, sondern ein Nachfolger auf Vereinsniveau. */
     if (echt.length && echt[0].ovr >= c.staerke - 1) { name = echt[0].name; staerke = echt[0].ovr; }
     else { const nat = natFuerLiga(c.liga); const nm = zufallsname(nat.pool); name = nm.v + ' ' + nm.n; staerke = c.staerke + 3; }
-    return { name, clubId: c.id, tore: 0, rate: clamp((staerke - 60) / 42, .04, .72) };
+    const relativ = clamp((staerke - mitte - 4) / 22, -.5, .6);
+    return { name, clubId: c.id, tore: 0, rate: clamp(.34 + relativ * .34 + rnd(-.06, .1), .1, .72) };
   });
+}
+function torjaegerAufsetzen() {
+  S.torjaeger = torjaegerFuer(S.liga.id).filter(t => t.clubId !== S.p.clubId);
+  /* Auch die uebrigen Ligen fuehren eine Torjaegerliste — sonst liesse sich am
+     Saisonende nicht sagen, wer wo Torschuetzenkoenig geworden ist. Sechs
+     Kandidaten je Liga reichen dafuer und halten den Spielstand klein. */
+  if (S.welt && S.welt.ligen) {
+    for (const l of LEAGUES) {
+      if (l.id === S.liga.id || !S.welt.ligen[l.id]) continue;
+      S.welt.ligen[l.id].tj = torjaegerFuer(l.id, 6);
+    }
+  }
 }
 function torjaegerSpieltag() {
   (S.torjaeger || []).forEach(t => { t.tore += poisson(t.rate); });
+  if (!S.welt || !S.welt.ligen) return;
+  for (const l of LEAGUES) {
+    const w = S.welt.ligen[l.id];
+    if (!w || !w.tj || (S.liga && l.id === S.liga.id) || w.spieltag > w.max) continue;
+    w.tj.forEach(t => { t.tore += poisson(t.rate); });
+  }
+}
+/* Wer eine Liga in dieser Saison angefuehrt hat. */
+function torjaegerKoenig(ligaId) {
+  const liste = (S.liga && ligaId === S.liga.id)
+    ? torjaegerListe()
+    : (((S.welt && S.welt.ligen[ligaId]) || {}).tj || []).map(t => ({ name: t.name, clubId: t.clubId, tore: t.tore }));
+  if (!liste.length) return null;
+  const best = liste.slice().sort((a, b) => b.tore - a.tore)[0];
+  return best && best.tore > 0 ? best : null;
 }
 function torjaegerListe() {
   const liste = (S.torjaeger || []).map(t => ({ name: t.name, club: CL(t.clubId).kurz, clubId: t.clubId, tore: t.tore }));
@@ -4244,24 +4301,41 @@ function torjaegerListe() {
   return liste.sort((a, b) => b.tore - a.tore);
 }
 
-/* ---------- Auf- und Abstieg des eigenen Vereins ---------- */
-function ligaTauschen(clubId, hoch) {
-  const c = CL(clubId), pyr = pyramideVon(c.liga), idx = pyr.indexOf(c.liga);
-  if (idx < 0) return null;
-  const zielIdx = hoch ? idx - 1 : idx + 1;
-  if (zielIdx < 0 || zielIdx >= pyr.length) return null;
-  const ziel = pyr[zielIdx];
-  const gegenueber = ligaClubs(ziel).slice().sort((a, b) => hoch ? a.staerke - b.staerke : b.staerke - a.staerke)[0];
-  c.liga = ziel;
-  gegenueber.liga = pyr[idx];
-  c.staerke = clamp(c.staerke + (hoch ? 5 : -5), 25, 95);
-  gegenueber.staerke = clamp(gegenueber.staerke + (hoch ? -5 : 5), 25, 95);
-  S.ligaTausch[c.id] = c.liga;
-  S.ligaTausch[gegenueber.id] = gegenueber.liga;
-  S.staerkeTausch[c.id] = c.staerke;
-  S.staerkeTausch[gegenueber.id] = gegenueber.staerke;
-  return ziel;
+/* ---------- Auf- und Abstieg in allen Ligen ----------
+   Bisher bewegte sich zwischen zwei Ligen nur der eigene Verein, und der
+   tauschte mit dem schwaechsten beziehungsweise staerksten der Nachbarliga.
+   Ausserhalb der eigenen Pyramidenstufe stand die Welt damit still — die Frage
+   "wer ist wo aufgestiegen" hatte im Spiel gar keine Antwort. Jetzt steigen in
+   jedem Land und auf jeder Stufe die ersten zwei auf und die letzten zwei ab,
+   nach der Abschlusstabelle. Der eigene Verein ist einer davon. */
+function weltAufUndAbstieg() {
+  const tabellen = {};
+  for (const l of LEAGUES) {
+    const T = weltTabelle(l.id);
+    tabellen[l.id] = T ? tabelleSortiert(T) : [];
+  }
+  const bewegungen = [];
+  for (const land of Object.keys(PYRAMIDEN)) {
+    const pyr = PYRAMIDEN[land];
+    for (let i = 0; i + 1 < pyr.length; i++) {
+      const oben = pyr[i], unten = pyr[i + 1];
+      const tO = tabellen[oben] || [], tU = tabellen[unten] || [];
+      if (tO.length < 4 || tU.length < 4) continue;
+      tU.slice(0, 2).forEach(x => bewegungen.push({ id: x.id, von: unten, nach: oben, hoch: 1 }));
+      tO.slice(-2).forEach(x => bewegungen.push({ id: x.id, von: oben, nach: unten, hoch: 0 }));
+    }
+  }
+  for (const b of bewegungen) {
+    const c = CL(b.id);
+    if (!c) continue;
+    c.liga = b.nach;
+    c.staerke = clamp(c.staerke + (b.hoch ? 5 : -5), 25, 95);
+    S.ligaTausch[c.id] = c.liga;
+    S.staerkeTausch[c.id] = c.staerke;
+  }
+  return bewegungen;
 }
+
 /* ---------------------------------------------------------------------
    Die Welt zwischen zwei Saisons. Zwei kleine Bewegungen, damit die
    Rangordnung nach zwanzig Jahren nicht dieselbe ist wie am ersten Tag —
@@ -4368,17 +4442,32 @@ async function saisonEnde() {
     S.welt.meister[jahrKey] = eintrag;
   }
 
-  /* Auf- und Abstieg */
-  let aufstieg = null;
-  /* Ob es nach unten geht, haengt daran, ob es unten noch etwas gibt — nicht
-     an der Ligastufe. Mit dem Unterbau stimmte das nicht mehr: Die League One
-     ist Stufe drei und konnte deshalb nicht absteigen, obwohl die League Two
-     darunterliegt. */
-  const pyr = pyramideVon(S.liga.id), stufe = pyr.indexOf(S.liga.id);
-  if (stufe > 0 && platz <= 2) aufstieg = ligaTauschen(p.clubId, true);
-  else if (stufe >= 0 && stufe < pyr.length - 1 && platz >= ligaClubs(S.liga.id).length - 1) {
-    aufstieg = ligaTauschen(p.clubId, false) ? 'ab' : null;
+  /* Torschützenkönige festhalten, solange die Ligen noch stehen. */
+  if (!S.welt || !S.welt.ligen) weltAufsetzen();
+  const jahrKey2 = saisonLabel(S.jahr);
+  S.welt.saison = S.welt.saison || {};
+  const rundgang = { tj: {}, auf: {}, ab: {} };
+  for (const l of LEAGUES) {
+    const k = torjaegerKoenig(l.id);
+    if (k) rundgang.tj[l.id] = { name: k.name, kurz: (CL(k.clubId) || {}).kurz || '', tore: k.tore, ich: k.ich ? 1 : 0 };
   }
+
+  /* Auf- und Abstieg — in allen Ligen, der eigene Verein ist einer von vielen. */
+  const bewegungen = weltAufUndAbstieg();
+  bewegungen.forEach(b => {
+    const c = CL(b.id);
+    if (!c) return;
+    const topf = b.hoch ? rundgang.auf : rundgang.ab;
+    const schluessel = b.hoch ? b.nach : b.von;
+    (topf[schluessel] = topf[schluessel] || []).push(c.kurz);
+  });
+  S.welt.saison[jahrKey2] = rundgang;
+  /* Nur die letzten Saisons behalten, sonst waechst der Spielstand mit. */
+  const alteSaisons = Object.keys(S.welt.saison);
+  while (alteSaisons.length > 6) delete S.welt.saison[alteSaisons.shift()];
+
+  const meineBewegung = bewegungen.find(b => b.id === p.clubId);
+  const aufstieg = meineBewegung ? (meineBewegung.hoch ? meineBewegung.nach : 'ab') : null;
 
   /* Saisonbericht */
   const tj = torjaegerListe();
@@ -4519,6 +4608,14 @@ async function saisonEnde() {
     });
     wirke({ ruf: ehrungen.length * 4, moral: 8, follower: Math.round(p.follower * (.15 * ehrungen.length) + 6000) });
   }
+
+  /* Der Rundgang durch Europa. Er kommt nach den eigenen Bildschirmen — erst
+     die eigene Saison, dann der Blick über den Zaun. */
+  await sagen({
+    eyebrow: 'Saison ' + jahrKey2 + ' · Europa', titel: 'Die Saison in Europa',
+    text: 'Meister, Torschützenkönige, Auf- und Absteiger in allen ' + LEAGUES.length + ' Ligen.',
+    extra: saisonRundgangHtml(jahrKey2), knopf: 'Weiter'
+  });
 
   /* Karriereeintrag */
   S.karriere.push({
@@ -5775,6 +5872,37 @@ function renderProfil() {
   el('view-profile').innerHTML = html;
 }
 
+/* Der Rundgang durch alle Ligen: Meister, Torschützenkönig, Auf- und
+   Absteiger. Am Saisonende einmal als eigener Bildschirm, danach jederzeit
+   über den Welt-Reiter nachzulesen. */
+function saisonRundgangHtml(jahrKey) {
+  const rec = ((S.welt && S.welt.saison) || {})[jahrKey];
+  const meister = ((S.welt && S.welt.meister) || {})[jahrKey] || {};
+  if (!rec) return '<p class="small muted">Für diese Saison liegt noch kein Rückblick vor.</p>';
+  const eigene = S.liga && S.liga.id;
+  let html = '', land = '';
+  for (const l of LEAGUES) {
+    if (l.land !== land) { html += '<div class="gruppe-titel">' + l.flag + ' ' + esc(l.land) + '</div>'; land = l.land; }
+    const m = meister[l.id] && CL(meister[l.id]);
+    const tj = (rec.tj || {})[l.id];
+    const auf = (rec.auf || {})[l.id] || [], ab = (rec.ab || {})[l.id] || [];
+    const zeile = (k, v) => '<div class="sl-zeile"><span>' + k + '</span><b>' + v + '</b></div>';
+    html += '<div class="saisonliga' + (l.id === eigene ? ' meine' : '') + '">'
+      + '<div class="sl-name">' + esc(l.name) + '</div>'
+      + zeile('Meister', m ? esc(m.name) : '—')
+      + (tj ? zeile('Torjäger', (tj.ich ? '<em>' : '') + esc(tj.name) + (tj.ich ? '</em>' : '')
+          + (tj.kurz ? ' · ' + esc(tj.kurz) : '') + ' · ' + tj.tore + ' Tore') : '')
+      + (auf.length ? zeile('Aufsteiger', esc(auf.join(', '))) : '')
+      + (ab.length ? zeile('Absteiger', esc(ab.join(', '))) : '')
+      + '</div>';
+  }
+  if (S.welt && S.welt.meister && meister.euro && CL(meister.euro)) {
+    html += '<div class="gruppe-titel">★ Europapokal</div>'
+      + '<div class="saisonliga"><div class="sl-zeile"><span>Sieger</span><b>' + esc(CL(meister.euro).name) + '</b></div></div>';
+  }
+  return html;
+}
+
 function tabelleHtml(ligaId, eigene) {
   const T = weltTabelle(ligaId);
   if (!T) return '<p class="small muted">Für diese Liga liegt noch keine Tabelle vor.</p>';
@@ -5874,6 +6002,16 @@ function renderWelt() {
     }
   }
 
+  /* Rueckblick auf die abgeschlossenen Saisons */
+  const rundgaenge = Object.keys((S.welt && S.welt.saison) || {}).reverse();
+  if (rundgaenge.length) {
+    html += '<section><div class="sect-title"><h3>Saisonrückblick</h3><span class="small muted">alle Ligen</span></div>'
+      + '<div class="card stack-sm">'
+      + rundgaenge.map(j => '<button class="btn btn-sm" data-act="rundgang:' + j + '" style="width:100%">'
+        + esc(j) + ' ansehen</button>').join('')
+      + '</div></section>';
+  }
+
   /* Meister der vergangenen Saisons */
   const jahre = Object.keys((S.welt && S.welt.meister) || {}).slice(-5).reverse();
   if (jahre.length) {
@@ -5945,6 +6083,13 @@ async function aktion(name) {
       toast(def.name + ' entlassen');
     }
     speichern(); render();
+    return;
+  }
+  if (name.startsWith('rundgang:')) {
+    const j = name.slice(9);
+    await sagen({ eyebrow: 'Saison ' + j + ' · Europa', titel: 'Die Saison in Europa',
+      text: 'Meister, Torschützenkönige, Auf- und Absteiger in allen ' + LEAGUES.length + ' Ligen.',
+      extra: saisonRundgangHtml(j), knopf: 'Schließen' });
     return;
   }
   if (name.startsWith('kauf:')) {
@@ -6170,6 +6315,14 @@ function migriere() {
     v.rueckschlaege = 0; v.getrieben = 0; v.behutsam = 0; v.phase = null;
   }
   if (!Array.isArray(S.p.verletzungen)) S.p.verletzungen = [];
+  if (S.welt && !S.welt.saison) S.welt.saison = {};
+  /* Torjaegerlisten der uebrigen Ligen gibt es erst seit dem Saisonrundgang. */
+  if (S.welt && S.welt.ligen) {
+    for (const l of LEAGUES) {
+      const w = S.welt.ligen[l.id];
+      if (w && !Array.isArray(w.tj)) w.tj = torjaegerFuer(l.id, 6);
+    }
+  }
   if (typeof S.p.anfaellig !== 'number') S.p.anfaellig = 0;
   tauschAnwenden();
   /* Verein aus einem älteren Spielstand, den es so nicht mehr gibt */
