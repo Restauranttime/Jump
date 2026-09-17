@@ -338,6 +338,48 @@ bezahlt:
 Sechsfache dessen, was der Verein zahlte — sie trugen die ganze Wirtschaft allein. Jetzt
 bleiben selbst die Verträge eines Weltstars unter seinem Vereinsgehalt.
 
+**Sponsoren melden sich, wenn Reichweite da ist.** Die Anfrage stand vorher als eines von
+siebenundzwanzig Ereignissen in einem Topf, aus dem nur jede dritte Woche überhaupt gezogen
+wurde — gemessen 4,6 % Anteil daran. Vom Erreichen der 25.000 Follower bis zum ersten
+Angebot vergingen im Median 40 Wochen, in einem Viertel der Fälle über 100. Mit einer
+Viertelmillion Followern konnte man Saison um Saison auf den ersten Vertrag warten, ohne
+dass an der Reichweite irgendetwas hing. Jetzt würfelt der Sponsor eine eigene Woche, und
+die Chance hängt daran, wie weit du über der Schwelle für den nächsten freien Platz liegst:
+
+| Followerschwelle | für den … Vertrag |
+|---|---|
+| 25.000 | ersten |
+| 150.000 | zweiten |
+| 900.000 | dritten |
+
+Direkt an der Schwelle meldet sich etwa alle 17 Wochen jemand, beim Zehnfachen alle sechs;
+der Ruf verschiebt das um ±30 %. Nach jeder Anfrage sind 5 bis 11 Wochen Ruhe. Gemessen über
+12 Karrieren: erste Anfrage im Median 15 Wochen nach den 25.000 statt 40, längste Wartezeit
+27 Wochen statt 273. Auf dem Social-Bildschirm steht jetzt, wie viele Follower bis zum
+nächsten Platz fehlen.
+
+Damit die Werbung dabei ein Zubrot bleibt, hängt das Angebot nicht mehr allein an der
+Reichweite, sondern auch am Vereinsgehalt. Ohne diese Bindung zahlten drei Verträge einem
+Spieler mit einer Million Followern in einem Mittelfeldverein mehr als sein Beruf — gemessen
+**40,2 Mio € Werbeeinnahmen gegen 24,2 Mio € Gehalt** über eine Karriere, bei einem
+Kontostand am Ende von 5,6 statt 1,5 Mio €.
+
+Der Deckel liegt bei knapp einem Fünftel des Wochengehalts je Vertrag, ist aber **weich**:
+Ein harter Deckel hätte in 96 % aller Angebote gegriffen — dann hätte die Reichweite nur
+noch entschieden, *ob* jemand anfragt, und nicht mehr, *was* er bietet. Darüber zahlt die
+Reichweite deshalb logarithmisch weiter. Wer viel größer ist als sein Verein, holt mehr
+heraus, aber nicht beliebig viel:
+
+| Alter | Median je Woche | im Jahr | Anteil am Wochengehalt |
+|---|---|---|---|
+| 17–21 | 1.800 € | 93.600 € | 18 % |
+| 22–26 | 3.400 € | 176.800 € | 20 % |
+| 27–31 | 6.300 € | 327.600 € | 21 % |
+| 32+ | 6.100 € | 317.200 € | 23 % |
+
+Unterm Strich: viermal so viele Anfragen wie vorher, in der Summe dasselbe Geld —
+9,8 Mio € Werbeeinnahmen über eine Karriere gegen vorher 9,5.
+
 **Steuern.** Auf Gehalt und Werbung gehen 43 bis 50 % weg, je nach Land, in dem du spielst,
 auf Kapitalerträge 26 %. Die Wochenbilanz zeigt jede Zeile einzeln. Saudi-Arabien zahlt
 keine Steuer und obendrein mehr als das Doppelte — der Grund, warum am Ende einer Karriere
@@ -355,6 +397,37 @@ Zeitpunkt eine Entscheidung.
 Gemessen über 30 Karrieren kauft sich eine durchschnittliche Karriere davon drei bis fünf
 der zehn Anschaffungen und hält zwischen 17 und 33 der 39 Stabstufen; nur eine einzige
 Karriere kam auf alles. Der Kontostand am Ende liegt im Median bei 1,5 Mio € statt bei 29.
+
+## Weltrangliste und Karriereende
+
+Die Weltrangliste ist die Wertung der Fachpresse: 22 Weltstars plus du, sortiert nach Toren,
+Vorlagen, Note, Titeln, Stärke und Vereinsstärke. Zwei Dinge stimmten daran nicht.
+
+**Die eigene Zeile fehlte.** Gezeigt wurden die ersten zehn — und der eigene Spieler stand
+gemessen über 368 Saisons im Median auf Platz 23 von 23, in 0 % aller Saisons unter den
+ersten zehn. Man sah also fast nie, wo man selbst steht. Jetzt hängt die eigene Zeile
+darunter, mit dem echten Platz und einer Zeile darüber, wie viele es insgesamt sind.
+
+**Es gab keine Torhüter.** Der Positionstopf der Weltstars war `ST, ST, FL, FL, OM, ZM, IV` —
+ein Torwart spielte gegen ein Feld, in dem seine Position nicht vorkam, und wurde an Toren
+gemessen, die er nie schießen wird. Jetzt sind zwei bis drei der 22 Torhüter, und sie
+rechnen in derselben Währung wie er: die Null zählt für den Torwart, was das Tor für den
+Stürmer zählt. In der Tabelle steht bei ihnen die Zahl der Spiele zu Null.
+
+**Die Legacy-Stufen.** Am Karriereende steht eine von fünf Stufen. Zwei davon waren
+unerreichbar: Die beste je erreichte Stärke zählte mal drei, das waren für jeden, der
+überhaupt Profi wurde, rund 250 geschenkte Punkte — gemessen kam über 16 Laufbahnen keine
+einzige unter 599 Punkte, gegen Grenzen bei 280 und 550. Jetzt zählt nur, was über dem Wert
+eines Reservisten liegt, und die Grenzen stehen dort, wo die gemessene Verteilung
+auseinanderfällt:
+
+| ab | Stufe | wer das ist |
+|---|---|---|
+| 0 | Ein ehrlicher Arbeiter | Laufbahn vor der neunten Saison zu Ende |
+| 280 | Solider Profi | rund 9 bis 15 Saisons |
+| 600 | Ein Großer seiner Liga | durchgespielt, ohne die ganz großen Titel |
+| 1.100 | Weltklassespieler | Europapokal, Goldener Ball, Nationalelf |
+| 1.800 | Legende des Weltfußballs | mehrfach davon |
 
 ## Wunschverein
 
@@ -684,6 +757,16 @@ eine durchgespielte Karriere:
   derselbe Wert wie bei einem Feldspieler im Team), fünfmal zu Null, Rekord 19. Von den
   Momentausgängen sind 15 Prozent Paraden, 11 Prozent Gegentore, 6 Prozent Nachschüsse.
   Die Höchststärke liegt im Mittelfeld aller Positionen (68 im Median gegen 67 bis 73).
+- Sponsorenanfragen, gemessen über 12 Karrieren: erste Anfrage im Median 15 Wochen nach den
+  25.000 Followern (vorher 40, längstenfalls 273), Wochenchance im Schnitt 20 %, rund 30
+  Angebote über eine ganze Laufbahn, keine Karriere ohne Angebot. Die Werbung bleibt trotzdem
+  ein Zubrot: 9,8 Mio € über die Karriere gegen 19,3 Mio € Gehalt — mehr Anfragen, dafür
+  kleinere Verträge. Kontostand am Ende im Median 1,2 Mio €, vorher 1,5.
+- Die fünf Legacy-Stufen sind alle erreichbar. Gemessen über 90 durchgespielte Laufbahnen in
+  drei Spielweisen: Solider Profi 22, Großer seiner Liga 46, Weltklassespieler 9, Legende 13;
+  die Spanne reicht von 311 bis 3.620 Punkten, der Median liegt bei 810. Die unterste Stufe
+  hängt an der Länge — eine Laufbahn, die vor der neunten Saison endet, liegt im Median unter
+  280 Punkten. Vorher: 0 von 16 Laufbahnen unter 599 Punkten, gegen Grenzen bei 280 und 550.
 - Torschützenkönig je Liga, gemessen über 230 Saisons: Median 20 bis 26 Tore in jeder
   einzelnen der 23 Ligen, Spanne 8 bis 49. Der eigene Spieler holt die Krone in 32 % seiner
   Saisons — vorher in fast jeder, weil die Konkurrenz unterhalb der ersten Liga bei ein bis

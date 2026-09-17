@@ -2768,13 +2768,6 @@ const EREIGNISSE = [
       { l: 'Schlucken und im Training antworten', h: 'Solide', run: () => ({ text: 'Du sagst nichts und rennst im Training alle in Grund und Boden. Auch das spricht sich herum.', eff: { zweikampf: .5, physis: .4, trainer: 4, energie: -5 } }) },
       { l: 'Ihn danach unter vier Augen ansprechen', h: 'Klug', run: () => ({ text: '„Ich meine es nicht persönlich, Junge." Seitdem erklärt er dir nach jedem Training deine Laufwege.', eff: { mentalitaet: .8, moral: 4, pass: .3 } }) }
     ] },
-  { id: 'sponsor', gewicht: 3, wenn: () => S.p.follower > 25000 && S.p.sponsoren.length < 3, eyebrow: 'Berater', titel: 'Ein Sponsor klopft an',
-    text: () => { const s = sponsorAngebot(); S._sponsor = s; return s.firma + ' will dich für ' + money(s.pro) + ' pro Woche als Werbegesicht. Dafür: Fototermine, Social Posts, gute Laune.'; },
-    wahl: [
-      { l: 'Unterschreiben', h: 'Geld', run: () => { const s = S._sponsor; S.p.sponsoren.push({ firma: s.firma, pro: s.pro, jahre: 2 }); return { text: 'Unterschrieben. Der erste Werbespot wird im Trainingslager gedreht.', eff: { geld: s.pro * 8, ruf: 3, energie: -4 } }; } },
-      { l: 'Mehr fordern', h: 'Riskant', run: () => { const s = S._sponsor; return chance(.45) ? (S.p.sponsoren.push({ firma: s.firma, pro: Math.round(s.pro * 1.6), jahre: 2 }), { text: 'Sie zahlen. Dein Berater grinst zum ersten Mal seit Monaten.', eff: { geld: s.pro * 12, ruf: 4 } }) : ({ text: 'Sie nehmen einen anderen Spieler. Der Werbespot läuft trotzdem — nur ohne dich.', eff: { moral: -4 } }); } },
-      { l: 'Ablehnen, Fokus auf Fußball', h: 'Sauber', run: () => ({ text: 'Dein Trainer erfährt davon und erwähnt es lobend in der Mannschaftssitzung.', eff: { trainer: 6, moral: 3 } }) }
-    ] },
   { id: 'boulevard', gewicht: 2, wenn: () => S.p.ruf > 25, eyebrow: 'Boulevard', titel: 'Eine Schlagzeile, die du nicht wolltest',
     text: () => 'Ein Boulevardblatt bringt Fotos von dir um drei Uhr nachts vor einem Club. Die Überschrift: „Feiert er sich aus der Startelf?"',
     wahl: [
@@ -3066,13 +3059,53 @@ const EREIGNISSE = [
 
 function sponsorAngebot() {
   const firmen = ['Nordstern Sportswear', 'Kraftwerk Energy', 'Halbzeit Getränke', 'Rasenmeister', 'Volt Mobilfunk', 'Adler Automobile', 'Pixelpass Gaming', 'Sonntagsheld Mode'];
-  /* Werbung ist ein Zubrot, kein zweites Gehalt: Selbst drei Verträge eines
-     Weltstars bleiben unter dem, was ihm sein Verein zahlt. */
+  /* Werbung ist ein Zubrot, kein zweites Gehalt. Die Reichweite allein war
+     dafuer der falsche Massstab: Wer mit einer Million Followern in einem
+     Mittelfeldverein spielt, kam damit auf drei Vertraege, die zusammen mehr
+     zahlten als sein Beruf. Was eine Firma bietet, haengt jetzt auch daran,
+     was der Verein zahlt. Ein harter Deckel griff dabei in 96 Prozent aller
+     Angebote — damit haette die Reichweite nur noch entschieden, ob jemand
+     anfragt, und nicht mehr, was er bietet. Der Deckel ist deshalb weich:
+     Bis knapp ein Fuenftel des Wochengehalts zahlt die Reichweite voll,
+     darueber nur noch logarithmisch weiter. Wer viel groesser ist als sein
+     Verein, holt mehr heraus — aber nicht beliebig viel. */
   const f = Math.max(1000, S.p.follower);
-  const pro = clamp(Math.round(Math.pow(f, .7) * .42 * (.6 + S.p.ruf / 100)
-    * stabWert('pr', [1.1, 1.25, 1.5]) / 100) * 100, 200, 26000);
+  const reichweite = Math.pow(f, .7) * .42 * (.6 + S.p.ruf / 100) * stabWert('pr', [1.1, 1.25, 1.5]);
+  const deckel = S.p.vertrag.gehalt / 52 * .18;
+  const roh = reichweite <= deckel ? reichweite : deckel * (1 + Math.log10(reichweite / deckel) * .18);
+  const pro = clamp(Math.round(roh / 100) * 100, 200, 26000);
   return { firma: pick(firmen), pro };
 }
+
+/* Werbevertraege sind kein Losglueck. Wer Reichweite hat, wird angefragt —
+   deshalb wuerfelt der Sponsor eine eigene Woche und steht nicht mit
+   siebenundzwanzig anderen Ereignissen in einem Topf, aus dem nur jede
+   dritte Woche ueberhaupt gezogen wird. Der erste Vertrag kommt mit der
+   ersten Sichtbarkeit, der zweite und dritte erst, wenn die Reichweite
+   wirklich etwas wert ist. */
+const SPONSOR_SCHWELLE = [25000, 150000, 900000];
+
+function sponsorChance() {
+  const p = S.p;
+  if (p.verletzung || S.sponsorPause > 0) return 0;
+  const n = p.sponsoren.length;
+  if (n >= 3) return 0;
+  const schwelle = SPONSOR_SCHWELLE[n];
+  if (p.follower < schwelle) return 0;
+  /* Null an der Schwelle, eins beim Zehnfachen: je weiter darueber, desto
+     schneller klopft jemand an. */
+  const ueber = clamp(Math.log10(p.follower / schwelle), 0, 2);
+  return clamp((.055 + ueber * .10) * (.7 + p.ruf / 140), 0, .32);
+}
+
+const SPONSOR_EREIGNIS =
+  { id: 'sponsor', eyebrow: 'Berater', titel: 'Ein Sponsor klopft an',
+    text: () => { const s = sponsorAngebot(); S._sponsor = s; return s.firma + ' will dich für ' + money(s.pro) + ' pro Woche als Werbegesicht. Dafür: Fototermine, Social Posts, gute Laune.'; },
+    wahl: [
+      { l: 'Unterschreiben', h: 'Geld', run: () => { const s = S._sponsor; S.p.sponsoren.push({ firma: s.firma, pro: s.pro, jahre: 2 }); return { text: 'Unterschrieben. Der erste Werbespot wird im Trainingslager gedreht.', eff: { geld: s.pro * 8, ruf: 3, energie: -4 } }; } },
+      { l: 'Mehr fordern', h: 'Riskant', run: () => { const s = S._sponsor; return chance(.45) ? (S.p.sponsoren.push({ firma: s.firma, pro: Math.round(s.pro * 1.6), jahre: 2 }), { text: 'Sie zahlen. Dein Berater grinst zum ersten Mal seit Monaten.', eff: { geld: s.pro * 12, ruf: 4 } }) : ({ text: 'Sie nehmen einen anderen Spieler. Der Werbespot läuft trotzdem — nur ohne dich.', eff: { moral: -4 } }); } },
+      { l: 'Ablehnen, Fokus auf Fußball', h: 'Sauber', run: () => ({ text: 'Dein Trainer erfährt davon und erwähnt es lobend in der Mannschaftssitzung.', eff: { trainer: 6, moral: 3 } }) }
+    ] };
 
 function ereignisWaehlen() {
   const moeglich = EREIGNISSE.filter(e => (!e.wenn || e.wenn()) && e.id !== S.letztesEreignis);
@@ -3246,8 +3279,10 @@ async function wocheVor() {
     } else {
       await planAnwenden();
     }
-    if (!S.p.verletzung && chance(.3)) {
-      const e = ereignisWaehlen();
+    if (S.sponsorPause > 0) S.sponsorPause--;
+    if (!S.p.verletzung) {
+      const e = chance(sponsorChance()) ? (S.sponsorPause = ri(5, 11), SPONSOR_EREIGNIS)
+        : chance(.3) ? ereignisWaehlen() : null;
       if (e) await ereignisSpielen(e);
     }
     for (const fx of aktuelleSpiele()) await spielAustragen(fx);
@@ -4178,16 +4213,22 @@ function rivaleAbschliessen() {
 }
 
 /* ========================== WELTSTARS & AUSZEICHNUNGEN ========================== */
+/* In der Weltspitze stand kein einziger Torwart. Ein Torhueter spielte damit
+   gegen ein Feld, in dem seine Position gar nicht vorkam — gemessen wurde er
+   an Toren, die er nie schiessen wird. Zwei bis drei der zweiundzwanzig sind
+   jetzt Torhueter, und sie werden an der Null gemessen wie er. */
+const STAR_POS = ['ST', 'ST', 'FL', 'FL', 'OM', 'ZM', 'IV', 'TW'];
+
+function neuerStar(top, alter) {
+  const nat = pick(NATIONEN), nm = zufallsname(nat.pool);
+  return { name: nm.v + ' ' + nm.n, natId: nat.id, clubId: pick(top).id, alter,
+    ovr: ri(83, 93), pos: pick(STAR_POS), tore: 0, vorlagen: 0, zuNull: 0, punkte: 0 };
+}
+
 function baueStars() {
   S.stars = [];
   const top = CLUBS.filter(c => c.staerke >= 76);
-  for (let i = 0; i < 22; i++) {
-    const nat = pick(NATIONEN), nm = zufallsname(nat.pool);
-    S.stars.push({
-      name: nm.v + ' ' + nm.n, natId: nat.id, clubId: pick(top).id, alter: ri(21, 32),
-      ovr: ri(83, 93), pos: pick(['ST', 'ST', 'FL', 'FL', 'OM', 'ZM', 'IV']), tore: 0, vorlagen: 0, punkte: 0
-    });
-  }
+  for (let i = 0; i < 22; i++) S.stars.push(neuerStar(top, ri(21, 32)));
 }
 /* Die Weltspitze erneuert sich ueber zwanzig Jahre. Ohne das stand dieselbe
    Liste mit denselben zweiundzwanzig Namen und denselben Werten 2046 noch
@@ -4200,27 +4241,28 @@ function starsAltern() {
     if (s.alter <= 25) s.ovr = clamp(s.ovr + ri(0, 2), 78, 96);
     else if (s.alter >= 30) s.ovr = clamp(s.ovr - ri(1, 3), 60, 96);
     if (chance(.18)) s.clubId = pick(top).id;
-    if (s.alter > 34 || s.ovr < 80) {
-      const nat = pick(NATIONEN), nm = zufallsname(nat.pool);
-      S.stars[i] = { name: nm.v + ' ' + nm.n, natId: nat.id, clubId: pick(top).id, alter: ri(20, 25),
-        ovr: ri(83, 93), pos: pick(['ST', 'ST', 'FL', 'FL', 'OM', 'ZM', 'IV']), tore: 0, vorlagen: 0, punkte: 0 };
-    }
+    if (s.alter > 34 || s.ovr < 80) S.stars[i] = neuerStar(top, ri(20, 25));
   });
 }
 
 function starsSaison() {
   for (const s of S.stars) {
+    const tw = s.pos === 'TW';
     const ang = POS(s.pos).angriff;
-    s.tore = Math.round(poisson(clamp((s.ovr - 70) * ang * .95, .2, 26)));
-    s.vorlagen = Math.round(poisson(clamp((s.ovr - 70) * .5, .2, 14)));
+    s.tore = tw ? 0 : Math.round(poisson(clamp((s.ovr - 70) * ang * .95, .2, 26)));
+    s.vorlagen = tw ? 0 : Math.round(poisson(clamp((s.ovr - 70) * .5, .2, 14)));
+    s.zuNull = tw ? Math.round(poisson(clamp((s.ovr - 72) * .78, 2, 20))) : 0;
     const titel = chance(.22) ? 1 : 0;
     /* Auch ein Weltstar hat eine Saisonnote und schiesst Laendertore. Ohne
        beides stand auf der einen Seite der Rechnung ein Notenbonus von bis zu
        65 Punkten und auf der anderen nichts: Gemessen gewann ein gut
        gespielter Spieler den Goldenen Ball in 44 Prozent aller Saisons. */
-    s.note = clamp(3.5 - (s.ovr - 80) * .075 - s.tore * .018 + rnd(-.3, .3), 1.1, 4.4);
-    s.natTore = Math.round(poisson(clamp((s.ovr - 76) * .35, 0, 9)));
-    s.punkte = Math.round(s.tore * 3.2 + s.vorlagen * 2 + Math.max(0, NOTE_MITTE + .2 - s.note) * 24
+    s.note = clamp(3.5 - (s.ovr - 80) * .075 - (tw ? s.zuNull * .028 : s.tore * .018) + rnd(-.3, .3), 1.1, 4.4);
+    s.natTore = tw ? 0 : Math.round(poisson(clamp((s.ovr - 76) * .35, 0, 9)));
+    /* Dieselbe Waehrung wie in meinePunkte(): die Null zaehlt fuer den
+       Torhueter, was das Tor fuer den Stuermer zaehlt. */
+    const eigen = tw ? s.zuNull * 3.6 : s.tore * 3.2 + s.vorlagen * 2;
+    s.punkte = Math.round(eigen + Math.max(0, NOTE_MITTE + .2 - s.note) * 24
       + s.ovr * 1.35 + CL(s.clubId).staerke * .3 + titel * 14 + s.natTore * 2.2 + rnd(-6, 10));
   }
   S.stars.sort((a, b) => b.punkte - a.punkte);
@@ -4234,8 +4276,10 @@ function meinePunkte() {
     + OVR() * 1.35 + CL(S.p.clubId).staerke * .3 + S.natStats.tore * 2.2);
 }
 function weltrangliste() {
-  const liste = S.stars.map(s => ({ name: s.name, club: CL(s.clubId).name, punkte: s.punkte, tore: s.tore, ovr: s.ovr }));
-  liste.push({ name: S.p.vorname + ' ' + S.p.nachname, club: CL(S.p.clubId).name, punkte: meinePunkte(), tore: S.stats.tore, ovr: OVR(), ich: true });
+  const liste = S.stars.map(s => ({ name: s.name, club: CL(s.clubId).name, punkte: s.punkte,
+    tore: s.tore, zuNull: s.zuNull || 0, pos: s.pos, ovr: s.ovr }));
+  liste.push({ name: S.p.vorname + ' ' + S.p.nachname, club: CL(S.p.clubId).name, punkte: meinePunkte(),
+    tore: S.stats.tore, zuNull: S.stats.zuNull || 0, pos: S.p.pos, ovr: OVR(), ich: true });
   return liste.sort((a, b) => b.punkte - a.punkte);
 }
 /* Torjäger: einmal pro Saison festgelegt, danach Woche für Woche
@@ -4707,6 +4751,17 @@ async function karriereendeCheck() {
   return false;
 }
 
+/* Fuenf Stufen, die es auch alle gibt: die Grenzen stehen dort, wo die
+   gemessene Verteilung ueber vierzig Laufbahnen tatsaechlich auseinanderfaellt. */
+const LEGACY_STUFEN = [
+  { ab: 1800, name: 'Legende des Weltfußballs' },
+  { ab: 1100, name: 'Weltklassespieler' },
+  { ab: 600, name: 'Ein Großer seiner Liga' },
+  { ab: 280, name: 'Solider Profi' },
+  { ab: 0, name: 'Ein ehrlicher Arbeiter' }
+];
+function LEGACY_STUFE(p) { return LEGACY_STUFEN.find(s => p >= s.ab).name; }
+
 function legacyPunkte() {
   const p = S.p;
   const ges = S.karriere.reduce((a, k) => ({ s: a.s + k.spiele, t: a.t + k.tore, v: a.v + k.vorlagen }), { s: 0, t: 0, v: 0 });
@@ -4716,15 +4771,21 @@ function legacyPunkte() {
   /* Ein Torwart schießt keine Tore. Ohne die Null als eigene Währung käme er
      bei gleicher Laufbahn auf ein Drittel der Punkte eines Stürmers. */
   const eigen = p.pos === 'TW' ? karriereZuNull() * 4.5 : ges.t * 3 + ges.v * 1.6;
-  return Math.round(eigen + ges.s * .4 + titel * 22 + gross * 55 + p.nat.spiele * 1.2 + p.nat.tore * 3 + vermaechtnis + Math.max(...S.karriere.map(k => k.ovr), 40) * 3);
+  /* Die beste je erreichte Staerke zaehlte frueher mal drei — das waren fuer
+     jeden, der ueberhaupt Profi wurde, zweihundertfuenfzig geschenkte Punkte,
+     und die beiden unteren Stufen damit unerreichbar. Gemessen kam ueber
+     sechzehn Laufbahnen keine einzige unter 599 Punkte. Jetzt zaehlt nur, was
+     ueber dem Wert eines Reservisten liegt. */
+  const besteOvr = Math.max(...S.karriere.map(k => k.ovr), 40);
+  return Math.round(eigen + ges.s * .4 + titel * 22 + gross * 55 + p.nat.spiele * 1.2 + p.nat.tore * 3
+    + vermaechtnis + Math.max(0, besteOvr - 58) * 7);
 }
 async function karriereEnde(grund) {
   S.beendet = true;
   const p = S.p;
   const ges = S.karriere.reduce((a, k) => ({ s: a.s + k.spiele, t: a.t + k.tore, v: a.v + k.vorlagen }), { s: 0, t: 0, v: 0 });
   const punkte = legacyPunkte();
-  const stufe = punkte > 1400 ? 'Legende des Weltfußballs' : punkte > 900 ? 'Weltklassespieler' : punkte > 550 ? 'Ein Großer seiner Liga'
-    : punkte > 280 ? 'Solider Profi' : 'Ein ehrlicher Arbeiter';
+  const stufe = LEGACY_STUFE(punkte);
   await sagen({
     eyebrow: 'Karriereende · ' + saisonLabel(S.jahr), titel: stufe,
     text: grund + '\n\n' + ges.s + ' Pflichtspiele · '
@@ -5592,20 +5653,43 @@ function renderSocial() {
     + '<div class="cond-item"><span class="k">Werbung</span><span class="v">' + (einnahmen ? money(einnahmen) : '—') + '</span></div>'
     + '</div>';
 
-  html += '<section><div class="sect-title"><h3>Sponsoren</h3></div>'
-    + (p.sponsoren.length
-      ? '<div class="stack-sm">' + p.sponsoren.map(s => '<div class="card row-between"><div><div style="font-weight:600;font-size:14px">' + esc(s.firma) + '</div>'
-        + '<div class="small muted">noch ' + s.jahre + ' Jahr(e)</div></div><span class="pill pill-accent">' + money(s.pro) + ' / Woche</span></div>').join('') + '</div>'
-      : '<div class="card"><p class="small muted">Noch kein Sponsor. Ab etwa 25.000 Followern melden sich die ersten Firmen — Reichweite baust du über Social-Media-Wochen, gute Spiele und Interviews auf.</p></div>')
-    + '</section>';
+  /* Wie weit es bis zum naechsten Werbepartner ist, soll man ablesen koennen
+     und nicht raten muessen. */
+  let sponsorHinweis = '';
+  if (p.sponsoren.length < 3) {
+    const schwelle = SPONSOR_SCHWELLE[p.sponsoren.length];
+    const erster = !p.sponsoren.length;
+    sponsorHinweis = p.follower >= schwelle
+      ? (erster ? 'Deine Reichweite reicht längst. Dein Berater telefoniert — es ist eine Frage der Wochen.'
+                : 'Platz für einen weiteren Werbepartner. Dein Berater telefoniert bereits.')
+      : (erster ? 'Noch kein Sponsor. Ab ' + followers(schwelle) + ' Followern melden sich die ersten Firmen — Reichweite baust du über Social-Media-Wochen, gute Spiele und Interviews auf.'
+                : 'Platz für einen weiteren Werbepartner — dafür brauchst du ' + followers(schwelle) + ' Follower. Dir fehlen noch ' + followers(schwelle - p.follower) + '.');
+  }
 
-  const rang = weltrangliste().slice(0, 10);
+  html += '<section><div class="sect-title"><h3>Sponsoren</h3>'
+    + (p.sponsoren.length ? '<span class="small muted">' + p.sponsoren.length + ' von 3</span>' : '') + '</div>'
+    + '<div class="stack-sm">'
+    + p.sponsoren.map(s => '<div class="card row-between"><div><div style="font-weight:600;font-size:14px">' + esc(s.firma) + '</div>'
+      + '<div class="small muted">noch ' + s.jahre + ' Jahr(e)</div></div><span class="pill pill-accent">' + money(s.pro) + ' / Woche</span></div>').join('')
+    + (sponsorHinweis ? '<div class="card"><p class="small muted">' + sponsorHinweis + '</p></div>' : '')
+    + '</div></section>';
+
+  /* Die eigene Zeile gehoert immer dazu — Platz 23 zu sehen ist eine
+     Information, gar nicht vorzukommen ist nur eine Leerstelle. */
+  const weltAlle = weltrangliste();
+  const meinPlatz = weltAlle.findIndex(r => r.ich);
+  const rang = weltAlle.slice(0, 10).map((r, i) => ({ r, nr: i + 1 }));
+  if (meinPlatz >= 10) rang.push({ r: weltAlle[meinPlatz], nr: meinPlatz + 1, weit: true });
   html += '<section><div class="sect-title"><h3>Weltrangliste</h3><span class="small muted">Wertung der Fachpresse</span></div>'
     + '<div class="card tablewrap"><table class="tbl"><thead><tr><th class="pos">#</th><th>Spieler</th><th>Tore</th><th>Pkt</th></tr></thead><tbody>'
-    + rang.map((r, i) => '<tr class="' + (r.ich ? 'me' : '') + '"><td class="pos">' + (i + 1) + '</td>'
-      + '<td><span class="truncate">' + esc(r.name) + '</span><div class="tiny muted truncate">' + esc(r.club) + '</div></td>'
-      + '<td>' + r.tore + '</td><td><b>' + r.punkte + '</b></td></tr>').join('')
-    + '</tbody></table></div></section>';
+    + rang.map(x => '<tr class="' + (x.r.ich ? 'me' : '') + '"' + (x.weit ? ' style="border-top:2px solid var(--line)"' : '') + '>'
+      + '<td class="pos">' + x.nr + '</td>'
+      + '<td><span class="truncate">' + esc(x.r.name) + '</span><div class="tiny muted truncate">' + esc(x.r.club) + '</div></td>'
+      + '<td>' + (x.r.pos === 'TW' ? x.r.zuNull + '<div class="tiny muted">zu Null</div>' : x.r.tore)
+      + '</td><td><b>' + x.r.punkte + '</b></td></tr>').join('')
+    + '</tbody></table></div>'
+    + (meinPlatz >= 10 ? '<p class="small muted" style="margin-top:8px">Platz ' + (meinPlatz + 1) + ' von ' + weltAlle.length + '. Die Fachpresse zählt Tore, Vorlagen, Noten und Titel — in dieser Reihenfolge.</p>' : '')
+    + '</section>';
 
   if (p.nat.dabei || p.nat.spiele) {
     const nat = NAT(p.natId);
@@ -6245,7 +6329,7 @@ function karriereStarten() {
   const o = ovrVon(attr, NEU.pos);
   const gehalt = Math.max(24000, Math.round(Math.exp(club.staerke * .11) * 530 * .35 / 1000) * 1000);
   S = {
-    v: 2, jahr: 2026, woche: 1, plan: 'technik', reha: 'plan', trainFokus: top2[0],
+    v: 2, jahr: 2026, woche: 1, plan: 'technik', reha: 'plan', trainFokus: top2[0], sponsorPause: 0,
     beendet: false, leihe: null, ligaTausch: {}, staerkeTausch: {}, transfers: {}, verlauf: [], karriere: [], stars: [], hoehepunkte: [],
     p: {
       vorname: NEU.vorname, nachname: NEU.nachname, natId: NEU.natId, pos: NEU.pos, fuss: NEU.fuss, archetyp: NEU.archetyp,
@@ -6290,6 +6374,7 @@ function migriere() {
   if (!POS(p.pos)) p.pos = 'ZM';
   if (typeof p.alter !== 'number') p.alter = 17;
   if (!S.stars.length) baueStars();
+  if (typeof S.sponsorPause !== 'number') S.sponsorPause = 0;
   S.ligaTausch = S.ligaTausch || {};
   S.staerkeTausch = S.staerkeTausch || {};
   S.transfers = S.transfers || {};
