@@ -2034,6 +2034,73 @@ const ERGEBNIS_TEXT = {
   eigenverletzung: ['Du bleibst liegen. Die Betreuer winken sofort, für dich ist Schluss.', 'Es reißt im Oberschenkel. Du gehst gestützt vom Platz.', 'Der Zusammenprall war zu heftig. Du kannst nicht weitermachen.']
 };
 
+/* ========================== DER AUFTRAG ==========================
+   Der Trainer war bisher vom Spiel abgekoppelt: Seine Spielidee entschied nur,
+   ob man aufgestellt wird. Sobald angepfiffen war, existierte er nicht mehr.
+   Jetzt gibt er der Startelf vor dem Anpfiff eine Aufgabe, die zu seinem Stil
+   und zur Position passt — und sieht danach nach, ob sie erfuellt wurde.
+
+   Bewusst ohne zusaetzlichen Knopf: Der Auftrag steht in der Anpfiffmeldung.
+   Vierzig Spiele pro Saison vertragen keine weitere Abfrage. Geprueft wird
+   ausschliesslich gegen Zahlen, die der Spieltag ohnehin fuehrt. */
+const AUFTRAEGE = [
+  { id: 'tor', kurz: 'Ein Tor erzielen', stil: ['offensiv', 'ergebnis'],
+    text: 'Ich will ein Tor von dir sehen. Dafür stehst du da vorne.',
+    wenn: () => POS(S.p.pos).angriff >= .7, erfuellt: r => r.tore >= 1 },
+  { id: 'zweiTore', kurz: 'Zwei Tore erzielen', stil: ['offensiv'],
+    text: 'Heute reicht mir einer nicht. Ich will zwei von dir.',
+    /* Nur an einen Stuermer in seinen besten Jahren. Bei Staerke 70 wurde der
+       Auftrag zu drei Prozent erfuellt — das ist keine Aufgabe, sondern eine
+       feststehende Niederlage. */
+    wenn: () => POS(S.p.pos).angriff >= .85 && effOvr() > 79, erfuellt: r => r.tore >= 2 },
+  { id: 'vorlage', kurz: 'Eine Vorlage geben', stil: ['offensiv'],
+    text: 'Du spielst heute den letzten Pass. Such den freien Mann, statt selbst abzuziehen.',
+    wenn: () => POS(S.p.pos).angriff >= .28, erfuellt: r => r.vorlagen >= 1 },
+  { id: 'beteiligt', kurz: 'An einem Treffer beteiligt sein', stil: ['offensiv', 'ergebnis'],
+    text: 'Sei an einem Treffer beteiligt. Wie, ist mir egal.',
+    wenn: () => POS(S.p.pos).angriff >= .28, erfuellt: r => r.tore + r.vorlagen >= 1 },
+  { id: 'zuNull', kurz: 'Ohne Gegentor bleiben', stil: ['defensiv'],
+    text: 'Hinten bleibt die Null stehen. Das ist heute deine einzige Aufgabe.',
+    wenn: () => POS(S.p.pos).angriff <= .5, erfuellt: r => r.toreGegner === 0 },
+  { id: 'einsMax', kurz: 'Höchstens ein Gegentor', stil: ['defensiv', 'ergebnis'],
+    text: 'Höchstens ein Gegentor. Alles darüber nehme ich dir persönlich übel.',
+    wenn: () => POS(S.p.pos).angriff <= .5, erfuellt: r => r.toreGegner <= 1 },
+  { id: 'zweikampf', kurz: 'Dich in die Zweikämpfe werfen', stil: ['defensiv', 'akribisch'],
+    text: 'Ich will dich in den Zweikämpfen sehen. Geh dahin, wo es wehtut.',
+    wenn: () => true, erfuellt: r => r.aktionen >= 1.6 },
+  { id: 'ohneFehler', kurz: 'Ohne Fehler bleiben', stil: ['akribisch', 'defensiv'],
+    text: 'Keine Geschenke. Kein einziger unnötiger Ballverlust.',
+    wenn: () => true, erfuellt: r => r.fehler < 1 },
+  { id: 'ohneKarte', kurz: 'Ohne Karte, aber sichtbar', stil: ['akribisch'],
+    text: 'Du gehst ohne Karte vom Platz — aber ich will dich trotzdem sehen, nicht nur zuschauen.',
+    wenn: () => true, erfuellt: r => r.gelb === 0 && r.rot === 0 && r.aktionen >= 1 },
+  { id: 'sieg', kurz: 'Das Spiel gewinnen', stil: ['ergebnis'],
+    text: 'Heute zählt nur eins: drei Punkte. Wie sie zustande kommen, interessiert mich nicht.',
+    wenn: () => true, erfuellt: r => r.ergebnis === 'sieg' },
+  { id: 'starkePartie', kurz: 'Eine starke Partie spielen', stil: ['ergebnis', 'talent'],
+    text: 'Zeig mir eine Partie, über die man am Montag noch redet.',
+    wenn: () => true, erfuellt: r => r.note <= 2.8 },
+  { id: 'mutig', kurz: 'Dich zeigen, statt dich zu verstecken', stil: ['talent'],
+    text: 'Du bist jung, also spiel auch so. Ich will dich am Ball sehen, nicht versteckt.',
+    wenn: () => S.p.alter <= 23, erfuellt: r => r.aktionen >= 2 || r.tore + r.vorlagen >= 1 },
+  { id: 'ruhig', kurz: 'Fehlerfrei und ohne Karte', stil: ['talent', 'akribisch'],
+    text: 'Keine Experimente heute. Mach das Einfache, und mach es richtig.',
+    wenn: () => S.p.alter <= 21, erfuellt: r => r.fehler < 1 && r.gelb === 0 }
+];
+
+/* Der Stil des Trainers macht seinen Auftrag viermal so wahrscheinlich — er
+   bleibt aber nicht der einzig moegliche, sonst haette jede Partie desselben
+   Trainers denselben Auftrag. */
+function auftragWaehlen(ts) {
+  const stil = (ts.stil && ts.stil.id) || 'ergebnis';
+  const moeglich = AUFTRAEGE.filter(a => !a.wenn || a.wenn());
+  if (!moeglich.length) return null;
+  const gew = moeglich.map(a => ({ a, w: a.stil.indexOf(stil) >= 0 ? 4 : 1 }));
+  let r = Math.random() * gew.reduce((sum, x) => sum + x.w, 0);
+  for (const x of gew) { r -= x.w; if (r <= 0) return x.a; }
+  return moeglich[moeglich.length - 1];
+}
+
 function baueSpielverlauf(fx, einsatz) {
   const p = S.p, ts = teamStand(fx), club = ts.team, gegner = CL(fx.gegnerId);
   const spielt = einsatz.status === 'startelf' || einsatz.status === 'einwechslung';
@@ -4020,9 +4087,14 @@ function stand(toreMein, toreGegner, heim) {
   el('sb-gh').textContent = heim ? toreMein : toreGegner;
   el('sb-ga').textContent = heim ? toreGegner : toreMein;
 }
-function warteKnopf(label, kl) {
+/* Mit "behalten" bleibt stehen, was schon in der Leiste steht. Ohne das wurde
+   der Abschlusskasten mit der Note gebaut und im selben Atemzug wieder
+   geloescht, weil warteKnopf die Leiste zuerst leert — die Note nach dem Spiel
+   war damit nie zu sehen. */
+function warteKnopf(label, kl, behalten) {
   return new Promise(r => {
-    const f = el('match-foot'); f.innerHTML = '';
+    const f = el('match-foot');
+    if (!behalten) f.innerHTML = '';
     const b = document.createElement('button');
     b.className = 'btn ' + (kl || 'btn-primary');
     b.textContent = label;
@@ -4066,12 +4138,20 @@ async function spielAustragen(fx) {
   el('match').hidden = false;
 
   let toreMein = 0, toreGegner = 0, meineTore = 0, vorlagen = 0, aktionen = 0, fehler = 0, gelb = 0, rot = 0, ausgewechselt = false;
+  let auftragErfuellt = null;
   let minuten = spielt ? (einsatz.status === 'startelf' ? 90 : 90 - einsatz.ab) : 0;
 
   tickerEintrag(0, 'Anpfiff', heimClub.name + ' gegen ' + gastClub.name + ' — ' + wettbewerbName(fx) + '.', '');
   if (einsatz.status === 'bank') tickerEintrag(0, 'Aufstellung', 'Du sitzt auf der Bank und schaust zu.', '');
   if (einsatz.status === 'verletzt') tickerEintrag(0, 'Aufstellung', 'Du fällst aus: ' + p.verletzung.name + '. Von der Tribüne aus fühlt sich jeder Fehlpass schlimmer an.', '');
   if (einsatz.status === 'startelf') tickerEintrag(0, 'Aufstellung', 'Du beginnst als ' + POS(p.pos).name + '.', 'ev-you');
+  /* Nur die Startelf bekommt einen Auftrag — wer erst in der 70. Minute kommt,
+     wird vom Trainer nicht mehr auf eine Aufgabe eingeschworen. */
+  const auftrag = einsatz.status === 'startelf' ? auftragWaehlen(ts) : null;
+  if (auftrag) {
+    const coach = ts.nat ? (S.natTrainer && S.natTrainer.name) : (S.trainer && S.trainer.name);
+    tickerEintrag(0, 'Der Auftrag', (coach ? coach + ': ' : '') + '\u201E' + auftrag.text + '\u201C', 'ev-you');
+  }
 
   await warteKnopf('Anpfiff');
 
@@ -4173,6 +4253,26 @@ async function spielAustragen(fx) {
   if (spielt) {
     const basis = 3.5 - clamp((effOvr() - club.staerke) * .035, -.5, .6);
     noteWert = noteBerechnen(basis, meineTore, vorlagen, aktionen, fehler, ergebnis, minuten, toreMein, toreGegner);
+    /* Der Auftrag wird gegen die Note vor der Anpassung geprueft — sonst haette
+       "eine starke Partie" sich selbst zum Teil erfuellt. Die Anpassung laeuft
+       ueber die Note und nicht daneben, damit Form, Moral und Vertrauen ihr
+       ohne zusaetzliche Rechnung folgen; dazu ein kleiner direkter Ausschlag
+       beim Trainer, denn er hat ja ausdruecklich danach gefragt.
+
+       Die Werte sind bewusst moderat. Ein Versuch mit -0,5 und +7 machte die
+       Sache schlechter, nicht besser: Wer nur noch fuer den Auftrag spielte,
+       schoss weniger Tore und stand am Ende mit der schlechteren Note da. Der
+       Auftrag soll gutes Fussballspielen wuerzen, nicht ersetzen. */
+    if (auftrag) {
+      auftragErfuellt = auftrag.erfuellt({
+        tore: meineTore, vorlagen, aktionen, fehler, gelb, rot,
+        toreGegner, ergebnis, note: noteWert, minuten
+      });
+      noteWert = clamp(round1(noteWert + (auftragErfuellt ? -.35 : .2)), 1, 6);
+      tickerEintrag(90, auftragErfuellt ? 'Auftrag erfüllt' : 'Auftrag verfehlt',
+        auftrag.kurz + (auftragErfuellt ? ' — der Trainer nickt.' : ' — der Trainer verschränkt die Arme.'),
+        auftragErfuellt ? 'ev-goal' : 'ev-bad');
+    }
     /* Laenderspiele zaehlen in die Laenderspielbilanz, nicht in die Saison
        beim Verein — sonst stuende am Saisonende eine Zahl, die kein Verein je
        gesehen hat. Einsatzminuten zaehlen dagegen ueberall, denn der Koerper
@@ -4227,7 +4327,7 @@ async function spielAustragen(fx) {
     if (p.formNoten.length > 14) p.formNoten.shift();
     wirke({
       energie: -(6 + minuten * .07 + (fx.comp !== 'liga' ? 2 : 0)) * energieFaktor(),
-      trainer: ts.nat ? 0 : clamp((NOTE_MITTE - noteWert) * 5, -8, 9),
+      trainer: ts.nat ? 0 : clamp((NOTE_MITTE - noteWert) * 5, -8, 9) + (auftragErfuellt === null ? 0 : auftragErfuellt ? 4 : -2),
       moral: clamp((NOTE_MITTE - noteWert) * 5 + (ergebnis === 'sieg' ? 4 : ergebnis === 'niederlage' ? -4 : 0), -12, 14),
       ruf: clamp(meineTore * 1.4 + vorlagen * .8 + (noteWert < 2 ? 1.6 : 0), 0, 8),
       follower: Math.round(p.follower * (.004 + meineTore * .022) + meineTore * 900 + (noteWert < 2 ? 1400 : 0))
@@ -4303,7 +4403,11 @@ async function spielAustragen(fx) {
   if (spielt) {
     box.innerHTML = '<span class="' + noteKl(noteWert) + '">' + note(noteWert) + '</span><div class="grow">'
       + '<div style="font-weight:600">' + ergText + ' · ' + (fx.heim ? toreMein + ':' + toreGegner : toreGegner + ':' + toreMein) + '</div>'
-      + '<div class="small muted">' + minuten + ' Minuten · ' + meineTore + ' Tore · ' + vorlagen + ' Vorlagen' + (gelb ? ' · gelb' : '') + (rot ? ' · rot' : '') + '</div></div>';
+      + '<div class="small muted">' + minuten + ' Minuten · ' + meineTore + ' Tore · ' + vorlagen + ' Vorlagen' + (gelb ? ' · gelb' : '') + (rot ? ' · rot' : '') + '</div>'
+      + (auftragErfuellt === null ? ''
+        : '<div class="tiny" style="margin-top:3px;color:' + (auftragErfuellt ? 'var(--good)' : 'var(--bad)') + '">'
+          + 'Auftrag ' + (auftragErfuellt ? 'erfüllt' : 'verfehlt') + ': ' + esc(auftrag.kurz) + '</div>')
+      + '</div>';
   } else {
     box.innerHTML = '<div class="trophy-ico">–</div><div class="grow"><div style="font-weight:600">' + ergText + ' · ' + (fx.heim ? toreMein + ':' + toreGegner : toreGegner + ':' + toreMein) + '</div>'
       + '<div class="small muted">Ohne Einsatz</div></div>';
@@ -4311,7 +4415,7 @@ async function spielAustragen(fx) {
   f.appendChild(box);
   log(wettbewerbName(fx) + ': ' + heimClub.kurz + ' ' + (fx.heim ? toreMein : toreGegner) + ':' + (fx.heim ? toreGegner : toreMein) + ' ' + gastClub.kurz
     + (spielt ? ' · Note ' + note(noteWert) + (meineTore ? ' · ' + meineTore + ' Tor(e)' : '') : ''), ergebnis === 'sieg' ? 'good' : ergebnis === 'niederlage' ? 'bad' : '');
-  await warteKnopf('Abpfiff', 'btn btn-primary');
+  await warteKnopf('Abpfiff', 'btn btn-primary', true);
   el('match').hidden = true;
 
   /* Qualifikation fortschreiben */

@@ -118,6 +118,9 @@ verfehlt, fliegt er mit hoher Wahrscheinlichkeit — und der Nachfolger bewertet
 deine Chance oder dein Problem sein kann. Liegt der Verein bei zwei Dritteln der Saison weit
 zurück, kommt die Freistellung schon mittendrin.
 
+**Der Auftrag** — Der Trainer gibt der Startelf vor jedem Anpfiff eine Aufgabe, die zu seiner
+Spielidee passt, und sieht danach nach. Eigener Abschnitt weiter unten.
+
 **Leihe** — Wer nicht spielt, kann eine Saison oder eine Rückrunde woanders verbringen, ohne
 seinen Vertrag aufzugeben. Eigener Abschnitt weiter unten.
 
@@ -199,6 +202,31 @@ in drei von vier Karrieren bei Bayern.
 Gemessen: Ein 1. FC Heidenheim erscheint für einen passenden Spieler ohne Wunsch in 0 Prozent
 der Transferfenster — er macht dir von sich aus nie ein Angebot. Mit Wunsch in 92 Prozent, genau
 der angesagten Chance.
+
+## Der Auftrag
+
+Der Trainer hat bisher nur entschieden, **ob** du spielst. Sobald angepfiffen war, existierte
+er nicht mehr. Jetzt gibt er der Startelf vor dem Anpfiff eine Aufgabe — sie steht in der
+Anpfiffmeldung, ohne zusätzlichen Knopf, denn vierzig Spiele pro Saison vertragen keine
+weitere Abfrage.
+
+Dreizehn Aufträge, gefiltert nach Position und gewichtet nach der Spielidee des Trainers: Der
+offensive verlangt ein Tor oder eine Vorlage, der defensive die Null hinten, der akribische
+Fehlerfreiheit, der ergebnisorientierte drei Punkte, der Talentförderer, dass ein Junger sich
+zeigt statt sich zu verstecken. Sein Stil macht den passenden Auftrag viermal so
+wahrscheinlich — aber nicht zum einzig möglichen, sonst käme bei demselben Trainer immer
+dasselbe.
+
+Geprüft wird ausschließlich gegen Zahlen, die der Spieltag ohnehin führt. Erfüllt heißt Note
+−0,35 und Trainer-Vertrauen +4, verfehlt +0,2 und −2. Die Anpassung läuft über die Note und
+nicht daneben, damit Form, Moral und Vertrauen ihr ohne zweite Rechnung folgen.
+
+Gemessen über rund 6.000 Aufträge: Die Schwierigkeit reicht von „zwei Tore" (12 % bei einem
+Spitzenstürmer) bis „ohne Karte, aber sichtbar" (66 %), im Schnitt 43 %. **Wer für den Auftrag
+spielt, kommt auf 51 % statt 41 %** — ein spürbarer, aber kein überwältigender Hebel, und das
+ist Absicht: Ein Versuch mit doppelter Wirkung machte die Sache schlechter, weil ein Stürmer,
+der nur noch den Auftrag im Kopf hat, weniger Tore schießt und am Ende die schlechtere Note
+bekommt. Der Auftrag soll gutes Fußballspielen würzen, nicht ersetzen.
 
 ## Leihe
 
