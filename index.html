@@ -637,6 +637,11 @@ for (const lid of Object.keys(CLUBS_RAW)) {
 }
 const CL = id => CLUBS.find(c => c.id === id);
 const ligaClubs = lid => CLUBS.filter(c => c.liga === lid);
+/* Die Staerke aus der Vorlage, bevor ein Spielstand sie veraendert. Die Drift
+   zwischen den Saisons laeuft immer ein Stueck dorthin zurueck — sonst waere die
+   Rangordnung nach zwanzig Jahren reines Rauschen. */
+const STAERKE_BASIS = {};
+CLUBS.forEach(c => { STAERKE_BASIS[c.id] = c.staerke; });
 
 /* ---------------------------- Echte Kader ----------------------------
    Aufstellungen nach bestem Wissensstand der Saison 2025/26. Wo ich mir
@@ -1413,18 +1418,34 @@ function ovrNachJahren(ovr, alter, jahre) {
   }
   return clamp(Math.round(v), 38, 95);
 }
-/* Der echte Kader eines Vereins, fortgeschrieben auf die laufende Saison.
+/* Nachschlagewerk ueber alle echten Spieler. Die Namen sind eindeutig, damit
+   ein Wechsel als ein einziger Eintrag Name -> Verein gespeichert werden kann
+   statt als vollstaendiger Kader aller 182 Vereine. */
+const SPIELER_ROH = {};
+for (const cid of Object.keys(ECHTE_KADER)) {
+  for (const e of ECHTE_KADER[cid]) SPIELER_ROH[e[0]] = { e, heimat: cid };
+}
+
+/* Der echte Kader eines Vereins, fortgeschrieben auf die laufende Saison:
+   gealtert und um die Wechsel der vergangenen Sommer bereinigt.
    Wer zu alt geworden ist, hat aufgehoert und faellt heraus — die Luecke fuellt
    kaderAuffuellen mit einem passenden Nachfolger. Die Grenze liegt bei 36, aber
    nie unter dem Startalter plus zwei: Sonst waeren die dreizehn Spieler, die
    schon 2025/26 aelter sind, von der ersten Saison an verschwunden. */
 function echterKaderStand(clubId) {
   const jahre = saisonsSeitStart();
+  const weg = (S && S.transfers) || {};
   const out = [];
-  for (const e of (ECHTE_KADER[clubId] || [])) {
+  const nimm = e => {
     const alter = e[2] + jahre;
-    if (alter > Math.max(36, e[2] + 2)) continue;
+    if (alter > Math.max(36, e[2] + 2)) return;
     out.push({ name: e[0], pos: e[1], alter, natId: e[3], ovr: ovrNachJahren(e[4], e[2], jahre), echt: 1 });
+  };
+  for (const e of (ECHTE_KADER[clubId] || [])) if ((weg[e[0]] || clubId) === clubId) nimm(e);
+  for (const name of Object.keys(weg)) {
+    if (weg[name] !== clubId) continue;
+    const r = SPIELER_ROH[name];
+    if (r && r.heimat !== clubId) nimm(r.e);
   }
   return out;
 }
@@ -2902,6 +2923,86 @@ function ligaTauschen(clubId, hoch) {
   S.staerkeTausch[gegenueber.id] = gegenueber.staerke;
   return ziel;
 }
+/* ---------------------------------------------------------------------
+   Die Welt zwischen zwei Saisons. Zwei kleine Bewegungen, damit die
+   Rangordnung nach zwanzig Jahren nicht dieselbe ist wie am ersten Tag —
+   beide bewusst so knapp gehalten, dass die Ligen erkennbar bleiben.
+   --------------------------------------------------------------------- */
+
+/* Erfolg zahlt sich aus, Misserfolg kostet: Die Abschlusstabelle verschiebt die
+   Vereinsstaerke um Bruchteile eines Punktes pro Saison. Dazu etwas Rauschen und
+   ein Zug zurueck zur Vorlage, begrenzt auf acht Punkte in jede Richtung. */
+function weltStaerkenDriften() {
+  for (const lg of LEAGUES) {
+    const T = weltTabelle(lg.id);
+    const liste = T ? tabelleSortiert(T) : null;
+    for (const c of ligaClubs(lg.id)) {
+      const basis = STAERKE_BASIS[c.id] || c.staerke;
+      let d = rnd(-.9, .9) + (basis - c.staerke) * .18;
+      if (liste && liste.length > 1) {
+        const rang = liste.findIndex(x => x.id === c.id);
+        if (rang >= 0) d += (.5 - rang / (liste.length - 1)) * 1.6;
+      }
+      const neu = clamp(Math.round(c.staerke + d), Math.max(25, basis - 8), Math.min(95, basis + 8));
+      if (neu !== c.staerke) { c.staerke = neu; S.staerkeTausch[c.id] = neu; }
+    }
+  }
+}
+
+/* Eine Handvoll echter Spieler wechselt den Verein — nach oben, wenn sie ihrem
+   Klub entwachsen sind, nach unten, wenn sie ihn ueberschritten haben, sonst
+   auf Augenhoehe. Pro Verein hoechstens eine Bewegung, damit kein Kader
+   ausgeduennt wird.
+
+   Der eigene Verein bleibt aussen vor: Dessen Kader liegt als eigener Stand in
+   S.kader und wuerde sonst auseinanderlaufen. Wechsel im eigenen Umfeld deckt
+   der Wochenablauf mit seinen Ereignissen ab. */
+function weltTransferfenster() {
+  S.transfers = S.transfers || {};
+  const mitKader = CLUBS.filter(c => ECHTE_KADER[c.id] && c.id !== S.p.clubId);
+  if (mitKader.length < 4) return;
+  const belegt = new Set();
+  const gemeldet = [];
+  let erledigt = 0, versuche = 0;
+  const ziel = ri(5, 9);
+  while (erledigt < ziel && versuche++ < 150) {
+    const von = pick(mitKader);
+    if (belegt.has(von.id)) continue;
+    /* Nur die namentlich bekannten Spieler koennen wechseln — erzeugte Kader
+       werden bei Bedarf neu gewuerfelt und haben keine Heimat. Die Schwelle
+       muss deshalb niedrig liegen: Sie zaehlt nicht den Kader, sondern den
+       Rest der Vorlage, und der schrumpft ueber die Jahre ohnehin. */
+    const kader = echterKaderStand(von.id);
+    if (kader.length < 6) continue;
+    /* Gewichtet nach Staerke: Gute Spieler wechseln haeufiger als
+       Ergaenzungsspieler — und nur deren Wechsel bekommt man ueberhaupt mit.
+       Bei gleichmaessiger Auswahl erwischte es fast immer die vierte Wahl. */
+    const gew = kader.map(k => ({ k, w: Math.pow(Math.max(1, k.ovr - 62), 2) }));
+    let r = Math.random() * gew.reduce((a, x) => a + x.w, 0);
+    let sp = gew[0].k;
+    for (const x of gew) { r -= x.w; if (r <= 0) { sp = x.k; break; } }
+    if (sp.alter >= 33) continue;
+    const hoch = sp.ovr > von.staerke + 2 && sp.alter <= 28;
+    const runter = sp.alter >= 30 && sp.ovr < von.staerke - 2;
+    const kandidaten = mitKader.filter(c => {
+      if (c.id === von.id || belegt.has(c.id)) return false;
+      const d = c.staerke - von.staerke;
+      if (hoch) return d > 2 && d <= 12 && sp.ovr >= c.staerke - 6;
+      if (runter) return d < -2 && d >= -14;
+      return Math.abs(d) <= 5;
+    });
+    if (!kandidaten.length) continue;
+    const nach = pick(kandidaten);
+    S.transfers[sp.name] = nach.id;
+    belegt.add(von.id); belegt.add(nach.id);
+    erledigt++;
+    if (sp.ovr >= 76) gemeldet.push({ sp, von, nach });
+  }
+  /* Nur die grossen Wechsel kommen in den Verlauf, sonst ertraenken sie ihn. */
+  gemeldet.sort((a, b) => b.sp.ovr - a.sp.ovr).slice(0, 2)
+    .forEach(x => log(x.sp.name + ' wechselt von ' + x.von.name + ' zu ' + x.nach.name + '.', 'gold'));
+}
+
 function tauschAnwenden() {
   for (const id of Object.keys(S.ligaTausch || {})) { const c = CL(id); if (c) c.liga = S.ligaTausch[id]; }
   for (const id of Object.keys(S.staerkeTausch || {})) { const c = CL(id); if (c) c.staerke = S.staerkeTausch[id]; }
@@ -3051,6 +3152,10 @@ async function saisonEnde() {
   p.sponsoren = p.sponsoren.filter(s => s.jahre > 0);
 
   await transferfenster(true);
+
+  /* Die uebrige Welt bewegt sich, bevor die neue Saison aufgesetzt wird */
+  weltStaerkenDriften();
+  weltTransferfenster();
 
   /* Neue Saison */
   S.jahr++;
@@ -4112,7 +4217,7 @@ function karriereStarten() {
   const gehalt = Math.max(24000, Math.round(Math.pow(club.staerke / 10, 5.2) * 45 * .35 / 1000) * 1000);
   S = {
     v: 1, jahr: 2026, woche: 1, plan: 'technik', trainFokus: top2[0],
-    beendet: false, ligaTausch: {}, staerkeTausch: {}, verlauf: [], karriere: [], stars: [], hoehepunkte: [],
+    beendet: false, ligaTausch: {}, staerkeTausch: {}, transfers: {}, verlauf: [], karriere: [], stars: [], hoehepunkte: [],
     p: {
       vorname: NEU.vorname, nachname: NEU.nachname, natId: NEU.natId, pos: NEU.pos, fuss: NEU.fuss, archetyp: NEU.archetyp,
       alter: 17, attr, potenzial: clamp(o + ri(19, 35) + weg.potenzial, 62, 99), kondition: ri(10, 20),
@@ -4136,6 +4241,7 @@ function migriere() {
   if (!S || !S.p) return;
   S.ligaTausch = S.ligaTausch || {};
   S.staerkeTausch = S.staerkeTausch || {};
+  S.transfers = S.transfers || {};
   S.p.stab = S.p.stab || {};
   S.p.besitz = S.p.besitz || {};
   if (typeof S.p.minutenSchnitt !== 'number') S.p.minutenSchnitt = Math.max(0, (S.p.fitness - 60) / .45);

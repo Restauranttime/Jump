@@ -177,6 +177,24 @@ dasselbe Ergebnis liefert. Bei Bayern sind 2026 noch 20 Spieler namentlich echt,
 ab 2046 keiner mehr. Saison 1 entspricht dabei exakt der Vorlage — geprüft über alle 1.315
 Einträge.
 
+**Wechsel zwischen den Vereinen.** Zwischen zwei Saisons wechseln vier bis fünf echte Spieler
+den Klub: nach oben, wer seinem Verein entwachsen ist, nach unten, wer ihn überschritten hat,
+sonst auf Augenhöhe. Die Auswahl ist nach Stärke gewichtet — gute Spieler wechseln häufiger als
+Ergänzungsspieler, und nur deren Wechsel bekommt man überhaupt mit. Pro Verein passiert
+höchstens eine Bewegung, damit kein Kader ausgedünnt wird. Die ein bis zwei größten Wechsel
+einer Saison stehen im Verlauf.
+
+Gespeichert wird das als eine Zeile pro Spieler (`Name → Verein`), nicht als Kader aller 182
+Vereine; über eine ganze Karriere wächst der Spielstand dadurch um etwa 5 KB. Der eigene Verein
+bleibt außen vor: Dessen Kader liegt als eigener Stand im Spielstand und würde sonst
+auseinanderlaufen — Wechsel im eigenen Umfeld deckt der Wochenablauf mit seinen Ereignissen ab.
+
+**Vereinsstärken driften.** Die Abschlusstabelle verschiebt jede Saison die Stärke jedes
+Vereins um Bruchteile eines Punktes: Erfolg zahlt sich aus, Misserfolg kostet. Dazu etwas
+Rauschen und ein Zug zurück zur Vorlage, begrenzt auf acht Punkte in jede Richtung — sonst wäre
+die Rangordnung nach zwanzig Jahren reines Rauschen. Gemessen über vier volle Karrieren liegt
+die durchschnittliche Abweichung bei 2,2 Punkten, die größte bei 6.
+
 Die Kaderdaten werden beim Start gegen Vereins-IDs, Positionen, Nationen, Altersspannen und
 Doppeleinträge geprüft (`scratchpad`-Testskript im Entwicklungsablauf) — Nationen ohne eigenen
 Eintrag in der Nationenliste sind auf die jeweils nächstliegende abgebildet.
