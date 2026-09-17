@@ -391,6 +391,18 @@ eine durchgespielte Karriere:
   gut 40 % auf rund ein Viertel.
 - Ein Attribut erreicht ohne Trainer etwa Potenzial + 6, mit Weltklasse-Trainer rund
   Potenzial + 15. Gemessen über 20 Durchläufe: 84 / 86 / 89 / 93 je Trainerstufe.
+- Die drei Startwege sind eine echte Entscheidung, keine Kosmetik. Gemessen über je 21
+  Karrieren, Median:
+
+  | Weg | Potenzial | Höchststärke | Tore | Titel | Legacy |
+  |---|---|---|---|---|---|
+  | Straßenkicker (3. Liga) | 87 | 95 | 350 | 52 | 4235 |
+  | Nachwuchsleistungszentrum | 77 | 92 | 334 | 40 | 3716 |
+  | Wunderkind (Bundesliga) | 74 | 89 | 368 | 36 | 3804 |
+
+  Der harte Weg hat den höchsten Deckel, das Wunderkind die meisten Tore (früher Start). Der
+  Deckel zahlt sich aber nur bei gezieltem Training aus: Wer ohne Plan spielt, fährt mit dem
+  Wunderkind besser (Höchststärke 70,0 gegen 67,6).
 - Verletzungen kosten rund ein Zehntel aller Wochen (bei riskanter Trainingswahl ein Siebtel).
 - Alle 44 Zufallsereignisse sind erreichbar — geprüft wird das über einen Lauf, der zählt, wie
   oft die Bedingung jedes Ereignisses überhaupt zutrifft, nicht nur, welches gezogen wurde.

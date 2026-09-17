@@ -1255,13 +1255,21 @@ const ARCHETYPEN = [
   { id: 'komplett', name: 'Der Komplette', text: 'Keine Schwäche, aber auch kein Zaubertrick.', boni: { tempo: 2, schuss: 2, pass: 2, dribbling: 2, zweikampf: 2, physis: 2, mentalitaet: 2 } }
 ];
 
+/* Das Potenzial wird aus den Startattributen abgeleitet — und erbt damit den
+   Attributbonus des Wegs. Der Zuschlag von +6 fuer den Strassenkicker reichte
+   deshalb nicht: Gemessen ueber je 21 Karrieren hatte ausgerechnet das
+   Wunderkind das hoechste Potenzial (80 gegen 77), obendrein die hoehere
+   Hoechststaerke, mehr Tore, mehr Titel und mehr Legacy. Der als haertester
+   Weg angekuendigte war damit auf jeder Kennzahl der schlechteste, und der
+   Satz "hoechstes Potenzial" schlicht falsch. Die Zuschlaege sind jetzt gross
+   genug, um den geerbten Attributbonus zu ueberwiegen. */
 const STARTWEGE = [
   { id: 'strasse', name: 'Straßenkicker', liga: 'de3', text: 'Kein Verein wollte dich im Nachwuchs. Du hast es dir auf dem Bolzplatz beigebracht — und ein Drittligist gibt dir eine Chance.',
-    meta: 'Start in der 3. Liga · härtester Weg · höchstes Potenzial', attr: -4, potenzial: 6, moral: 5 },
+    meta: 'Start in der 3. Liga · härtester Weg · höchstes Potenzial', attr: -4, potenzial: 12, moral: 5 },
   { id: 'nlz', name: 'Nachwuchsleistungszentrum', liga: 'de2', text: 'Seit du zehn bist im Internat. Sauber ausgebildet, taktisch geschult, jetzt der Sprung zu den Profis.',
     meta: 'Start in der 2. Bundesliga · ausgeglichen', attr: 0, potenzial: 0, moral: 0 },
   { id: 'wunderkind', name: 'Wunderkind', liga: 'de1', text: 'Die Zeitungen kennen deinen Namen, bevor du ein Profispiel gemacht hast. Der Druck kommt gratis dazu.',
-    meta: 'Start in der Bundesliga · viel Erwartung, wenig Geduld', attr: 5, potenzial: -2, moral: -5, ruf: 12 }
+    meta: 'Start in der Bundesliga · viel Erwartung, wenig Geduld', attr: 5, potenzial: -6, moral: -5, ruf: 12 }
 ];
 
 /* ========================== SPIELSTAND ========================== */
