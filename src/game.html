@@ -2862,6 +2862,66 @@ function titelGeben(name, jahr, wo) {
   log('Titel gewonnen: ' + name + '.', 'gold');
 }
 
+/* ========================== DER RIVALE ==========================
+   Ein echter Spieler deines Jahrgangs und deiner Position, der die ganze
+   Karriere neben dir herlaeuft. Gespeichert wird nur sein Name und was er
+   geleistet hat — Alter, Staerke und Verein ergeben sich aus denselben
+   Regeln wie fuer jeden anderen echten Spieler. Er altert also mit, wechselt
+   ueber das Transferfenster den Klub und beendet irgendwann seine Laufbahn,
+   ohne dass hier etwas doppelt gefuehrt wird. */
+function rivalenWaehlen(pos) {
+  const jung = [];
+  for (const cid of Object.keys(ECHTE_KADER)) {
+    for (const e of ECHTE_KADER[cid]) {
+      if (e[2] > 20 || e[4] < 70) continue;
+      jung.push(e);
+    }
+  }
+  if (!jung.length) return null;
+  const gleich = jung.filter(e => e[1] === pos);
+  const e = pick(gleich.length ? gleich : jung);
+  return { name: e[0], pos: e[1], spiele: 0, tore: 0, vorlagen: 0, titel: 0, saisons: [] };
+}
+
+/* Wo er gerade steht. null heisst: Laufbahn beendet. */
+function rivaleStand() {
+  const r = S.rivale;
+  if (!r) return null;
+  const roh = SPIELER_ROH[r.name];
+  if (!roh) return null;
+  const jahre = saisonsSeitStart();
+  const alter = roh.e[2] + jahre;
+  if (alter > Math.max(36, roh.e[2] + 2)) return null;
+  const clubId = (S.transfers && S.transfers[r.name]) || roh.heimat;
+  return { clubId, club: CL(clubId), alter, ovr: ovrNachJahren(roh.e[4], roh.e[2], jahre), pos: roh.e[1] };
+}
+
+/* Seine Saison, nach demselben Muster wie bei den Weltstars gerechnet. */
+function rivaleSaison(st) {
+  const ang = POS(st.pos).angriff;
+  const spiele = clamp(Math.round(rnd(.55, .95) * 34), 6, 38);
+  const tore = Math.round(poisson(clamp((st.ovr - 68) * ang * .9, .1, 28)));
+  const vorlagen = Math.round(poisson(clamp((st.ovr - 68) * .42, .1, 15)));
+  /* Titelchancen haengen am Verein, nicht am Spieler — wer bei einem Grossen
+     unterschreibt, gewinnt oefter etwas. Dazu die Torjaegerkrone, damit der
+     Vergleich fair bleibt: Auf deiner Seite zaehlen Einzelauszeichnungen
+     schliesslich auch mit. */
+  const titel = (chance(clamp((st.club.staerke - 72) * .035, .02, .55)) ? 1 : 0) + (tore >= 22 ? 1 : 0);
+  return { spiele, tore, vorlagen, titel };
+}
+
+function rivaleAbschliessen() {
+  const r = S.rivale;
+  if (!r) return null;
+  const st = rivaleStand();
+  if (!st) { r.beendet = r.beendet || saisonLabel(S.jahr); return null; }
+  const sa = rivaleSaison(st);
+  r.spiele += sa.spiele; r.tore += sa.tore; r.vorlagen += sa.vorlagen; r.titel += sa.titel;
+  r.saisons.push({ saison: saisonLabel(S.jahr), club: st.club.kurz, ovr: st.ovr, tore: sa.tore, vorlagen: sa.vorlagen });
+  if (r.saisons.length > 26) r.saisons.shift();
+  return { st, sa };
+}
+
 /* ========================== WELTSTARS & AUSZEICHNUNGEN ========================== */
 function baueStars() {
   S.stars = [];
@@ -3062,6 +3122,29 @@ async function saisonEnde() {
   if (S.natStats.spiele) zeilen.push('Länderspiele: ' + S.natStats.spiele + ' (' + S.natStats.tore + ' Tore)');
   await sagen({ eyebrow: 'Saison ' + saisonLabel(S.jahr) + ' beendet', titel: club.name, text: zeilen.join('\n') });
 
+  /* Der Vergleich mit dem Rivalen */
+  const rv = rivaleAbschliessen();
+  if (rv) {
+    const r = S.rivale;
+    const vorherVorn = r.tore - rv.sa.tore > karriereTore() - st.tore;
+    const jetztVorn = karriereTore() > r.tore;
+    if (vorherVorn && jetztVorn) merken('serie', 'Erstmals mehr Karrieretore als ' + r.name + '.', 1);
+    await sagen({
+      eyebrow: 'Dein Jahrgang', titel: r.name,
+      text: [
+        r.name + ' · ' + rv.st.alter + ' Jahre · ' + rv.st.club.name + ' · Stärke ' + rv.st.ovr,
+        '',
+        'Diese Saison: ' + rv.sa.tore + ' Tore, ' + rv.sa.vorlagen + ' Vorlagen in ' + rv.sa.spiele + ' Spielen'
+          + (rv.sa.titel ? ' · ein Titel' : ''),
+        'Du:           ' + st.tore + ' Tore, ' + st.vorlagen + ' Vorlagen in ' + st.spiele + ' Spielen'
+          + (S.titelDieseSaison.length ? ' · ' + S.titelDieseSaison.length + ' Titel' : ''),
+        '',
+        'Karriere: ' + karriereTore() + ' zu ' + r.tore + ' Toren, ' + p.titel.length + ' zu ' + r.titel + ' Titeln'
+      ].join('\n'),
+      effekte: [{ t: karriereTore() >= r.tore ? 'Du führst' : 'Er führt', gut: karriereTore() >= r.tore }]
+    });
+  }
+
   /* Saisonziel */
   if (S.saisonZiel) {
     const erreicht = platz <= S.saisonZiel.platz;
@@ -3211,6 +3294,22 @@ async function karriereEnde(grund) {
       + p.titel.length + ' Titel · Kontostand ' + money(p.geld),
     effekte: p.titel.slice(0, 8).map(t => ({ t: t.name, gut: true }))
   });
+  if (S.rivale && S.rivale.spiele) {
+    const r = S.rivale;
+    const meineTore = S.karriere.reduce((a, k) => a + k.tore, 0);
+    const besser = meineTore > r.tore, mehrTitel = p.titel.length > r.titel;
+    const urteil = besser && mehrTitel ? 'Von euch beiden hast du mehr aus dem Jahrgang gemacht.'
+      : !besser && !mehrTitel ? 'Er ist der geblieben, an dem du dich messen musstest.'
+      : besser ? 'Du hast öfter getroffen, er hat mehr gewonnen.'
+      : 'Er hat öfter getroffen, du hast mehr gewonnen.';
+    await sagen({
+      eyebrow: 'Dein Jahrgang', titel: r.name,
+      text: 'Ihr habt am selben Tag angefangen.\n\n'
+        + 'Tore: ' + meineTore + ' zu ' + r.tore + '\n'
+        + 'Titel: ' + p.titel.length + ' zu ' + r.titel + '\n'
+        + 'Spiele: ' + S.karriere.reduce((a, k) => a + k.spiele, 0) + ' zu ' + r.spiele + '\n\n' + urteil
+    });
+  }
   const grosse = (S.hoehepunkte || []).filter(h => h.gross);
   if (grosse.length) {
     await sagen({
@@ -3926,6 +4025,38 @@ function renderProfil() {
       + '</tbody></table></div></section>';
   }
 
+  if (S.rivale) {
+    const r = S.rivale, st = rivaleStand();
+    const zeile = (k, meins, seins) => {
+      const vorn = meins >= seins;
+      return '<div class="attr" style="grid-template-columns:1fr 64px 64px">'
+        + '<span class="k">' + k + '</span>'
+        + '<span class="v" style="color:' + (vorn ? 'var(--accent-2)' : 'var(--ink-2)') + '">' + de(meins) + '</span>'
+        + '<span class="v" style="color:' + (vorn ? 'var(--ink-2)' : 'var(--accent-2)') + '">' + de(seins) + '</span></div>';
+    };
+    html += '<section><div class="sect-title"><h3>Dein Jahrgang</h3><span class="small muted">'
+      + (st ? POS(st.pos).kurz : 'Laufbahn beendet') + '</span></div><div class="card">'
+      + '<div class="row" style="gap:10px;align-items:flex-start">'
+      + (st ? badgeHtml(st.club) : '')
+      + '<div class="grow"><div style="font-family:var(--font-data);font-weight:700;font-size:15px">' + esc(r.name) + '</div>'
+      + '<div class="small muted">' + (st ? st.alter + ' Jahre · ' + esc(st.club.name) + ' · Stärke ' + st.ovr
+          : 'hat ' + esc(r.beendet || 'zuletzt') + ' aufgehört') + '</div></div></div>'
+      /* Seine Zahlen entstehen erst am Saisonende. In der ersten Saison stuende
+         hier sonst eine Tabelle voller Nullen — dann lieber ein Satz. */
+      + (r.saisons.length
+        ? '<div class="attrs" style="margin-top:12px">'
+          + '<div class="attr" style="grid-template-columns:1fr 64px 64px">'
+          + '<span class="k"></span><span class="k" style="text-align:right">du</span>'
+          + '<span class="k" style="text-align:right">er</span></div>'
+          + zeile('Spiele', karriereSpiele(), r.spiele)
+          + zeile('Tore', karriereTore(), r.tore)
+          + zeile('Vorlagen', S.karriere.reduce((a, k) => a + k.vorlagen, 0) + S.stats.vorlagen, r.vorlagen)
+          + zeile('Titel', p.titel.length, r.titel)
+          + '</div>'
+        : '<p class="small muted" style="margin-top:11px">Ihr habt am selben Tag angefangen. Am Ende jeder Saison siehst du hier, wer weiter ist.</p>')
+      + '</div></section>';
+  }
+
   if (p.titel.length) {
     html += '<section><div class="sect-title"><h3>Titel & Auszeichnungen</h3></div><div class="stack-sm">'
       + p.titel.slice().reverse().map(t => '<div class="award ' + (/Goldener Ball|Weltmeister|Europapokal/.test(t.name) ? 'gold' : '') + '">'
@@ -4248,6 +4379,7 @@ function karriereStarten() {
     }
   };
   S.kader = kaderErzeugen(club.id);
+  S.rivale = rivalenWaehlen(NEU.pos);
   baueStars();
   starsSaison();
   starteSaison();
@@ -4288,6 +4420,24 @@ function migriere() {
   if (!S.saisonZiel) saisonZielSetzen();
   S.serie = S.serie || [];
   S.hoehepunkte = S.hoehepunkte || [];
+  /* Laufende Karrieren bekommen ihren Rivalen nachtraeglich — mit einer
+     Vorgeschichte, die zu den schon gespielten Saisons passt, statt bei null
+     zu beginnen. */
+  if (!S.rivale) {
+    S.rivale = rivalenWaehlen(S.p.pos);
+    const roh = S.rivale && SPIELER_ROH[S.rivale.name];
+    if (roh) {
+      for (let i = 0; i < S.karriere.length; i++) {
+        const alter = roh.e[2] + i;
+        if (alter > Math.max(36, roh.e[2] + 2)) break;
+        const st = { clubId: roh.heimat, club: CL(roh.heimat), alter, ovr: ovrNachJahren(roh.e[4], roh.e[2], i), pos: roh.e[1] };
+        const sa = rivaleSaison(st);
+        S.rivale.spiele += sa.spiele; S.rivale.tore += sa.tore;
+        S.rivale.vorlagen += sa.vorlagen; S.rivale.titel += sa.titel;
+        S.rivale.saisons.push({ saison: saisonLabel(2026 + i), club: st.club.kurz, ovr: st.ovr, tore: sa.tore, vorlagen: sa.vorlagen });
+      }
+    }
+  }
   /* Ligagröße hat sich geändert: laufende Saison neu aufsetzen, Karriere bleibt */
   const anzahl = ligaClubs(CL(S.p.clubId).liga).length;
   if (!S.liga || !S.liga.tabelle || Object.keys(S.liga.tabelle).length !== anzahl) {

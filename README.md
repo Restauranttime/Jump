@@ -166,6 +166,24 @@ Potenzial, ab 29 baut der Körper ab. Saisonbilanz mit Torschützenkönig, Spiel
 und Goldenem Ball, Weltrangliste, Titelvitrine, Karrieretabelle über alle Saisons.
 Am Schluss: Rücktritt und Legacy-Punkte.
 
+## Dein Jahrgang
+
+Beim Anlegen bekommst du einen echten Spieler deiner Position und deines Jahrgangs als Rivalen
+zugelost — je nach Position Lamine Yamal, Kenan Yıldız, Pietro Comuzzo oder einen der anderen
+rund fünfzig Zwanzigjährigen aus den Kaderdaten. Er läuft die ganze Karriere neben dir her.
+
+Gespeichert wird nur sein Name und was er geleistet hat. Alter, Stärke und Verein ergeben sich
+aus denselben Regeln wie für jeden anderen echten Spieler — er altert also mit, wechselt über
+das Transferfenster den Klub und beendet irgendwann seine Laufbahn, ohne dass irgendetwas
+doppelt geführt wird.
+
+Am Ende jeder Saison stellt euch das Spiel gegenüber, im Profil steht der Karrierestand, und
+beim Rücktritt fällt ein Urteil. Zur Fairness zählt bei ihm die Torjägerkrone als Titel mit —
+auf deiner Seite zählen Einzelauszeichnungen schließlich auch.
+
+Gemessen über sechs volle Karrieren liegen beide im Mittel bei rund 110 Karrieretoren; wer vorn
+liegt, entscheidet sich von Karriere zu Karriere.
+
 ## Vereine und Spieler
 
 10 Ligen in 8 Ländern, 182 Vereine mit ihren echten Namen, Trikotfarben und -mustern. Vereins-
