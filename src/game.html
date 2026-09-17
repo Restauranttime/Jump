@@ -2581,17 +2581,64 @@ const VERLETZUNGEN = [
   { n: 'Muskelbündelriss', w: [5, 9], p: .09 }, { n: 'Schambeinentzündung', w: [6, 11], p: .06 },
   { n: 'Knöchelbruch', w: [9, 16], p: .04 }, { n: 'Kreuzbandriss', w: [22, 36], p: .02 }
 ];
+/* Ab acht Wochen ist es keine Pause mehr, sondern eine Reha — mit Phasen, einer
+   eigenen wöchentlichen Entscheidung und der Möglichkeit, dass es schiefgeht.
+   Gemessen trifft das viermal je Karriere; ein Kreuzbandriss (im Schnitt 29
+   Wochen) etwa jede zweite. Darunter bleibt es die schlichte Pause von vorher. */
+const REHA_GRENZE = 8;
+const REHA_PHASEN = [
+  { id: 'ruhe', name: 'Ruhigstellung', ab: 0, text: 'Schiene, Krücken, Physiotherapie im Liegen. Das Einzige, was jetzt hilft, ist Zeit.', risiko: .2 },
+  { id: 'aufbau', name: 'Aufbau', ab: .3, text: 'Kraftraum und Wasserbecken. Der Muskel um das Gelenk herum muss zurück, bevor das Gelenk belastet werden darf.', risiko: .7 },
+  { id: 'laufen', name: 'Erste Läufe', ab: .62, text: 'Geradeausläufe auf dem Nebenplatz, allein, mit dem Reha-Trainer. Es fühlt sich falsch an und ist trotzdem richtig.', risiko: 1.25 },
+  { id: 'ball', name: 'Mit Ball', ab: .85, text: 'Teiltraining mit der Mannschaft, noch ohne Zweikämpfe. Von hier ist es nicht mehr weit.', risiko: 1 }
+];
+/* Drei echte Wege, nicht einer mit zwei schlechteren Varianten. Die erste
+   Fassung machte "Vorantreiben" zur Falle: gemessen 20,4 statt 15,2 Wochen,
+   weil die Rückschläge mehr kosteten, als das Tempo einbrachte — und
+   "Nach Plan" war von "Nichts erzwingen" in jeder Kennzahl geschlagen. */
+const REHA_PLAENE = [
+  { id: 'behutsam', name: 'Nichts erzwingen', text: 'Kaum Risiko, dafür keine einzige Abkürzung', risiko: .25, tempo: 0 },
+  { id: 'plan', name: 'Nach Plan', text: 'Genau das, was der Physio vorgibt', risiko: 1, tempo: .22 },
+  { id: 'treiben', name: 'Vorantreiben', text: 'Deutlich früher zurück — oder deutlich später', risiko: 2, tempo: .62 }
+];
+const REHA_PLAN = id => REHA_PLAENE.find(x => x.id === id) || REHA_PLAENE[1];
+function rehaPhase(v) {
+  if (!v || !v.reha) return null;
+  const fortschritt = 1 - v.wochen / Math.max(1, v.gesamt);
+  let ph = REHA_PHASEN[0];
+  for (const x of REHA_PHASEN) if (fortschritt >= x.ab) ph = x;
+  return ph;
+}
+
 function verletzen() {
   const r = Math.random();
   let acc = 0, v = VERLETZUNGEN[0];
   for (const x of VERLETZUNGEN) { acc += x.p; if (r <= acc) { v = x; break; } }
   const wochen = Math.max(1, Math.round(ri(v.w[0], v.w[1]) * stabWert('physio', [.9, .8, .7])));
-  S.p.verletzung = { name: v.n, wochen };
+  S.p.verletzung = { name: v.n, wochen, gesamt: wochen, reha: wochen >= REHA_GRENZE ? 1 : 0,
+    rueckschlaege: 0, getrieben: 0, behutsam: 0, phase: null };
   S.p.fitness = clamp(S.p.fitness - wochen * 2.5, 12, 100);
   log(v.n + ' — voraussichtlich ' + wochen + ' Wochen Pause.', 'bad');
-  if (wochen >= 8) merken('verletzung', v.n + ' — ' + wochen + ' Wochen Pause.', wochen >= 16);
+  if (wochen >= REHA_GRENZE) merken('verletzung', v.n + ' — ' + wochen + ' Wochen Pause.', wochen >= 16);
   return { name: v.n, wochen };
 }
+
+/* Was eine lange Verletzung dauerhaft kostet. Der Körper entscheidet mit —
+   Alter und Dauer —, aber auch, wie die Reha gelaufen ist: Wer dreimal einen
+   Rückschlag hatte, weil er getrieben hat, kommt anders zurück als jemand, der
+   sich Zeit gelassen hat. */
+function rehaPreis(v) {
+  const p = S.p;
+  const dauer = clamp((v.gesamt - 6) / 22, 0, 1.4);
+  const alterF = p.alter <= 23 ? .45 : p.alter <= 27 ? .8 : p.alter <= 30 ? 1.15 : p.alter <= 33 ? 1.6 : 2.2;
+  const wochen = Math.max(1, v.getrieben + v.behutsam + 1);
+  const rehaF = clamp(1 + v.rueckschlaege * .3 + (v.getrieben / wochen) * .4 - (v.behutsam / wochen) * .3, .55, 2.4);
+  return clamp(dauer * alterF * rehaF * rnd(1.3, 2.9), 0, 9);
+}
+/* Nach einer schweren Verletzung bricht dieselbe Stelle leichter wieder. Der
+   Wert klingt zwischen den Saisons ab, sonst waere eine Karriere nach der
+   dritten langen Verletzung nicht mehr zu spielen. */
+function anfaelligkeit() { return clamp(S.p.anfaellig || 0, 0, .5); }
 
 /* ========================== STAB UND BESITZ ==========================
    Der Stab wird angestellt, nicht gekauft: Jede Kraft kostet Wochengehalt,
@@ -3115,7 +3162,7 @@ async function planAnwenden() {
     const zuwachs = Math.round(S.p.follower * .035 + 240 + S.p.ruf * 26);
     wirke({ follower: zuwachs });
   }
-  if (plan.risiko && chance(plan.risiko * (S.p.energie < 45 ? 1.9 : 1))) {
+  if (plan.risiko && chance(plan.risiko * (S.p.energie < 45 ? 1.9 : 1) * (1 + anfaelligkeit()))) {
     const v = verletzen();
     await sagen({ eyebrow: 'Verletzung', titel: v.name, text: 'Doppelschichten fordern ihren Preis: Im Abschlusstraining reißt es dich. Pause: ' + v.wochen + ' Wochen.' });
   }
@@ -3177,12 +3224,9 @@ async function wocheVor() {
     const w = S.woche;
     S.wochenMinuten = 0;
     if (S.p.verletzung) {
-      S.p.verletzung.wochen--;
-      S.p.energie = clamp(S.p.energie + 4, 0, 82);
-      if (S.p.verletzung.wochen <= 0) {
-        log('Nach ' + S.p.verletzung.name + ' zurück im Mannschaftstraining.', 'good');
-        S.p.verletzung = null;
-      }
+      await rehaWoche();
+      /* Wer nach der Verletzung aufhört, spielt diese Woche nicht mehr. */
+      if (S.beendet) return;
     } else {
       await planAnwenden();
     }
@@ -3225,6 +3269,104 @@ async function wocheVor() {
   }
   speichern();
   render();
+}
+
+/* ---------- Die Reha ----------
+   Eine kurze Verletzung bleibt ein Zähler, der herunterläuft. Eine lange wird
+   zu einer eigenen Geschichte: vier Phasen, eine Entscheidung pro Woche, die
+   Möglichkeit eines Rückschlags — und am Ende ein Preis, den Alter, Dauer und
+   der eigene Umgang mit der Reha gemeinsam bestimmen. */
+async function rehaWoche() {
+  const p = S.p, v = p.verletzung;
+  p.energie = clamp(p.energie + 4, 0, 82);
+  if (!v.reha) {
+    v.wochen--;
+    if (v.wochen <= 0) {
+      log('Nach ' + v.name + ' zurück im Mannschaftstraining.', 'good');
+      p.verletzung = null;
+    }
+    return;
+  }
+  const plan = REHA_PLAN(S.reha), phase = rehaPhase(v);
+  /* Jede neue Phase wird angekündigt — daran merkt man, dass es vorangeht. */
+  if (v.phase !== phase.id) {
+    v.phase = phase.id;
+    if (phase.id !== 'ruhe') {
+      await sagen({ eyebrow: 'Reha · ' + v.name, titel: phase.name,
+        text: phase.text + '\n\nVoraussichtlich noch ' + zahlwort(v.wochen, 'Woche', 'Wochen') + '.' });
+    }
+  }
+  if (plan.id === 'treiben') v.getrieben++;
+  else if (plan.id === 'behutsam') v.behutsam++;
+
+  const risiko = clamp(.034 * phase.risiko * plan.risiko * (p.alter >= 31 ? 1.35 : 1)
+    * stabWert('physio', [.85, .7, .55]), 0, .45);
+  if (v.wochen > 1 && chance(risiko)) {
+    const extra = ri(2, 5);
+    v.wochen += extra; v.gesamt += extra; v.rueckschlaege++; v.phase = null;
+    const eff = wirke({ moral: -13 });
+    log('Rückschlag in der Reha — ' + extra + ' Wochen mehr.', 'bad');
+    merken('verletzung', 'Rückschlag in der Reha: ' + extra + ' Wochen mehr.', v.rueckschlaege >= 2);
+    await sagen({ eyebrow: 'Reha · Rückschlag', titel: 'Es hält nicht',
+      text: (plan.id === 'treiben'
+        ? 'Du hast gedrückt, und es war zu früh. Mitten in der Einheit zieht es wieder — dieselbe Stelle.'
+        : 'Es zieht wieder, ohne Vorwarnung. Der Arzt sagt nicht viel, das MRT sagt genug.')
+        + '\n\nDu fängst eine Stufe weiter vorn wieder an.',
+      effekte: eff.concat([{ t: '+' + extra + ' Wochen', gut: false }]) });
+    return;
+  }
+
+  v.wochen--;
+  /* Wer treibt, kommt manchmal wirklich frueher zurueck. */
+  if (v.wochen > 1 && chance(plan.tempo)) {
+    v.wochen--;
+    log('Die Reha läuft schneller als geplant.', 'good');
+  }
+  if (v.wochen <= 0) await rehaEnde(v);
+}
+
+async function rehaEnde(v) {
+  const p = S.p;
+  p.verletzung = null;
+  p.verletzungen = (p.verletzungen || []).concat([{ name: v.name, wochen: v.gesamt,
+    jahr: S.jahr, alter: p.alter, rueckschlaege: v.rueckschlaege }]);
+  if (p.verletzungen.length > 20) p.verletzungen.shift();
+  const preis = rehaPreis(v);
+  const eff = wirke({ tempo: -preis, physis: -preis * .6, zweikampf: -preis * .35, moral: 12 });
+  p.anfaellig = clamp((p.anfaellig || 0) + clamp(v.gesamt / 90, .04, .22), 0, .5);
+  p.rueckkehr = v.gesamt;
+  log('Comeback nach ' + v.gesamt + ' Wochen — zurück im Mannschaftstraining.', 'good');
+  merken('verletzung', 'Comeback nach ' + zahlwort(v.gesamt, 'Woche', 'Wochen') + ' (' + v.name + ').', v.gesamt >= 16);
+  await sagen({
+    eyebrow: 'Comeback · ' + saisonLabel(S.jahr), titel: 'Zurück im Kreis',
+    text: zahlwort(v.gesamt, 'Woche', 'Wochen') + ' nach dem ' + v.name
+      + (v.rueckschlaege ? ', mit ' + zahlwort(v.rueckschlaege, 'Rückschlag' , 'Rückschlägen') : ' ohne Rückschlag')
+      + '. Heute stehst du zum ersten Mal wieder in der vollen Einheit.\n\n'
+      + (preis < 1 ? 'Der Körper hat das gut weggesteckt — du fühlst dich fast wie vorher.'
+        : preis < 2.6 ? 'Etwas fehlt. In den ersten Schritten merkst du es, danach nicht mehr.'
+        : 'Es ist nicht mehr dasselbe Bein. Den ersten Antritt spürst du bis in den Nacken.')
+      + '\n\nDein Rhythmus ist bei ' + Math.round(p.fitness) + ' von 100 — Spielpraxis bekommst du nur zurück, indem du spielst.',
+    effekte: eff
+  });
+  /* Nach einer sehr langen Verletzung in fortgeschrittenem Alter steht die
+     Frage im Raum. Sie wird gestellt, nie entschieden. */
+  if (v.gesamt >= 18 && p.alter >= 30 && !S.beendet) {
+    const idx = await frage({
+      eyebrow: 'Entscheidung', titel: 'Kommst du wirklich zurück?',
+      text: 'Du bist ' + p.alter + ' und warst ' + zahlwort(v.gesamt, 'Woche', 'Wochen') + ' weg. '
+        + 'Dein Berater legt die Karten auf den Tisch: noch einmal ganz von vorn anfangen, '
+        + 'mit einem Knie, das nicht mehr das alte ist — oder aufhören, solange du selbst entscheidest.',
+      wahlen: [
+        { label: 'Weitermachen', hinweis: 'Noch einmal von vorn' },
+        { label: 'Karriere beenden', hinweis: 'Die Verletzung war das Ende' }
+      ]
+    });
+    if (idx === 1) {
+      await karriereEnde('Nach ' + zahlwort(v.gesamt, 'Woche', 'Wochen') + ' Pause bist du nicht mehr zurückgekommen. Der ' + v.name + ' war das Ende.');
+      return;
+    }
+    wirke({ moral: 8, mentalitaet: .8 });
+  }
 }
 
 async function ereignisSpielen(e) {
@@ -4394,6 +4536,9 @@ async function saisonEnde() {
   }
   if (p.alter <= 33) wirke({ mentalitaet: rnd(.25, .9), pass: p.alter > 27 ? rnd(0, .4) : 0 });
   if (p.alter >= 31) p.kondition = clamp(kondi() - rnd(1.5, 4), 0, 100);
+  /* Der Körper vergisst eine Verletzung langsam wieder — ohne das wäre eine
+     Karriere nach der dritten langen Pause nicht mehr zu spielen. */
+  p.anfaellig = Math.max(0, (p.anfaellig || 0) - .06);
   p.potenzial = clamp(p.potenzial + ri(-1, 1), 40, 99);
   kaderAltern();
   p.energie = clamp(p.energie + 10, 0, 100);
@@ -4670,6 +4815,13 @@ async function spielAustragen(fx) {
   if (einsatz.status === 'bank') tickerEintrag(0, 'Aufstellung', 'Du sitzt auf der Bank und schaust zu.', '');
   if (einsatz.status === 'verletzt') tickerEintrag(0, 'Aufstellung', 'Du fällst aus: ' + p.verletzung.name + '. Von der Tribüne aus fühlt sich jeder Fehlpass schlimmer an.', '');
   if (einsatz.status === 'startelf') tickerEintrag(0, 'Aufstellung', 'Du beginnst als ' + POS(p.pos).name + '.', 'ev-you');
+  /* Das erste Spiel nach einer langen Pause gehört eigens erwähnt. */
+  if (spielt && p.rueckkehr) {
+    tickerEintrag(0, 'Rückkehr', 'Dein erstes Spiel nach ' + zahlwort(p.rueckkehr, 'Woche', 'Wochen')
+      + ' Pause. Als deine Nummer gezeigt wird, steht das halbe Stadion auf.', 'ev-you');
+    merken('verletzung', 'Erstes Spiel nach ' + zahlwort(p.rueckkehr, 'Woche', 'Wochen') + ' Pause.', p.rueckkehr >= 16);
+    p.rueckkehr = 0;
+  }
   /* Nur die Startelf bekommt einen Auftrag — wer erst in der 70. Minute kommt,
      wird vom Trainer nicht mehr auf eine Aufgabe eingeschworen. */
   const auftrag = einsatz.status === 'startelf' ? auftragWaehlen(ts) : null;
@@ -4884,7 +5036,7 @@ async function spielAustragen(fx) {
     }
     /* Verletzung im Spiel */
     const risiko = clamp(.022 + Math.max(0, 75 - p.fitness) * .0013 + (p.energie < 40 ? .03 : 0) + (p.alter > 31 ? .012 : 0), 0, .12)
-      * stabWert('physio', [.85, .7, .55]);
+      * stabWert('physio', [.85, .7, .55]) * (1 + anfaelligkeit());
     if (!p.verletzung && chance(risiko)) verletzen();
   } else {
     wirke({ energie: 1, moral: einsatz.status === 'bank' ? -3 : -1, trainer: -1 });
@@ -5077,9 +5229,27 @@ function renderHome() {
       + '<div class="cond-item"><span class="k">Rhythmus</span><span class="v">' + Math.round(p.fitness) + '</span>' + meter(p.fitness, zustandsKlasse(p.fitness)) + '</div>'
       + '</div></section>';
 
-    if (p.verletzung) {
+    if (p.verletzung && p.verletzung.reha) {
+      const v = p.verletzung, ph = rehaPhase(v);
+      const fort = clamp(Math.round((1 - v.wochen / Math.max(1, v.gesamt)) * 100), 0, 99);
+      html += '<section><div class="sect-title"><h3>Reha</h3><span class="small muted">' + esc(v.name) + '</span></div>'
+        + '<div class="card">'
+        + '<div class="row-between" style="align-items:flex-start"><div class="grow">'
+        + '<div style="font-weight:600;font-size:15px">' + esc(ph.name) + '</div>'
+        + '<div class="small muted">noch ' + zahlwort(v.wochen, 'Woche', 'Wochen')
+        + (v.rueckschlaege ? ' · ' + zahlwort(v.rueckschlaege, 'Rückschlag', 'Rückschläge') : '') + '</div></div>'
+        + '<span class="pill">' + fort + ' %</span></div>'
+        + '<div style="margin-top:10px">' + meter(fort, fort >= 85 ? 'good' : '') + '</div>'
+        + '<p class="small ink2" style="margin-top:10px">' + esc(ph.text) + '</p>'
+        + '<div class="sect-title" style="margin-top:14px"><h3>Wie gehst du vor?</h3></div>'
+        + '<div class="plan-grid" style="grid-template-columns:1fr">'
+        + REHA_PLAENE.map(r => '<button class="plan" data-reha="' + r.id + '" aria-pressed="' + (S.reha === r.id) + '">'
+          + '<b>' + esc(r.name) + '</b><span>' + esc(r.text) + '</span></button>').join('')
+        + '</div></div></section>';
+    } else if (p.verletzung) {
       html += '<div class="card"><p class="eyebrow">Behandlung</p><p class="sheet-text" style="margin-top:6px">'
-        + esc(p.verletzung.name) + ' — noch ' + p.verletzung.wochen + ' Woche(n). Training fällt aus, du arbeitest mit dem Physio.</p></div>';
+        + esc(p.verletzung.name) + ' — noch ' + zahlwort(p.verletzung.wochen, 'Woche', 'Wochen')
+        + '. Training fällt aus, du arbeitest mit dem Physio.</p></div>';
     } else {
       html += '<section><div class="sect-title"><h3>Wochenplan</h3></div><div class="plan-grid">'
         + PLAENE.map(pl => '<button class="plan" data-plan="' + pl.id + '" aria-pressed="' + (S.plan === pl.id) + '"><b>' + esc(pl.name) + '</b><span>' + esc(pl.text) + '</span></button>').join('')
@@ -5522,6 +5692,22 @@ function renderProfil() {
       + '</div></section>';
   }
 
+  if ((p.verletzungen || []).length) {
+    const wochen = p.verletzungen.reduce((a, x) => a + x.wochen, 0);
+    html += '<section><div class="sect-title"><h3>Lange Verletzungen</h3><span class="small muted">'
+      + zahlwort(wochen, 'Woche', 'Wochen') + ' ausgefallen</span></div><div class="card">'
+      + p.verletzungen.slice().reverse().map(x => '<div class="spieler" style="grid-template-columns:70px 1fr auto">'
+        + '<span class="meta">' + esc(saisonLabel(x.jahr)) + '</span>'
+        + '<span class="grow" style="min-width:0"><span class="nm">' + esc(x.name) + '</span>'
+        + '<div class="meta">mit ' + x.alter + (x.rueckschlaege ? ' · ' + zahlwort(x.rueckschlaege, 'Rückschlag', 'Rückschläge') : '') + '</div></span>'
+        + '<span class="st" style="font-size:15px">' + x.wochen + ' Wo.</span></div>').join('')
+      + (anfaelligkeit() > .08
+        ? '<p class="tiny muted" style="margin-top:10px">Dein Körper ist im Moment anfälliger als vorher — das Verletzungsrisiko liegt rund '
+          + Math.round(anfaelligkeit() * 100) + ' % über deinem normalen und klingt über die nächsten Saisons wieder ab.</p>'
+        : '')
+      + '</div></section>';
+  }
+
   if (S.rivale) {
     const r = S.rivale, st = rivaleStand();
     const zeile = (k, meins, seins) => {
@@ -5914,7 +6100,7 @@ function karriereStarten() {
   const o = ovrVon(attr, NEU.pos);
   const gehalt = Math.max(24000, Math.round(Math.exp(club.staerke * .11) * 530 * .35 / 1000) * 1000);
   S = {
-    v: 2, jahr: 2026, woche: 1, plan: 'technik', trainFokus: top2[0],
+    v: 2, jahr: 2026, woche: 1, plan: 'technik', reha: 'plan', trainFokus: top2[0],
     beendet: false, leihe: null, ligaTausch: {}, staerkeTausch: {}, transfers: {}, verlauf: [], karriere: [], stars: [], hoehepunkte: [],
     p: {
       vorname: NEU.vorname, nachname: NEU.nachname, natId: NEU.natId, pos: NEU.pos, fuss: NEU.fuss, archetyp: NEU.archetyp,
@@ -5975,6 +6161,16 @@ function migriere() {
     delete S.p.extras;
   }
   if (!PLAN(S.plan)) S.plan = 'technik';
+  if (!REHA_PLAENE.some(r => r.id === S.reha)) S.reha = 'plan';
+  /* Eine Verletzung aus einem älteren Spielstand kennt die Reha-Felder nicht. */
+  if (S.p.verletzung && typeof S.p.verletzung.gesamt !== 'number') {
+    const v = S.p.verletzung;
+    v.gesamt = Math.max(v.wochen || 1, 1);
+    v.reha = v.gesamt >= REHA_GRENZE ? 1 : 0;
+    v.rueckschlaege = 0; v.getrieben = 0; v.behutsam = 0; v.phase = null;
+  }
+  if (!Array.isArray(S.p.verletzungen)) S.p.verletzungen = [];
+  if (typeof S.p.anfaellig !== 'number') S.p.anfaellig = 0;
   tauschAnwenden();
   /* Verein aus einem älteren Spielstand, den es so nicht mehr gibt */
   if (!CL(S.p.clubId)) {
@@ -6329,6 +6525,8 @@ function verdrahten() {
       if (welt.dataset.welt !== 'euro') S.weltLand = LG(welt.dataset.welt).land;
       render(); return;
     }
+    const reha = e.target.closest('[data-reha]');
+    if (reha) { S.reha = reha.dataset.reha; speichern(); render(); return; }
     const fokus = e.target.closest('[data-fokus]');
     if (fokus) { S.trainFokus = fokus.dataset.fokus; speichern(); render(); return; }
     const act = e.target.closest('[data-act]');

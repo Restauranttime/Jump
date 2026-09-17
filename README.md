@@ -162,6 +162,8 @@ weiter unten.
 
 **Geld** — Gehalt, Steuern, Werbung, laufende Kosten. Eigener Abschnitt weiter unten.
 
+**Verletzungen** — Kurze Pausen laufen nebenher ab. Ab acht Wochen wird daraus eine Reha mit Phasen, einer eigenen Entscheidung, Rückschlägen und einem Preis, den du danach behältst. Eigener Abschnitt weiter unten.
+
 **Drumherum** — Presse-Interviews nach Spielen, Follower und Ruf, Sponsorenverträge,
 44 zufällige Wochenereignisse, viele davon an deine Lage gekoppelt: ein Formtief, drei
 Niederlagen in Folge, ein auslaufender Vertrag, fehlende Spielpraxis, ein junger Konkurrent
@@ -184,6 +186,52 @@ Länderspieldebüt, Rekordtransfer, schwere Verletzung, jedes 50. Karrieretor un
 Potenzial, ab 29 baut der Körper ab. Saisonbilanz mit Torschützenkönig, Spieler der Saison
 und Goldenem Ball, Weltrangliste, Titelvitrine, Karrieretabelle über alle Saisons.
 Am Schluss: Rücktritt und Legacy-Punkte.
+
+## Die schwere Verletzung
+
+Eine Prellung ist eine Pause. Ein Kreuzbandriss ist etwas anderes — und sah bisher genauso
+aus: ein Zähler, der acht Monate lang jede Woche um eins kleiner wurde. Ab acht Wochen wird
+daraus eine Reha.
+
+**Vier Phasen**, jede mit eigenem Text und eigenem Risiko: Ruhigstellung, Aufbau im
+Kraftraum, erste Läufe auf dem Nebenplatz, Teiltraining mit Ball. Jede neue Phase wird
+angekündigt — daran merkst du, dass es vorangeht.
+
+**Eine Entscheidung, die bleibt.** Statt eines Wochenplans wählst du, wie du an die Reha
+herangehst. Gemessen über je 18 Karrieren und rund 60 lange Verletzungen je Spalte:
+
+| | echte Wochen weg | Rückschläge | Tempo dauerhaft weg | 90 %-Fall |
+|---|---|---|---|---|
+| Nichts erzwingen | 13,4 | 0,10 | 0,72 | 32 Wochen |
+| Nach Plan | 11,3 | 0,27 | 0,80 | 21 Wochen |
+| Vorantreiben | **9,2** | 0,42 | **1,41** | 15 Wochen |
+
+Drei echte Wege, keine Falle: Wer treibt, ist im Schnitt vier Wochen früher zurück und
+zahlt dafür fast das Doppelte an Substanz. Die erste Fassung war anders herum — dort
+dauerte „Vorantreiben“ 20,4 statt 15,2 Wochen, weil die Rückschläge mehr kosteten als das
+Tempo einbrachte. Das war keine Entscheidung, sondern eine Strafe für Neugier.
+
+**Der Rückschlag.** Es zieht wieder, dieselbe Stelle: zwei bis fünf Wochen mehr, eine Phase
+zurück, Moral weg. Mit „Vorantreiben“ passiert das viermal so oft wie mit „Nichts
+erzwingen“.
+
+**Der Preis.** Nach einer langen Verletzung kommst du nicht als derselbe zurück. Wie viel
+Tempo, Physis und Zweikampf dauerhaft fehlen, hängt an drei Dingen: wie alt du bist, wie
+lange du weg warst, und wie du die Reha gemacht hast. Ein Kreuzbandriss kostet im Schnitt
+2,6 Tempo, mit über dreissig und drei Rückschlägen ein Vielfaches davon. Dazu wird der
+Körper **anfälliger** — bis zu 50 % mehr Verletzungsrisiko, das über die nächsten Saisons
+wieder abklingt.
+
+**Das Comeback** bekommt einen eigenen Bildschirm: wie lange, wie viele Rückschläge, was es
+gekostet hat, wo dein Rhythmus steht. Im ersten Spiel danach steht das Stadion auf, wenn
+deine Nummer gezeigt wird.
+
+**Und die Frage.** Wer mit über dreißig länger als achtzehn Wochen weg war, wird gefragt, ob
+er wirklich zurückkommt. Das Spiel beendet keine Karriere von selbst — es legt dir nur die
+Zahlen hin. Gemessen kommt die Frage in jeder fünften bis dritten Karriere.
+
+Im Profil steht danach eine Liste aller langen Verletzungen mit Saison, Alter, Dauer und
+Rückschlägen.
 
 ## Der Torwart
 
@@ -593,6 +641,10 @@ eine durchgespielte Karriere:
   Momentausgängen sind 15 Prozent Paraden, 11 Prozent Gegentore, 6 Prozent Nachschüsse.
   Die Höchststärke liegt im Mittelfeld aller Positionen (68 im Median gegen 67 bis 73).
 - Verletzungen kosten rund ein Zehntel aller Wochen (bei riskanter Trainingswahl ein Siebtel).
+  Gemessen über 20 Karrieren: 21 Verletzungen je Laufbahn, davon vier ab acht Wochen; 18 von
+  20 Karrieren erleben mindestens eine lange, acht von 20 eine ab zwanzig Wochen. Ein
+  Kreuzbandriss dauert im Schnitt dreissig Wochen. Das Medianalter bei einer langen
+  Verletzung ist 30 — genau dort, wo sie am meisten kostet.
 - Alle 44 Zufallsereignisse sind erreichbar — geprüft wird das über einen Lauf, der zählt, wie
   oft die Bedingung jedes Ereignisses überhaupt zutrifft, nicht nur, welches gezogen wurde.
 - Ein Spielstand überlebt das Fehlen jedes einzelnen Feldes: geprüft über 16 Fassungen, von
