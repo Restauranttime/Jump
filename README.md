@@ -166,6 +166,26 @@ Potenzial, ab 29 baut der Körper ab. Saisonbilanz mit Torschützenkönig, Spiel
 und Goldenem Ball, Weltrangliste, Titelvitrine, Karrieretabelle über alle Saisons.
 Am Schluss: Rücktritt und Legacy-Punkte.
 
+## Wunschverein
+
+Beim Berater kannst du einen bestimmten Verein als Ziel angeben. Er arbeitet dann gezielt
+daran, statt nur allgemein den Markt zu sondieren — und sagt dir vorher, was er davon hält:
+„machbar", „schwierig", „sehr schwierig", „fast aussichtslos" oder „chancenlos".
+
+Nennen darfst du jeden der 182 Vereine. Es kostet acht Punkte Trainer-Vertrauen — dein Verein
+erfährt davon — und zwei Prozent deines Marktwerts als Beratervorschuss. Der Wunsch bleibt
+bestehen, bis er erfüllt ist oder du ihn zurückziehst; wirst du im Lauf der Jahre besser, öffnet
+sich ein vorher chancenloses Ziel von selbst.
+
+Die Chance hängt davon ab, wie weit der Verein über deinem Niveau steht. **Ab zwölf Punkten
+Abstand ist sie null, nicht bloß klein.** Mit einer Restchance von einem Prozent hätte sich über
+zwanzig Transferfenster jedes Ziel von selbst erfüllt: Im Test landete ein Spieler mit Stärke 75
+in drei von vier Karrieren bei Bayern.
+
+Gemessen: Ein 1. FC Heidenheim erscheint für einen passenden Spieler ohne Wunsch in 0 Prozent
+der Transferfenster — er macht dir von sich aus nie ein Angebot. Mit Wunsch in 92 Prozent, genau
+der angesagten Chance.
+
 ## Bestmarken
 
 Im Profil stehen die Rekorde einer Karriere: meiste Tore in einem Spiel, beste Note, längste

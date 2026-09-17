@@ -310,7 +310,9 @@ table.tbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-
 .sheet-body{overflow-y:auto;display:flex;flex-direction:column;gap:11px}
 .sheet h2{font-family:var(--font-display);font-size:23px;letter-spacing:.01em;line-height:1.1}
 .sheet-text{font-size:14.5px;color:var(--ink-2);line-height:1.5}
-.choices{display:flex;flex-direction:column;gap:8px}
+/* Lange Listen — etwa die Vereinsauswahl beim Berater — muessen innerhalb des
+   Fensters scrollen, statt unten herauszulaufen. */
+.choices{display:flex;flex-direction:column;gap:8px;min-height:0;overflow-y:auto}
 .choice{text-align:left;padding:13px;border-radius:13px;border:1px solid var(--line);background:var(--surface-2);width:100%}
 .choice b{display:block;font-size:14.5px;font-weight:600}
 .choice span{display:block;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.35}
@@ -2695,20 +2697,108 @@ function angeboteErzeugen(sommer) {
   if (chance(wahrsch)) anzahl = ri(1, 3);
   if (!sommer) anzahl = Math.min(anzahl, 2);
   const out = [];
-  for (let i = 0; i < anzahl && i < gewichtet.length; i++) {
-    const c = gewichtet[i].c;
-    const gehalt = jahresGehaltFuer(c);
-    out.push({
-      clubId: c.id, gehalt, jahre: p.alter > 31 ? ri(1, 2) : ri(3, 5),
-      abloese: p.vertrag.jahre <= 0 ? 0 : Math.round(marktwert() * rnd(.8, 1.5) / 100000) * 100000,
-      rolle: (() => {
-        const d = OVR() - besterKonkurrent(c.id);
-        return d >= 2 ? 'als Stammspieler eingeplant' : d >= -4 ? 'Rotation, du musst dich durchsetzen'
-          : 'zunächst Ergänzungsspieler';
-      })()
-    });
+  for (let i = 0; i < anzahl && i < gewichtet.length; i++) out.push(angebotFuer(gewichtet[i].c));
+  /* Der Wunschverein kommt zusaetzlich und unabhaengig davon, ob sonst etwas
+     hereinkommt — genau dafuer bezahlst du den Berater. */
+  if (p.wunschClub && p.wunschClub !== p.clubId && !out.some(a => a.clubId === p.wunschClub)
+      && chance(wunschChance(p.wunschClub))) {
+    const c = CL(p.wunschClub);
+    if (c) out.unshift(angebotFuer(c));
   }
   return out;
+}
+function angebotFuer(c) {
+  const p = S.p;
+  return {
+    clubId: c.id, gehalt: jahresGehaltFuer(c), jahre: p.alter > 31 ? ri(1, 2) : ri(3, 5),
+    abloese: p.vertrag.jahre <= 0 ? 0 : Math.round(marktwert() * rnd(.8, 1.5) / 100000) * 100000,
+    rolle: (() => {
+      const d = OVR() - besterKonkurrent(c.id);
+      return d >= 2 ? 'als Stammspieler eingeplant' : d >= -4 ? 'Rotation, du musst dich durchsetzen'
+        : 'zunächst Ergänzungsspieler';
+    })()
+  };
+}
+
+/* ---------- Wunschverein ----------
+   Dein Berater arbeitet gezielt an einem Verein statt nur allgemein den Markt
+   zu sondieren. Die Chance haengt davon ab, wie weit der Verein ueber deinem
+   Niveau steht — und der Berater sagt sie dir vorher ehrlich, damit niemand
+   zwei Saisons blind auf etwas Chancenloses hinarbeitet. */
+function wunschChance(clubId) {
+  const c = CL(clubId), p = S.p;
+  if (!c || clubId === p.clubId) return 0;
+  const niveau = OVR() + formWert() * 1.3 + (p.ruf - 40) * .1 + (p.alter <= 21 ? 3 : 0) - (p.alter >= 32 ? 6 : 0);
+  const d = c.staerke - niveau;
+  /* Ueber zwoelf Punkten Abstand ist es wirklich chancenlos — nicht nur
+     unwahrscheinlich. Mit einer Restchance von einem Prozent wuerde sich ueber
+     zwanzig Transferfenster sonst jedes Ziel von selbst erfuellen: Im Test
+     landete ein Spieler mit Staerke 75 in drei von vier Karrieren bei Bayern.
+     Der Wunsch bleibt trotzdem stehen; wird der Spieler besser, oeffnet er sich. */
+  if (d > 12) return 0;
+  let ch = clamp(.75 - d * .06, .02, .92);
+  ch *= stabWert('berater', [1.12, 1.28, 1.5]);
+  if (p.vertrag.jahre <= 0) ch *= 1.35;
+  if (c.liga === 'sa1' && p.alter < 28) ch *= .2;
+  return clamp(ch, 0, .92);
+}
+function wunschText(clubId) {
+  const ch = wunschChance(clubId);
+  return ch <= 0 ? 'chancenlos' : ch > .55 ? 'machbar' : ch > .3 ? 'schwierig'
+    : ch > .12 ? 'sehr schwierig' : 'fast aussichtslos';
+}
+function wunschHonorar() {
+  return Math.max(5000, Math.round(marktwert() * .02 / 5000) * 5000);
+}
+
+async function wunschWaehlen() {
+  const p = S.p;
+  const ligen = LEAGUES.slice();
+  const li = await frage({
+    eyebrow: 'Berater', titel: 'Wunschverein',
+    text: 'Sag deinem Berater, wohin du willst. Er arbeitet dann gezielt daran — und sagt dir vorher, was er davon hält.',
+    wahlen: ligen.map(l => ({ label: l.flag + ' ' + l.name, hinweis: l.land })).concat([{ label: 'Abbrechen' }])
+  });
+  if (li >= ligen.length) return;
+  const clubs = ligaClubs(ligen[li].id).slice().sort((a, b) => b.staerke - a.staerke);
+  const ci = await frage({
+    eyebrow: ligen[li].flag + ' ' + ligen[li].name, titel: 'Welcher Verein?',
+    text: 'Die Einschätzung deines Beraters steht dahinter.',
+    wahlen: clubs.map(c => ({
+      label: c.name,
+      hinweis: 'Teamstärke ' + c.staerke + ' · ' + (c.id === p.clubId ? 'dein Verein' : wunschText(c.id))
+    })).concat([{ label: 'Zurück' }])
+  });
+  if (ci >= clubs.length) return wunschWaehlen();
+  const ziel = clubs[ci];
+  if (ziel.id === p.clubId) {
+    await sagen({ eyebrow: 'Berater', titel: 'Da bist du schon', text: 'Für deinen eigenen Verein braucht es keinen Wunsch.' });
+    return;
+  }
+  const honorar = wunschHonorar();
+  const ok = await frage({
+    eyebrow: 'Berater', titel: ziel.name,
+    text: 'Einschätzung: ' + wunschText(ziel.id) + '.\n\nDein Verein wird davon erfahren — das kostet Vertrauen beim Trainer. '
+      + 'Dein Berater will ' + money(honorar) + ' Vorschuss.',
+    wahlen: [
+      { label: 'Beauftragen', hinweis: money(honorar) + ' · Trainer-Vertrauen −8', gold: true },
+      { label: 'Doch nicht' }
+    ]
+  });
+  if (ok !== 0) return;
+  if (p.geld < honorar) {
+    await sagen({ eyebrow: 'Berater', titel: 'Zu wenig auf dem Konto', text: 'Der Vorschuss von ' + money(honorar) + ' ist nicht gedeckt.' });
+    return;
+  }
+  p.wunschClub = ziel.id;
+  p.wechselwunsch = true;
+  const eff = wirke({ geld: -honorar, trainer: -8 });
+  log('Berater beauftragt: Wechselwunsch zu ' + ziel.name + '.', 'gold');
+  await sagen({
+    eyebrow: 'Berater', titel: 'Er kümmert sich',
+    text: 'Dein Berater nimmt Kontakt zu ' + ziel.name + ' auf. Der Wunsch bleibt bestehen, bis er erfüllt ist oder du ihn zurückziehst.',
+    effekte: eff
+  });
 }
 
 async function vertragVerhandeln(angebot, clubName) {
@@ -2747,6 +2837,10 @@ function wechselVerein(clubId, vertrag) {
   S.p.trainer = clamp(48 + (OVR() - neu.staerke) * 1.2 + ri(-5, 5), 10, 90);
   S.p.wechselwunsch = false;
   S.p.kapitaen = false;
+  if (S.p.wunschClub === clubId) {
+    S.p.wunschClub = null;
+    merken('transfer', 'Wunschverein erreicht: ' + neu.name + '.', 1);
+  }
   S.kader = kaderErzeugen(clubId);
   S.trainer = trainerErzeugen(neu);
   S.p.trainer = clamp(48 + trainerStilBonus() * 60 + ri(-5, 5), 12, 85);
@@ -4123,14 +4217,25 @@ function renderMarkt() {
     + '<div class="attr"><span class="k">Wochenlohn</span><span class="small ink2">' + money(p.vertrag.gehalt / 52) + '</span><span class="v"></span></div>'
     + '</div></section>';
 
-  html += '<section><div class="sect-title"><h3>Berater</h3></div><div class="card stack-sm">'
-    + '<p class="small ink2">' + (p.wechselwunsch
-      ? 'Dein Berater hört sich aktiv um. Im nächsten Transferfenster kommen mehr Angebote — dein Trainer weiß das inzwischen auch.'
-      : 'Dein Berater wartet ab. Du kannst ihn losschicken, um im nächsten Fenster mehr Angebote zu bekommen.') + '</p>'
+  const wunsch = p.wunschClub && CL(p.wunschClub);
+  html += '<section><div class="sect-title"><h3>Berater</h3>'
+    + (wunsch ? '<span class="small muted">Einschätzung: ' + wunschText(wunsch.id) + '</span>' : '') + '</div>'
+    + '<div class="card stack-sm">'
+    + (wunsch
+      ? '<div class="row" style="gap:10px">' + badgeHtml(wunsch)
+        + '<div class="grow"><div style="font-weight:600;font-size:14px">' + esc(wunsch.name) + '</div>'
+        + '<div class="small muted">' + LG(wunsch.liga).flag + ' ' + esc(LG(wunsch.liga).name) + ' · Teamstärke ' + wunsch.staerke + '</div></div></div>'
+        + '<p class="small ink2">Dein Berater arbeitet gezielt daran. Der Wunsch bleibt, bis er erfüllt ist.</p>'
+      : '<p class="small ink2">' + (p.wechselwunsch
+        ? 'Dein Berater hört sich aktiv um. Im nächsten Transferfenster kommen mehr Angebote — dein Trainer weiß das inzwischen auch.'
+        : 'Dein Berater wartet ab. Du kannst ihn losschicken, um im nächsten Fenster mehr Angebote zu bekommen.') + '</p>')
     + '<p class="small muted">' + naechstes + '</p>'
-    + (p.wechselwunsch ? '<button class="btn btn-sm" data-act="bleiben" style="width:100%">Wechselwunsch zurückziehen</button>'
-      : '<button class="btn btn-sm" data-act="berater" style="width:100%">Berater beauftragen</button>')
-    + '</div></section>';
+    + '<div class="btn-row">'
+    + '<button class="btn btn-sm" data-act="wunsch">' + (wunsch ? 'Anderer Verein' : 'Wunschverein wählen') + '</button>'
+    + (wunsch ? '<button class="btn btn-sm btn-quiet" data-act="wunschWeg">Wunsch zurückziehen</button>'
+      : p.wechselwunsch ? '<button class="btn btn-sm btn-quiet" data-act="bleiben">Wechselwunsch zurückziehen</button>'
+      : '<button class="btn btn-sm" data-act="berater">Umhören lassen</button>')
+    + '</div></div></section>';
 
   /* Wochenbilanz */
   const ein = wochenEinnahmen(), aus = stabKosten();
@@ -4552,6 +4657,12 @@ async function aktion(name) {
   if (name === 'woche') return wocheVor();
   if (name === 'berater') { S.p.wechselwunsch = true; wirke({ trainer: -3 }); speichern(); render(); return; }
   if (name === 'bleiben') { S.p.wechselwunsch = false; speichern(); render(); return; }
+  if (name === 'wunsch') { await wunschWaehlen(); speichern(); render(); return; }
+  if (name === 'wunschWeg') {
+    S.p.wunschClub = null;
+    toast('Wunschverein zurückgezogen');
+    speichern(); render(); return;
+  }
   if (name === 'hoehe') { S.hoeheAlle = !S.hoeheAlle; render(); return; }
   if (name === 'speichern') {
     const ok = await speichernJetzt();
@@ -4775,6 +4886,7 @@ function migriere() {
   S.serie = S.serie || [];
   S.hoehepunkte = S.hoehepunkte || [];
   S.rekorde = S.rekorde || {};
+  if (S.p.wunschClub && !CL(S.p.wunschClub)) S.p.wunschClub = null;
   if (typeof S.p.nat.vertrauen !== 'number') S.p.nat.vertrauen = 50;
   if (S.p.nat.dabei && !S.natTrainer) S.natTrainer = natTrainerErzeugen();
   if (!S.natWochen) {
