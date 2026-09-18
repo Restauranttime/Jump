@@ -77,9 +77,25 @@ Sechzehn Hinweise, verteilt über die erste Saison:
 | Welt / Markt / Presse / Profil | je einer |
 | Spieltag | vor dem Anpfiff · beim ersten Schlüsselmoment · zur Note |
 
-In jeder Blase steht ein zweiter Knopf **„Tutorial beenden"**, und im Profil lässt es sich
-jederzeit wieder einschalten — auch mitten in einer laufenden Karriere. Bestehende Spielstände
+In jeder Blase steht ein zweiter Knopf **„Tutorial beenden"**, und hinter dem Zahnrad lässt
+es sich jederzeit wieder einschalten — auch mitten in einer laufenden Karriere. Bestehende Spielstände
 bekommen kein Tutorial: Die Migration setzt es auf aus.
+
+## Einstellungen
+
+Oben rechts in der Kopfleiste sitzt ein **Zahnrad** — auf jedem der sechs Reiter erreichbar.
+Dahinter liegt alles, was nicht zur Karriere gehört, sondern zum Spielstand: der
+Speicherzustand, *Jetzt speichern*, der *Sicherungscode*, *Tutorial an/aus*, *Karriere
+wechseln* und *Diese Karriere löschen*.
+
+Vorher standen diese fünf Knöpfe mitten im Profil, zwischen Attributen und Titelvitrine. Das
+Profil zeigt jetzt nur noch, was zur Laufbahn gehört: Fächer, Formkurve, Saisonzahlen,
+Bestmarken, Titel, Höhepunkte und die Karrieretabelle.
+
+Dabei kam ein Fehler ans Licht, den die Umstellung auf drei Plätze hinterlassen hatte:
+`data-act="loeschen"` rief `standLoeschen()` **ohne Platznummer** auf. Seit es drei Plätze
+gibt, traf das den Schlüssel `.pundefined` — also nichts. „Karriere löschen und neu beginnen"
+schickte einen zur Startseite zurück, und der Spielstand stand unverändert da.
 
 ## Speichern
 
