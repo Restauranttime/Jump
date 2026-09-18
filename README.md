@@ -273,6 +273,38 @@ lange du weg warst, und wie du die Reha gemacht hast. Ein Kreuzbandriss kostet i
 Körper **anfälliger** — bis zu 50 % mehr Verletzungsrisiko, das über die nächsten Saisons
 wieder abklingt.
 
+**Die letzte Woche ist eine ganze Woche.** Lange stand „noch 1 Woche" da — und in genau
+dieser Woche spieltest du. `rehaWoche()` lief ganz oben im Wochenablauf, zog die letzte
+Woche ab und setzte die Verletzung auf null; weiter unten in derselben Woche lief der
+Spieltag. Gemessen über 350 Verletzungen: **in 93 % von ihnen stand man in der Woche auf dem
+Platz, in der es hieß „noch eine Woche"**. Jetzt merkt `rehaWoche()` das Ende nur vor;
+freigegeben wird zu Beginn der Woche darauf. Nicht nach dem Spieltag, sondern am
+Wochenanfang — weil ein Länderspielturnier später in derselben Woche laufen kann, und dort
+spielte in einem ersten Anlauf einer von 381 trotzdem.
+
+**Nach einer schweren Verletzung kommt eine Aufbauwoche.** Der Comeback-Bildschirm sagt
+wörtlich „Heute stehst du zum ersten Mal wieder in der vollen Einheit" — und danach spielte
+man. Jetzt stimmt beides überein: eine Woche volles Training, kein Einsatz, ab der Woche
+darauf bist du wieder eine Option. Nur ab acht Wochen Ausfall, eine Zerrung über zwei Wochen
+braucht das nicht. Gemessen: 1,18 Spiele je schwerer Verletzung fallen in die Aufbauwoche.
+
+**Der Ausfall ist kein Loch mehr.** Sechs Ereignisse gibt es nur, während du nicht spielst:
+dein Vertreter trifft doppelt und die Zeitung nennt ihn „die Lösung, die keiner gesucht
+hat"; zwei Mitspieler stehen mit Kaffee in der Behandlungskabine; die Presse rechnet vor,
+wie wenige nach dieser Verletzung ihr Niveau wiederfinden; der Trainer ruft an einem
+Sonntagabend an; drei Uhr nachts rechnest du dein Alter gegen deinen Vertrag; ein Spezialist
+im Ausland bietet eine zweite Meinung an, die zwei Wochen sparen kann oder 28.000 € kostet.
+Gemessen 0,8 je Verletzung — die letzte Woche bleibt frei, die gehört dem Comeback.
+
+**Ereignisse behaupten nichts mehr über Spiele, die du nicht gespielt hast.** „Im Interview
+hast du die Schiedsrichterleistung zerlegt" hatte gar keine Bedingung, „Drei schwache Spiele
+hintereinander" prüfte nur die Saisonsumme. Gemessen feuerten **629 Ereignisse, während das
+letzte Spiel drei Wochen oder länger her war** — nach einer langen Verletzung las man dann,
+man habe schlecht gespielt, obwohl man überhaupt nicht gespielt hatte. Acht Ereignisse
+prüfen jetzt `frischGespielt()`: höchstens zwei Wochen ohne Einsatz, und nicht in der
+Aufbauwoche. In der Endwoche der Verletzung kommt gar kein Zufallsereignis mehr (vorher:
+35 % aller Verletzungen).
+
 **Das Comeback** bekommt einen eigenen Bildschirm: wie lange, wie viele Rückschläge, was es
 gekostet hat, wo dein Rhythmus steht. Im ersten Spiel danach steht das Stadion auf, wenn
 deine Nummer gezeigt wird.
@@ -817,6 +849,13 @@ eine durchgespielte Karriere:
   Angebote über eine ganze Laufbahn, keine Karriere ohne Angebot. Die Werbung bleibt trotzdem
   ein Zubrot: 9,8 Mio € über die Karriere gegen 19,3 Mio € Gehalt — mehr Anfragen, dafür
   kleinere Verträge. Kontostand am Ende im Median 1,2 Mio €, vorher 1,5.
+- Während einer Verletzung wird nicht gespielt — auch nicht in der letzten Woche. Gemessen
+  über 306 Verletzungen und 1.254 verletzte Wochen: null Einsätze, davon 315 Wochen mit
+  „noch 1 Woche" und ebenfalls null Einsätzen. Vorher: 93 % der Verletzungen endeten mit
+  einem Spiel in der letzten Woche.
+- Die acht Ereignisse, die ein gespieltes Spiel voraussetzen, feuern nur noch mit höchstens
+  zwei spielfreien Wochen im Rücken. Gemessen über 562 Auslösungen: 0 Wochen 446×, 1 Woche
+  70×, 2 Wochen 46×, darüber keine.
 - Die Weltrangliste ist eine Leiter, keine Decke. Gemessen über 598 Saisons je Spielweise:
   gewöhnlich gespielt Median-Platz 45 von 55 mit dem besten Jahr auf 28, meisterhaft Median 22
   mit dem besten Jahr auf 9 und dem Goldenen Ball in 15,4 % aller Saisons. Vorher: 23 von 23

@@ -2045,6 +2045,7 @@ function simErgebnis(sh, sg) {
 function einsatzBestimmen(fx) {
   const p = S.p;
   if (p.verletzung) return { status: 'verletzt', ab: 0 };
+  if (p.aufbau > 0) return { status: 'aufbau', ab: 0 };
   const ts = teamStand(fx);
   const konk = ts.kader.filter(k => k.pos === p.pos).sort((a, b) => b.ovr - a.ovr);
   const bester = konk.length ? konk[0].ovr : ts.team.staerke - 2;
@@ -2772,6 +2773,14 @@ function wochenEinnahmen() {
 function wochenKosten() { return stabKosten() + unterhaltKosten(); }
 
 /* ========================== ZUFALLSEREIGNISSE ========================== */
+/* Manche Ereignisse behaupten etwas ueber ein Spiel: „Im Interview hast du die
+   Schiedsrichterleistung zerlegt“, „Drei schwache Spiele hintereinander“. Sie
+   hatten daran aber keine Bedingung — gemessen feuerten 629 Ereignisse,
+   waehrend das letzte Spiel drei Wochen oder laenger her war. Nach einer
+   langen Verletzung las man dann, man habe schlecht gespielt, obwohl man
+   ueberhaupt nicht gespielt hatte. */
+function frischGespielt() { return (S.p.ohneSpiel || 0) <= 2 && !S.p.aufbau; }
+
 const EREIGNISSE = [
   { id: 'trainergespraech', gewicht: 3, wenn: () => S.p.trainer < 45, eyebrow: 'Trainerbüro', titel: 'Aussprache',
     text: () => 'Der Trainer bittet dich nach dem Training in sein Büro. „Ich sehe dich im Moment nicht in meiner ersten Elf. Sag mir, warum ich das ändern soll."',
@@ -2812,7 +2821,7 @@ const EREIGNISSE = [
       { l: 'Von ihm lernen', h: 'Klug', run: () => ({ text: 'Du klebst im Training an ihm. Was er kann, versuchst du zu kopieren.', eff: { pass: .5, dribbling: .5, moral: 2 } }) },
       { l: 'Berater anrufen', h: 'Ausstieg', run: () => { S.p.wechselwunsch = true; return { text: 'Dein Berater beginnt, sich umzuhören. Im nächsten Transferfenster wird es konkret.', eff: { moral: -3, trainer: -4 } }; } }
     ] },
-  { id: 'kapitaen', gewicht: 2, wenn: () => S.p.trainer > 72 && S.p.alter > 23 && !S.p.kapitaen, eyebrow: 'Verantwortung', titel: 'Die Binde',
+  { id: 'kapitaen', gewicht: 2, wenn: () => S.p.trainer > 72 && S.p.alter > 23 && !S.p.kapitaen && frischGespielt(), eyebrow: 'Verantwortung', titel: 'Die Binde',
     text: () => 'Der Kapitän fällt lange aus. Der Trainer hält dir die Binde hin.',
     wahl: [
       { l: 'Annehmen', h: 'Druck', run: () => { S.p.kapitaen = true; merken('titel', 'Kapitän von ' + CL(S.p.clubId).name + '.', 1); return { text: 'Du bist Kapitän. Ab jetzt schaut das ganze Stadion zuerst auf dich.', eff: { mentalitaet: 1.2, ruf: 5, trainer: 5, moral: 6 } }; } },
@@ -2851,7 +2860,7 @@ const EREIGNISSE = [
       { l: 'Mitfahren', h: 'Herz', run: () => ({ text: 'Drei Stunden Autogramme und Selfies. Die Bilder gehen durch die halbe Stadt.', eff: { ruf: 5, follower: Math.round(S.p.follower * .07 + 900), moral: 5, energie: -5 } }) },
       { l: 'Absagen', h: 'Frei', run: () => ({ text: 'Du bleibst zuhause. Niemand sagt etwas — aber der Pressechef merkt es sich.', eff: { energie: 6, ruf: -2 } }) }
     ] },
-  { id: 'shitstorm', gewicht: 2, wenn: () => S.p.follower > 60000, eyebrow: 'Netz', titel: 'Shitstorm',
+  { id: 'shitstorm', gewicht: 2, wenn: () => S.p.follower > 60000 && frischGespielt(), eyebrow: 'Netz', titel: 'Shitstorm',
     text: () => 'Nach der Niederlage stehen unter deinem letzten Post 4.000 Kommentare. Die wenigsten sind freundlich.',
     wahl: [
       { l: 'Kommentare abschalten', h: 'Schutz', run: () => ({ text: 'Ruhe im Kopf, dafür Häme in den Medien: „Dünne Haut."', eff: { moral: 4, ruf: -2 } }) },
@@ -2877,14 +2886,14 @@ const EREIGNISSE = [
       { l: 'Voll mitmachen', h: 'Körper', run: () => ({ text: 'Weniger Zucker, festere Schlafzeiten, Blutwerte alle zwei Wochen. Du fühlst dich leichter.', eff: { fitness: 11, physis: .6, energie: 6, moral: -2 } }) },
       { l: 'Nur das Nötigste', h: 'Locker', run: () => ({ text: 'Du machst das Minimum. Reicht auch.', eff: { fitness: 3 } }) }
     ] },
-  { id: 'schiri', gewicht: 2, eyebrow: 'Nachspiel', titel: 'Kritik am Schiedsrichter',
+  { id: 'schiri', gewicht: 2, wenn: () => frischGespielt(), eyebrow: 'Nachspiel', titel: 'Kritik am Schiedsrichter',
     text: () => 'Im Interview hast du die Schiedsrichterleistung zerlegt. Der Verband lädt dich vor.',
     wahl: [
       { l: 'Aussage zurücknehmen', h: 'Ruhe', run: () => ({ text: 'Geldstrafe im niedrigen Bereich, Sache erledigt.', eff: { geld: -15000, ruf: -1 } }) },
       { l: 'Dabei bleiben', h: 'Haltung', run: () => ({ text: 'Zwei Spiele Sperre-Androhung und eine saftige Strafe — aber die Kurve singt deinen Namen.', eff: { geld: -45000, ruf: 5, moral: 4, mentalitaet: .4 } }) }
     ] }
 ,
-  { id: 'formtief', gewicht: 4, wenn: () => formWert() < -1.4 && S.stats.spiele > 3, eyebrow: 'Krise', titel: 'Es läuft nicht',
+  { id: 'formtief', gewicht: 4, wenn: () => formWert() < -1.4 && S.stats.spiele > 3 && frischGespielt(), eyebrow: 'Krise', titel: 'Es läuft nicht',
     text: () => 'Drei schwache Spiele hintereinander. ' + (S.trainer ? S.trainer.name : 'Der Trainer') + ' bittet dich zum Gespräch und legt dir deine Noten hin.',
     wahl: [
       { l: 'Um mehr Spielzeit bitten, um rauszukommen', h: 'Riskant', run: () => chance(.45)
@@ -2933,7 +2942,7 @@ const EREIGNISSE = [
       { l: 'Bescheiden: erst mal lernen', h: 'Sicher', run: () => ({ text: 'Er mag Spieler, die zuhören. Du bekommst Trainingsvideos mit nach Hause.', eff: { trainer: 6, mentalitaet: .5 } }) },
       { l: 'Nach seiner Spielidee fragen', h: 'Klug', run: () => ({ text: 'Eine Stunde Taktik am Whiteboard. Danach weißt du genau, was er sehen will.', eff: { trainer: 8, mentalitaet: .8, pass: .3 } }) }
     ] },
-  { id: 'derby', gewicht: 3, eyebrow: 'Spielwoche', titel: 'Derbywoche',
+  { id: 'derby', gewicht: 3, wenn: () => frischGespielt(), eyebrow: 'Spielwoche', titel: 'Derbywoche',
     text: () => 'Am Wochenende steht das Derby an. Die Stadt redet über nichts anderes, an der Trainingsanlage stehen Fans mit Transparenten.',
     wahl: [
       { l: 'Zu den Fans rausgehen', h: 'Herz', run: () => ({ text: 'Eine Stunde Autogramme im Nieselregen. Die Kurve wird das am Samstag zurückgeben.', eff: { moral: 8, ruf: 3, follower: Math.round(S.p.follower * .04 + 1200), energie: -4 } }) },
@@ -2962,7 +2971,7 @@ const EREIGNISSE = [
           ? ({ text: 'Er handelt die Summe deutlich herunter.', eff: { geld: -Math.round(S.p.geld * .03) } })
           : ({ text: 'Es zieht sich, wird teurer und landet in der Zeitung.', eff: { geld: -Math.round(S.p.geld * .12), ruf: -5 } }) }
     ] },
-  { id: 'rekordjagd', gewicht: 5, wenn: () => S.stats.tore >= 6, eyebrow: 'Statistik', titel: 'Die Rekordjagd',
+  { id: 'rekordjagd', gewicht: 5, wenn: () => S.stats.tore >= 6 && frischGespielt(), eyebrow: 'Statistik', titel: 'Die Rekordjagd',
     text: () => 'Mit ' + S.stats.tore + ' Saisontoren schreiben die Zeitungen über den Vereinsrekord. Jeder Reporter fragt danach.',
     wahl: [
       { l: 'Den Rekord zum Ziel erklären', h: 'Druck', run: () => chance(.55)
@@ -3010,7 +3019,7 @@ const EREIGNISSE = [
       { l: 'Nur Trainings- und Spielszenen erlauben', h: 'Mittelweg', run: () => ({ text: 'Weniger Geld, weniger Ärger, ein solider Film.', eff: { geld: 180000, follower: Math.round(S.p.follower * .14 + 8000), ruf: 4 } }) },
       { l: 'Ablehnen', h: 'Ruhe', run: () => ({ text: 'Dein Privatleben bleibt privat. Der Trainer findet das gut.', eff: { trainer: 4, moral: 3 } }) }
     ] },
-  { id: 'aberglaube', gewicht: 2, eyebrow: 'Kopfsache', titel: 'Das Ritual',
+  { id: 'aberglaube', gewicht: 2, wenn: () => frischGespielt(), eyebrow: 'Kopfsache', titel: 'Das Ritual',
     text: () => 'Seit drei Siegen ziehst du im selben Ablauf dieselben Socken an. Heute sind sie nicht in der Kabine.',
     wahl: [
       { l: 'Die halbe Stadt danach absuchen', h: 'Verrückt', run: () => ({ text: 'Der Zeugwart findet sie im Wäschekorb. Du bist erleichtert — und weißt, wie albern das ist.', eff: { moral: 5, energie: -3 } }) },
@@ -3052,7 +3061,7 @@ const EREIGNISSE = [
       { l: 'Hinfahren', h: 'Verband', run: () => ({ text: 'Ein langer Tag im Studio. Der Bundestrainer registriert, wer sich zeigt.', eff: { geld: 60000, ruf: 4, energie: -10 } }) },
       { l: 'Absagen', h: 'Verein', run: () => ({ text: 'Du bleibst beim Training. Dein Trainer freut sich, der Verband weniger.', eff: { trainer: 5, ruf: -2 } }) }
     ] },
-  { id: 'schiedsrichterhilfe', gewicht: 2, eyebrow: 'Fairplay', titel: 'Die ehrliche Entscheidung',
+  { id: 'schiedsrichterhilfe', gewicht: 2, wenn: () => frischGespielt(), eyebrow: 'Fairplay', titel: 'Die ehrliche Entscheidung',
     text: () => 'Der Schiedsrichter gibt euch einen Elfmeter, den es nicht gab — du weißt genau, dass du den Kontakt gesucht hast.',
     wahl: [
       { l: 'Ihn aufklären', h: 'Fair', run: () => ({ text: 'Er nimmt die Entscheidung zurück. Die Kurve pfeift, der Verband schickt einen Fairplay-Preis.', eff: { ruf: 9, moral: 4, trainer: -4 } }) },
@@ -3130,14 +3139,90 @@ const SPONSOR_EREIGNIS =
       { l: 'Ablehnen, Fokus auf Fußball', h: 'Sauber', run: () => ({ text: 'Dein Trainer erfährt davon und erwähnt es lobend in der Mannschaftssitzung.', eff: { trainer: 6, moral: 3 } }) }
     ] };
 
-function ereignisWaehlen() {
-  const moeglich = EREIGNISSE.filter(e => (!e.wenn || e.wenn()) && e.id !== S.letztesEreignis);
+/* ---------- Ereignisse waehrend des Ausfalls ----------
+   Der Ausfall war bisher eine Luecke: Reha-Bildschirm, Knopf, naechste Woche.
+   Waehrend man nicht spielt, geht das Leben im Verein aber weiter — und genau
+   daraus entsteht der Druck, unter dem man zurueckkommt. */
+const REHA_EREIGNISSE = [
+  { id: 'vertreter', gewicht: 4, wenn: () => (S.p.verletzung.gesamt || 0) >= 4,
+    eyebrow: 'Von der Tribüne', titel: 'Dein Vertreter trifft doppelt',
+    text: () => {
+      const konk = (S.kader || []).filter(k => k.pos === S.p.pos).sort((a, b) => b.ovr - a.ovr)[0];
+      return (konk ? konk.name : 'Dein Vertreter') + ' macht das Spiel seines Lebens. '
+        + 'Die Zeitung nennt ihn am nächsten Tag „die Lösung, die keiner gesucht hat“. '
+        + 'Du liest das auf dem Behandlungstisch.';
+    },
+    wahl: [
+      { l: 'Ihm gratulieren, ehrlich', h: 'Größe', run: () => ({ text: 'Du schreibst ihm drei Sätze. Er antwortet mit einer Sprachnachricht, in der er ziemlich verlegen klingt.', eff: { moral: 5, trainer: 4, mentalitaet: .4 } }) },
+      { l: 'Es als Ansporn nehmen', h: 'Hunger', run: () => ({ text: 'Du hängst dich in die Reha wie in ein Spiel. Der Physio muss dich zweimal bremsen.', eff: { mentalitaet: .7, moral: -2, energie: -6 } }) },
+      { l: 'Nicht mehr hinschauen', h: 'Schutz', run: () => ({ text: 'Handy weg, Fernseher aus. Zwei ruhige Wochen — und du weißt trotzdem, wie es steht.', eff: { moral: 3, energie: 5, trainer: -2 } }) }
+    ] },
+  { id: 'kabinenbesuch', gewicht: 4,
+    eyebrow: 'Kabine', titel: 'Zwei kommen vorbei',
+    text: () => 'Nach dem Training stehen zwei Mitspieler in der Behandlungskabine, mit Kaffee und ohne Termin. '
+      + 'Sie erzählen eine halbe Stunde Unsinn und fragen kein einziges Mal, wie lange es noch dauert.',
+    wahl: [
+      { l: 'Mitlachen', h: 'Kabine', run: () => ({ text: 'Zum ersten Mal seit Wochen fühlt es sich an, als gehörtest du noch dazu.', eff: { moral: 9, trainer: 2 } }) },
+      { l: 'Nach der Mannschaft fragen', h: 'Interesse', run: () => ({ text: 'Sie reden sich warm. Du erfährst mehr über die Kabine als in einem halben Jahr Training.', eff: { moral: 5, trainer: 5, mentalitaet: .3 } }) },
+      { l: 'Höflich bleiben, du bist nicht in Stimmung', h: 'Ehrlich', run: () => ({ text: 'Sie gehen nach zehn Minuten. Am Abend schreibt einer von beiden trotzdem noch mal.', eff: { moral: -3, energie: 4 } }) }
+    ] },
+  { id: 'pressefrage', gewicht: 3, wenn: () => S.p.ruf > 30 && (S.p.verletzung.gesamt || 0) >= 8,
+    eyebrow: 'Medien', titel: '„Kommt er überhaupt zurück?“',
+    text: () => 'Ein Kommentar in der Sportpresse rechnet vor, wie viele Spieler nach dieser Verletzung '
+      + 'wieder ihr altes Niveau erreicht haben. Die Zahl ist niedrig. Dein Name steht in der Überschrift.',
+    wahl: [
+      { l: 'Antworten, mit Datum', h: 'Ansage', run: () => chance(.5)
+          ? ({ text: 'Du nennst öffentlich einen Monat für dein Comeback. Die Schlagzeile dreht sich — jetzt musst du sie einhalten.', eff: { ruf: 6, moral: 6, mentalitaet: -.3, follower: Math.round(S.p.follower * .08 + 2500) } })
+          : ({ text: 'Zwei Wochen später liegt dein Datum in weiter Ferne. Das wird jemand aufschreiben.', eff: { ruf: -4, moral: -7 } }) },
+      { l: 'Schweigen', h: 'Ruhig', run: () => ({ text: 'Dein Berater sagt ab. Die Geschichte läuft zwei Tage und ist dann vorbei.', eff: { mentalitaet: .4, moral: -2 } }) },
+      { l: 'Den Physio zitieren lassen', h: 'Sachlich', run: () => ({ text: 'Der Verein stellt Zahlen richtig. Trocken, langweilig, wirksam.', eff: { ruf: 2, trainer: 3, moral: 3 } }) }
+    ] },
+  { id: 'trainerruf', gewicht: 3,
+    eyebrow: 'Trainerbüro', titel: 'Der Trainer ruft an',
+    text: () => (S.trainer ? S.trainer.name : 'Der Trainer') + ' ruft an einem Sonntagabend an. '
+      + 'Kein Gespräch über Termine, kein Gespräch über die Reha — er will wissen, wie es dir geht.',
+    wahl: [
+      { l: 'Ehrlich sein', h: 'Offen', run: () => ({ text: 'Du sagst, dass es dir schlecht geht. Er sagt, das sei normal, und dass er das auch kenne.', eff: { trainer: 8, moral: 7 } }) },
+      { l: 'Sagen, es läuft nach Plan', h: 'Profi', run: () => ({ text: 'Kurz, sachlich, erledigt. Er legt zufrieden auf, du liegst noch eine Stunde wach.', eff: { trainer: 4, moral: -2 } }) },
+      { l: 'Nach deinem Platz fragen', h: 'Direkt', run: () => chance(.55)
+          ? ({ text: '„Der Platz ist deiner, wenn du fit bist." Mehr brauchst du gerade nicht.', eff: { moral: 11, trainer: 3, mentalitaet: .4 } })
+          : ({ text: 'Er weicht aus. Das ist auch eine Antwort.', eff: { moral: -8, trainer: -2, mentalitaet: .3 } }) }
+    ] },
+  { id: 'nachts', gewicht: 3, wenn: () => (S.p.verletzung.gesamt || 0) >= 6,
+    eyebrow: 'Kopfsache', titel: 'Drei Uhr nachts',
+    text: () => 'Du liegst wach und rechnest: dein Alter, dein Vertrag, die Wochen, die noch fehlen. '
+      + 'Es ist das dritte Mal diese Woche.',
+    wahl: [
+      { l: 'Mit jemandem reden', h: 'Hilfe', run: () => ({ text: 'Der Verein vermittelt dir einen Sportpsychologen. Die erste Sitzung dauert zwei Stunden.', eff: { mentalitaet: .9, moral: 8, geld: -4000 } }) },
+      { l: 'Aufstehen und den Reha-Plan lesen', h: 'Kontrolle', run: () => ({ text: 'Du gehst jede Woche durch, die noch kommt. Um vier schläfst du ein, aber du schläfst.', eff: { moral: 3, energie: -4, mentalitaet: .3 } }) },
+      { l: 'Liegen bleiben', h: 'Aushalten', run: () => ({ text: 'Irgendwann wird es hell. Am Morgen fährst du zur Behandlung wie immer.', eff: { moral: -5, energie: -5, mentalitaet: .5 } }) }
+    ] },
+  { id: 'zweitmeinung', gewicht: 3, wenn: () => S.p.verletzung.wochen >= 4 && S.p.geld > 30000,
+    eyebrow: 'Medizin', titel: 'Eine zweite Meinung',
+    text: () => 'Ein Spezialist im Ausland hat schon drei Nationalspieler mit derselben Diagnose behandelt. '
+      + 'Er nimmt dich kurzfristig — der Verein hält nichts davon, dein Berater schon.',
+    wahl: [
+      { l: 'Hinfliegen', h: 'Kostet', run: () => {
+          const v = S.p.verletzung;
+          if (chance(.55)) { const weg = Math.min(2, Math.max(1, v.wochen - 1)); v.wochen -= weg;
+            return { text: 'Er ändert die Belastungssteuerung komplett. Nach zehn Tagen merkst du den Unterschied.', eff: { geld: -28000, moral: 8 } }; }
+          return { text: 'Er bestätigt, was der Vereinsarzt gesagt hat. Teuer, aber jetzt weißt du es.', eff: { geld: -28000, mentalitaet: .3 } };
+        } },
+      { l: 'Beim Verein bleiben', h: 'Vertrauen', run: () => ({ text: 'Der Vereinsarzt bekommt das mit und nimmt es dir hoch an.', eff: { trainer: 5, moral: 3 } }) },
+      { l: 'Nur die Unterlagen schicken', h: 'Mittelweg', run: () => ({ text: 'Zwei Telefonate, ein zweiseitiger Befund, keine Reise. Beide Ärzte sind zufrieden.', eff: { geld: -6000, moral: 4, mentalitaet: .2 } }) }
+    ] }
+];
+
+function ausTopfWaehlen(liste) {
+  const moeglich = liste.filter(e => (!e.wenn || e.wenn()) && e.id !== S.letztesEreignis);
   if (!moeglich.length) return null;
   const summe = moeglich.reduce((a, e) => a + (e.gewicht || 1), 0);
   let r = Math.random() * summe;
   for (const e of moeglich) { r -= (e.gewicht || 1); if (r <= 0) return e; }
   return moeglich[0];
 }
+function ereignisWaehlen() { return ausTopfWaehlen(EREIGNISSE); }
+function rehaEreignisWaehlen() { return ausTopfWaehlen(REHA_EREIGNISSE); }
 
 /* ========================== WOCHENABLAUF ========================== */
 const POKAL_RUNDEN = ['1. Runde', '2. Runde', 'Achtelfinale', 'Viertelfinale', 'Halbfinale', 'Finale'];
@@ -3277,6 +3362,10 @@ function wochenAbschluss() {
     }
   }
   p.energie = clamp(p.energie + (p.verletzung ? erholung() * .5 : erholung()), 0, p.verletzung ? 82 : 100);
+  /* Wie lange das letzte Spiel her ist — daran haengen die Ereignisse, die
+     ein gespieltes Spiel voraussetzen. */
+  p.ohneSpiel = (S.wochenMinuten || 0) > 0 ? 0 : (p.ohneSpiel || 0) + 1;
+  if (p.aufbau > 0) p.aufbau--;
   const minuten = Math.min(S.wochenMinuten || 0, 130);
   p.minutenSchnitt = (p.minutenSchnitt || 0) * .72 + minuten * .28;
   const rhythmusZiel = clamp(60 + p.minutenSchnitt * .45, 60, 100);
@@ -3295,10 +3384,33 @@ async function wocheVor() {
   try {
     const w = S.woche;
     S.wochenMinuten = 0;
+    /* Die letzte Verletzungswoche ist eine ganze Woche: rehaWoche() merkt das
+       Ende nur vor, freigegeben wird erst hier, zu Beginn der Woche darauf.
+       Vorher zog rehaWoche() ganz oben die letzte Woche ab und setzte
+       verletzung auf null — und weiter unten in derselben Woche spielte man.
+       Gemessen ueber 350 Verletzungen: in 93 Prozent stand man in genau der
+       Woche auf dem Platz, in der es hiess „noch eine Woche“.
+       Am Wochenanfang und nicht nach dem Spieltag, weil ein Laenderspiel-
+       turnier spaeter in derselben Woche laufen kann — gemessen spielte
+       dort einer von 381 trotzdem. */
+    if (S.p.verletzung && S.p.verletzung.fertig) {
+      const fertig = S.p.verletzung;
+      if (fertig.reha) { await rehaEnde(fertig); if (S.beendet) return; }
+      else {
+        S.p.verletzung = null;
+        log('Nach ' + fertig.name + ' zurück im Mannschaftstraining.', 'good');
+      }
+    }
     if (S.p.verletzung) {
       await rehaWoche();
       /* Wer nach der Verletzung aufhört, spielt diese Woche nicht mehr. */
       if (S.beendet) return;
+      /* Auch der Ausfall ist Karriere. Nicht in der letzten Woche — die
+         gehoert dem Comeback. */
+      if (S.p.verletzung && !S.p.verletzung.fertig && chance(.26)) {
+        const re = rehaEreignisWaehlen();
+        if (re) await ereignisSpielen(re);
+      }
     } else {
       await planAnwenden();
     }
@@ -3356,10 +3468,7 @@ async function rehaWoche() {
   p.energie = clamp(p.energie + 4, 0, 82);
   if (!v.reha) {
     v.wochen--;
-    if (v.wochen <= 0) {
-      log('Nach ' + v.name + ' zurück im Mannschaftstraining.', 'good');
-      p.verletzung = null;
-    }
+    if (v.wochen <= 0) v.fertig = true;
     return;
   }
   const plan = REHA_PLAN(S.reha), phase = rehaPhase(v);
@@ -3397,7 +3506,9 @@ async function rehaWoche() {
     v.wochen--;
     log('Die Reha läuft schneller als geplant.', 'good');
   }
-  if (v.wochen <= 0) await rehaEnde(v);
+  /* Nur vormerken, nicht beenden: Die letzte Woche ist eine ganze Woche, das
+     Spiel darin faellt aus. Beendet wird nach dem Spieltag. */
+  if (v.wochen <= 0) v.fertig = true;
 }
 
 async function rehaEnde(v) {
@@ -3410,6 +3521,10 @@ async function rehaEnde(v) {
   const eff = wirke({ tempo: -preis, physis: -preis * .6, zweikampf: -preis * .35, moral: 12 });
   p.anfaellig = clamp((p.anfaellig || 0) + clamp(v.gesamt / 90, .04, .22), 0, .5);
   p.rueckkehr = v.gesamt;
+  /* Nach einer schweren Verletzung steht man erst wieder im Training, bevor
+     man spielt — genau das sagt dieser Bildschirm ja auch. Eine Woche volle
+     Einheiten, kein Einsatz. Eine Blessur unter acht Wochen braucht das nicht. */
+  p.aufbau = 1;
   log('Comeback nach ' + v.gesamt + ' Wochen — zurück im Mannschaftstraining.', 'good');
   merken('verletzung', 'Comeback nach ' + zahlwort(v.gesamt, 'Woche', 'Wochen') + ' (' + v.name + ').', v.gesamt >= 16);
   await sagen({
@@ -3420,7 +3535,8 @@ async function rehaEnde(v) {
       + (preis < 1 ? 'Der Körper hat das gut weggesteckt — du fühlst dich fast wie vorher.'
         : preis < 2.6 ? 'Etwas fehlt. In den ersten Schritten merkst du es, danach nicht mehr.'
         : 'Es ist nicht mehr dasselbe Bein. Den ersten Antritt spürst du bis in den Nacken.')
-      + '\n\nDein Rhythmus ist bei ' + Math.round(p.fitness) + ' von 100 — Spielpraxis bekommst du nur zurück, indem du spielst.',
+      + '\n\nDein Rhythmus ist bei ' + Math.round(p.fitness) + ' von 100 — Spielpraxis bekommst du nur zurück, indem du spielst.'
+      + '\n\nDiese Woche trainierst du voll mit, aufgestellt wirst du noch nicht. Ab der Woche darauf bist du wieder eine Option.',
     effekte: eff
   });
   /* Nach einer sehr langen Verletzung in fortgeschrittenem Alter steht die
@@ -5059,8 +5175,10 @@ async function spielAustragen(fx) {
   const heimClub = fx.heim ? club : gegner, gastClub = fx.heim ? gegner : club;
 
   el('sb-comp').textContent = wettbewerbName(fx);
-  el('sb-role').textContent = { startelf: 'Startelf', einwechslung: 'Bank → Einwechslung', bank: 'Nur Bank', verletzt: p.verletzung ? p.verletzung.name : 'Verletzt' }[einsatz.status];
-  el('sb-role').className = 'pill ' + (einsatz.status === 'startelf' ? 'pill-accent' : einsatz.status === 'verletzt' ? 'pill-bad' : '');
+  el('sb-role').textContent = { startelf: 'Startelf', einwechslung: 'Bank → Einwechslung', bank: 'Nur Bank',
+    aufbau: 'Aufbau', verletzt: p.verletzung ? p.verletzung.name : 'Verletzt' }[einsatz.status];
+  el('sb-role').className = 'pill ' + (einsatz.status === 'startelf' ? 'pill-accent'
+    : einsatz.status === 'verletzt' ? 'pill-bad' : einsatz.status === 'aufbau' ? 'pill-warn' : '');
   badgeSetzen(el('sb-badge-h'), heimClub);
   badgeSetzen(el('sb-badge-a'), gastClub);
   el('sb-name-h').textContent = heimClub.name;
@@ -5086,6 +5204,7 @@ async function spielAustragen(fx) {
   }
   if (einsatz.status === 'bank') tickerEintrag(0, 'Aufstellung', 'Du sitzt auf der Bank und schaust zu.', '');
   if (einsatz.status === 'verletzt') tickerEintrag(0, 'Aufstellung', 'Du fällst aus: ' + p.verletzung.name + '. Von der Tribüne aus fühlt sich jeder Fehlpass schlimmer an.', '');
+  if (einsatz.status === 'aufbau') tickerEintrag(0, 'Aufstellung', 'Du hast die Woche voll mitrainiert, aufgestellt wirst du noch nicht. Nächste Woche bist du wieder eine Option.', '');
   if (einsatz.status === 'startelf') tickerEintrag(0, 'Aufstellung', 'Du beginnst als ' + POS(p.pos).name + '.', 'ev-you');
   /* Das erste Spiel nach einer langen Pause gehört eigens erwähnt. */
   if (spielt && p.rueckkehr) {
@@ -5453,7 +5572,9 @@ function render() {
   el('hud-ovr').textContent = OVR();
   const f = formText();
   el('hud-chips').innerHTML = [
-    p.verletzung ? '<span class="pill pill-bad">' + esc(p.verletzung.name) + ' · ' + p.verletzung.wochen + ' Wo.</span>' : '',
+    p.verletzung && p.verletzung.fertig ? '<span class="pill pill-warn">' + esc(p.verletzung.name) + ' · Reha beendet</span>'
+      : p.verletzung ? '<span class="pill pill-bad">' + esc(p.verletzung.name) + ' · ' + p.verletzung.wochen + ' Wo.</span>'
+      : p.aufbau > 0 ? '<span class="pill pill-warn">Aufbau · kein Einsatz</span>' : '',
     S.leihe ? '<span class="pill pill-warn">verliehen</span>' : '',
     '<span class="pill">Energie ' + Math.round(p.energie) + '</span>',
     '<span class="pill">Moral ' + Math.round(p.moral) + '</span>',
@@ -5501,6 +5622,13 @@ function renderHome() {
       + '<div class="cond-item"><span class="k">Rhythmus</span><span class="v">' + Math.round(p.fitness) + '</span>' + meter(p.fitness, zustandsKlasse(p.fitness)) + '</div>'
       + '</div></section>';
 
+    if (p.aufbau > 0) {
+      html += '<section><div class="sect-title"><h3>Aufbau</h3><span class="small muted">zurück im Training</span></div>'
+        + '<div class="card"><p class="sheet-text">Du trainierst diese Woche voll mit, aufgestellt wirst du noch nicht. '
+        + 'Der Rhythmus liegt bei ' + Math.round(p.fitness) + ' von 100 — ab nächster Woche bist du wieder eine Option.</p>'
+        + '<p class="small muted" style="margin-top:8px">Trainingsplan und Schwerpunkt gelten ganz normal.</p></div></section>';
+    }
+
     if (p.verletzung && p.verletzung.reha) {
       const v = p.verletzung, ph = rehaPhase(v);
       const fort = clamp(Math.round((1 - v.wochen / Math.max(1, v.gesamt)) * 100), 0, 99);
@@ -5508,11 +5636,12 @@ function renderHome() {
         + '<div class="card">'
         + '<div class="row-between" style="align-items:flex-start"><div class="grow">'
         + '<div style="font-weight:600;font-size:15px">' + esc(ph.name) + '</div>'
-        + '<div class="small muted">noch ' + zahlwort(v.wochen, 'Woche', 'Wochen')
+        + '<div class="small muted">' + (v.fertig ? 'Reha beendet' : 'noch ' + zahlwort(v.wochen, 'Woche', 'Wochen'))
         + (v.rueckschlaege ? ' · ' + zahlwort(v.rueckschlaege, 'Rückschlag', 'Rückschläge') : '') + '</div></div>'
         + '<span class="pill">' + fort + ' %</span></div>'
         + '<div style="margin-top:10px">' + meter(fort, fort >= 85 ? 'good' : '') + '</div>'
-        + '<p class="small ink2" style="margin-top:10px">' + esc(ph.text) + '</p>'
+        + '<p class="small ink2" style="margin-top:10px">'
+        + (v.fertig ? 'Die Reha ist durch. Nächste Woche stehst du wieder im Mannschaftstraining.' : esc(ph.text)) + '</p>'
         + '<div class="sect-title" style="margin-top:14px"><h3>Wie gehst du vor?</h3></div>'
         + '<div class="plan-grid" style="grid-template-columns:1fr">'
         + REHA_PLAENE.map(r => '<button class="plan" data-reha="' + r.id + '" aria-pressed="' + (S.reha === r.id) + '">'
@@ -6450,6 +6579,7 @@ function karriereStarten() {
       energie: 86, moral: clamp(70 + (weg.moral || 0), 0, 100), fitness: 92, ruf: clamp(5 + (weg.ruf || 0), 0, 100),
       follower: ri(300, 2400), geld: 0, verletzung: null, clubId: club.id, trainer: 46,
       vertrag: { gehalt, jahre: 3 }, sponsoren: [], titel: [], formNoten: [], stab: {}, besitz: {}, minutenSchnitt: 0,
+      aufbau: 0, ohneSpiel: 0,
       nat: { dabei: false, spiele: 0, tore: 0 }, wechselwunsch: false, kapitaen: false
     }
   };
@@ -6488,6 +6618,8 @@ function migriere() {
   if (!S.stars.length) baueStars();
   if (S.stars.length < STAR_ANZAHL || S.stars.some(x => typeof x.wurf !== 'number')) starsNachruesten();
   if (typeof S.sponsorPause !== 'number') S.sponsorPause = 0;
+  if (typeof S.p.aufbau !== 'number') S.p.aufbau = 0;
+  if (typeof S.p.ohneSpiel !== 'number') S.p.ohneSpiel = 0;
   S.ligaTausch = S.ligaTausch || {};
   S.staerkeTausch = S.staerkeTausch || {};
   S.transfers = S.transfers || {};
