@@ -333,6 +333,9 @@ table.tbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-
 .spieler .pos{font-family:var(--font-data);font-size:10.5px;letter-spacing:.08em;color:var(--muted);
   border:1px solid var(--line);border-radius:6px;padding:2px 5px}
 .spieler .st{font-family:var(--font-display);font-size:16px;letter-spacing:.02em;min-width:26px;text-align:right}
+tr[data-verein]{cursor:pointer;-webkit-tap-highlight-color:transparent}
+tr[data-verein]:active{background:var(--surface-3)}
+tr[data-verein] td:first-child{position:relative}
 .spieler .wer{font-size:11.5px;line-height:1.35;color:var(--ink-2);margin-top:3px;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .spieler.ich{background:var(--accent-dim);border-radius:9px;padding:8px;margin:2px -8px;border-top-color:transparent}
@@ -3310,6 +3313,52 @@ function natFuerLiga(liga) {
   const heim = LIGA_NATION[liga];
   if (!heim) return pick(NATIONEN);
   return chance(.58) ? NAT(heim) : pick(NATIONEN);
+}
+function natFuerLigaSaat(liga, r) {
+  const heim = LIGA_NATION[liga];
+  if (!heim) return saatWahl(r, NATIONEN);
+  return r() < .58 ? NAT(heim) : saatWahl(r, NATIONEN);
+}
+
+/* ---------- Die Vereine der Welt ----------
+   Bis hierher wurde nur der eigene Kader ausgebaut, und der steht im
+   Spielstand. Wer sich jeden Verein ansehen kann, braucht deren Kader und
+   Trainer aber auch — und die stehen nirgends, sie werden bei jedem Blick
+   neu beschrieben. Mit echtem Zufall hiesse der Trainer von Bayern bei jedem
+   zweiten Aufschlagen anders. Darum gesaet aus Verein und Jahr: derselbe
+   Verein zeigt in derselben Saison immer dieselbe Mannschaft. */
+function fremderKader(clubId) {
+  const club = CL(clubId);
+  if (!club) return [];
+  const liste = echterKaderStand(clubId);
+  const r = saat('kader|' + clubId + '|' + S.jahr);
+  for (const [pos, anzahl] of KADER_PLAN) {
+    let da = liste.filter(x => x.pos === pos).length;
+    while (da < anzahl) {
+      const nat = natFuerLigaSaat(club.liga, r);
+      let name = '', versuch = 0;
+      do { const nm = saatName(r, nat.pool); name = nm.v + ' ' + nm.n; versuch++; }
+      while (versuch < 12 && liste.some(x => x.name === name));
+      const stamm = da === 0;
+      liste.push({ name, pos, alter: saatZahl(r, 18, 33), natId: nat.id,
+        ovr: clamp(Math.round(club.staerke + (stamm ? saatZahl(r, -3, 4) : saatZahl(r, -15, -2))), 38, 92) });
+      da++;
+    }
+  }
+  return liste;
+}
+/* Der eigene Trainer steht im Spielstand und wechselt mit eigener Geschichte.
+   Die Trainer der anderen 441 Vereine entstehen hier — stabil, solange der
+   Verein und das Jahr dieselben sind. */
+function fremderTrainer(clubId) {
+  const club = CL(clubId);
+  if (!club) return null;
+  if (clubId === S.p.clubId && S.trainer) return S.trainer;
+  const r = saat('trainer|' + clubId + '|' + S.jahr);
+  const nat = natFuerLigaSaat(club.liga, r);
+  const nm = saatName(r, nat.pool);
+  return { name: nm.v + ' ' + nm.n, natId: nat.id,
+    stil: saatWahl(r, TRAINER_STILE).id, alter: saatZahl(r, 38, 63), jahre: 0 };
 }
 function kaderAuffuellen(liste, club) {
   for (const [pos, anzahl] of KADER_PLAN) {
@@ -8700,7 +8749,7 @@ function tabelleHtml(ligaId, eigene) {
       const pyr = pyramideVon(ligaId);
       const hatUnten = pyr.indexOf(ligaId) >= 0 && pyr.indexOf(ligaId) < pyr.length - 1;
       const zone = i < 4 && lg.euro ? 'zone-cl' : (i < 6 && lg.euro ? 'zone-el' : (i >= n - 2 && hatUnten ? 'zone-ab' : ''));
-      return '<tr class="' + (t.id === S.p.clubId ? 'me ' : '') + zone + '"><td class="pos">' + (i + 1) + '</td>'
+      return '<tr class="' + (t.id === S.p.clubId ? 'me ' : '') + zone + '" data-verein="' + t.id + '"><td class="pos">' + (i + 1) + '</td>'
         + '<td><div class="row" style="gap:7px">' + badgeHtml(c, 'badge-sm') + '<span class="truncate">' + esc(c.name) + '</span></div></td>'
         + '<td>' + t.s + '</td><td>' + (t.diff > 0 ? '+' : '') + t.diff + '</td><td><b>' + t.p + '</b></td></tr>';
     }).join('') + '</tbody></table></div>';
@@ -8737,7 +8786,7 @@ function renderWelt() {
         + '<table class="tbl"><thead><tr><th class="pos">#</th><th>Verein</th><th>Sp</th><th>Diff</th><th>Pkt</th></tr></thead><tbody>'
         + tabelleSortiert(e.tabelle).map((t, i) => {
           const c = CL(t.id);
-          return '<tr class="' + (t.id === p.clubId ? 'me ' : '') + (i < 16 ? 'zone-cl' : '') + '"><td class="pos">' + (i + 1) + '</td>'
+          return '<tr class="' + (t.id === p.clubId ? 'me ' : '') + (i < 16 ? 'zone-cl' : '') + '" data-verein="' + t.id + '"><td class="pos">' + (i + 1) + '</td>'
             + '<td><div class="row" style="gap:7px">' + badgeHtml(c, 'badge-sm') + '<span class="truncate">' + esc(c.name) + '</span></div></td>'
             + '<td>' + t.s + '</td><td>' + (t.diff > 0 ? '+' : '') + t.diff + '</td><td><b>' + t.p + '</b></td></tr>';
         }).join('')
@@ -8928,6 +8977,60 @@ async function einstellungen() {
   }
   if (idx === 3) return zurueckZurStartseite();
   if (idx === 4) return aktion('loeschen');
+}
+
+/* ---------- Jeder Verein zum Ansehen ----------
+   Aus der Tabelle heraus laesst sich jeder der 442 Vereine antippen. Was man
+   sieht, ist dasselbe wie beim eigenen Verein, nur ohne das, was nur einen
+   selbst betrifft: Wappen und Einordnung, der Trainer mit seiner Spielidee,
+   der ganze Kader nach Mannschaftsteilen. Dieselbe Spielerzeile wie im
+   eigenen Kader, damit man beides ohne Umdenken liest. */
+async function vereinAnsehen(clubId) {
+  const club = CL(clubId);
+  if (!club) return;
+  const lg = LG(club.liga);
+  const T = weltTabelle(club.liga);
+  const liste = T ? tabelleSortiert(T) : null;
+  const platz = liste ? liste.findIndex(x => x.id === clubId) + 1 : 0;
+  const zeile = liste ? liste.find(x => x.id === clubId) : null;
+  const eigen = clubId === S.p.clubId;
+  /* Beim eigenen Verein der echte Kader aus dem Spielstand, samt einem selbst -
+     sonst staende man auf der Seite seines eigenen Vereins nicht drin, und die
+     Mitspieler waeren andere als die, mit denen man Woche fuer Woche spielt. */
+  const kader = (eigen
+    ? (S.kader || []).concat([{ name: S.p.vorname + ' ' + S.p.nachname, pos: S.p.pos,
+        alter: S.p.alter, natId: S.p.natId, ovr: OVR(), ich: 1 }])
+    : fremderKader(clubId)).slice().sort((a, b) => b.ovr - a.ovr);
+  const tr = fremderTrainer(clubId);
+
+  /* Der Name steht schon als Titel ueber dem Blatt - hier nur das Wappen und
+     die Einordnung, sonst liest man ihn zweimal untereinander. */
+  let h = '<div class="card"><div class="row">' + badgeHtml(club, 'badge-lg') + '<div class="grow">'
+    + '<div style="font-family:var(--font-data);font-weight:700;font-size:15px">'
+    + (platz ? 'Platz ' + platz + ' in der ' + esc(lg.name) : esc(lg.name)) + '</div>'
+    + '<div class="small muted">Teamst\u00e4rke ' + club.staerke
+    + (zeile ? ' \u00b7 ' + zeile.s + ' Spiele \u00b7 ' + zeile.p + ' Punkte \u00b7 '
+      + (zeile.diff > 0 ? '+' : '') + zeile.diff + ' Tore' : '') + '</div></div></div></div>';
+
+  if (tr) {
+    const st = STIL(tr.stil), nat = herkunft(tr.natId);
+    h += '<section><div class="sect-title"><h3>Trainer</h3></div><div class="card">'
+      + '<div style="font-family:var(--font-data);font-weight:700;font-size:15px">'
+      + (nat ? nat.flag + ' ' : '') + esc(tr.name) + '</div>'
+      + '<div class="small muted">' + esc(st.name) + ' \u00b7 ' + tr.alter + ' Jahre</div>'
+      + '<p class="small ink2" style="margin-top:8px">' + esc(st.text) + '</p></div></section>';
+  }
+
+  const gruppen = [['Tor', ['TW']], ['Abwehr', ['IV', 'AV']], ['Mittelfeld', ['DM', 'ZM', 'OM']], ['Angriff', ['FL', 'ST']]];
+  h += '<section><div class="sect-title"><h3>Kader</h3><span class="small muted">' + kader.length + ' Spieler</span></div><div class="card">'
+    + gruppen.map(([titel, posse]) => {
+      const teil = kader.filter(k => posse.indexOf(k.pos) >= 0);
+      if (!teil.length) return '';
+      return '<div class="gruppe-titel">' + titel + '</div>'
+        + teil.map(k => spielerZeile(k, null, true)).join('');
+    }).join('') + '</div></section>';
+
+  await sagen({ eyebrow: lg.flag + ' ' + lg.name, titel: club.name, text: '', extra: h, knopf: 'Schlie\u00dfen' });
 }
 
 /* ---------- Sicherungscode: letzte Rettung, wenn kein Speicher greift ---------- */
@@ -9777,6 +9880,11 @@ function verdrahten() {
       if (welt.dataset.welt !== 'euro') S.weltLand = LG(welt.dataset.welt).land;
       render(); return;
     }
+    /* Jede Tabellenzeile fuehrt zu ihrem Verein. Nur wenn gerade kein Fenster
+       offen ist - sonst oeffnet ein Tipp durch das Blatt hindurch ein
+       zweites. */
+    const verein = e.target.closest('[data-verein]');
+    if (verein) { if (!busy) vereinAnsehen(verein.dataset.verein); return; }
     const reha = e.target.closest('[data-reha]');
     if (reha) { S.reha = reha.dataset.reha; speichern(); render(); return; }
     const fokus = e.target.closest('[data-fokus]');

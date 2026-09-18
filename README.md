@@ -383,6 +383,29 @@ wäre albern. Gemessen über zwölf Laufbahnen: kein einziger Verstoß.
   Laufbahnen 10 bis 20 % beträgt. Die Durchschnittsnoten aller acht Positionen bewegen sich
   um höchstens 0,1 — und an der Note hängt alles Weitere.
 
+## Jeder Verein zum Ansehen
+
+In jeder Tabelle — den dreiundzwanzig Ligen und dem Europapokal — lässt sich jede Zeile
+antippen. Es öffnet sich dieselbe Ansicht wie beim eigenen Verein, nur ohne das, was allein
+einen selbst betrifft: Wappen und Einordnung, der Trainer mit seiner Spielidee, der ganze
+Kader nach Mannschaftsteilen, in derselben Spielerzeile mit Flagge, Alter, Beschreibung und
+Stärke. Beim eigenen Verein steht man selbst mit drin.
+
+**Das Schwierige daran ist nicht die Ansicht, sondern die Beständigkeit.** Kader und Trainer
+der 441 anderen Vereine stehen in keinem Spielstand — sie werden bei jedem Aufschlagen neu
+beschrieben. Mit echtem Zufall hieße der Trainer von Bayern bei jedem zweiten Blick anders,
+und der Kader wäre ein anderer. Beide kommen deshalb aus dem gesäten Generator: Aus Verein
+und Jahr entsteht immer dieselbe Mannschaft, und mit der neuen Saison eine neue.
+
+Geprüft über zwölf Vereine quer durch alle Ligen: zweimal hintereinander aufgerufen — gleich;
+über acht Spieljahre hinweg gespeichert und wieder eingelesen — gleich. Alle 442 Vereine
+einmal aufgerufen: kein Fehler, kein leerer Kader, zwischen 25 und 27 Spielern.
+
+**Was echt ist und was nicht.** In den 122 Vereinen mit hinterlegtem Kader stehen 2.332 echte
+Spieler und 800 ergänzte. Die ergänzten haben keine Beschreibung — daran erkennt man sie.
+Gemessen ist in 4 von 122 Vereinen ein ergänzter Spieler stärker als jeder echte, und das um
+ein bis drei Punkte; das bleibt, weil es die Rangfolge nicht verzerrt.
+
 ## Die Saison in Europa
 
 Am Ende jeder Saison steht ein Bildschirm, der durch alle 23 Ligen geht: **Meister,
