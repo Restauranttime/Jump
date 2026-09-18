@@ -814,10 +814,31 @@ eine durchgespielte Karriere:
   | Außenverteidiger | 0,08–0,13 | 3–4 | 0–4,3 |
   | Innenverteidiger | 0,06–0,10 | 2–3 | 0,1–4,7 |
 - Marktwert auf dem Höhepunkt: zweistellige Millionen, mit Weltklasse deutlich darüber.
-- Energie eines Stammspielers: Ø 48–60, je nach Umgang mit Regenerationswochen. Wer nicht
-  spielt, bleibt naturgemäß frisch — der Karriereschnitt über alle Wochen liegt deshalb höher.
-- Ausdauer wirkt sichtbar: Mit hohem Wert sinkt der Anteil der Wochen unter 55 Energie von
-  gut 40 % auf rund ein Viertel.
+- **Die Pausen füllen den Tank.** Die Sommerpause gab früher zehn Punkte Energie, die
+  Winterpause gar nichts — wer ausgelaugt in den Mai ging, startete ausgelaugt in den August.
+  Jetzt füllen beide auf, so weit der Körper es im jeweiligen Alter noch hergibt: bis 29 auf
+  100, danach zwei Punkte weniger je Jahr, mit 35 noch 88. Die Winterpause kostet dafür vier
+  Punkte Rhythmus — frisch, aber nicht im Spielfluss. Gemessen über 288 Winterpausen: Energie
+  64 → 100 im Median, bei den über 33-Jährigen 86.
+- Das Ereignis „Zwei Wochen frei" gibt deshalb keine Energie mehr, sondern entscheidet, was
+  du sonst aus den zwei Wochen mitnimmst: Kopf frei (Moral, kostet Rhythmus), individuelles
+  Programm (Ausdauer und Rhythmus, kostet Moral) oder Heimatverein (Moral und Ruf).
+- Energie über eine ganze Karriere, gemessen über je fünf Spielweisen. Die Pausen heben vor
+  allem den unteren Rand — wer gar nicht regeneriert, kommt zweimal im Jahr trotzdem voll
+  zurück:
+
+  | Spielweise | Ø Energie | Wochen unter 55 |
+  |---|---|---|
+  | nur Techniktraining | 64,0 → **75,8** | 41 % → **18 %** |
+  | Technik, Regen unter 50 | 74,9 → **75,2** | 12 % → **16 %** |
+  | jede 3. Woche Ausdauer | 66,6 → **72,9** | 26 % → **15 %** |
+  | Doppelschichten durchgehend | 50,0 → **60,7** | 61 % → **40 %** |
+
+  Der Preis steht in derselben Tabelle: Die Regenerationswoche war vorher elf Punkte Energie
+  wert (64,0 gegen 74,9), jetzt ist der Unterschied verschwunden. Wer den Tank zweimal im
+  Jahr geschenkt bekommt, muss ihn unterwegs seltener selbst füllen.
+- Wer nicht spielt, bleibt naturgemäß frisch — der Karriereschnitt über alle Wochen liegt
+  deshalb höher als der eines Stammspielers in der Saison.
 - Ein Attribut erreicht ohne Trainer etwa Potenzial + 6, mit Weltklasse-Trainer rund
   Potenzial + 15. Gemessen über 20 Durchläufe: 84 / 86 / 89 / 93 je Trainerstufe.
 - Die drei Startwege sind eine echte Entscheidung, keine Kosmetik. Gemessen über je 21

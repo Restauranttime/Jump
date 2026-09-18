@@ -316,12 +316,18 @@ table.tbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-
   border-radius:20px 20px 0 0;padding:18px 16px calc(18px + var(--sab));
   max-height:92%;display:flex;flex-direction:column;gap:13px;animation:rise .22s ease}
 @keyframes rise{from{transform:translateY(18px);opacity:.4}to{transform:none;opacity:1}}
-.sheet-body{overflow-y:auto;display:flex;flex-direction:column;gap:11px}
+/* Ohne min-height:0 schrumpft ein Flex-Kind nie unter seinen Inhalt. Der
+   Koerper blieb dadurch in voller Hoehe stehen und schob stattdessen die
+   Knopfleiste aus dem Fenster: Beim Rundgang durch Europa (2.842 px Inhalt)
+   lag der Knopf gemessen bei 813 bis 862 in einem 844 Pixel hohen Fenster
+   und ein Tipp auf seine Mitte traf ihn nicht mehr. Jetzt scrollt der
+   Koerper, und die Knoepfe stehen fest. */
+.sheet-body{flex:1 1 auto;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:11px}
 .sheet h2{font-family:var(--font-display);font-size:23px;letter-spacing:.01em;line-height:1.1}
 .sheet-text{font-size:14.5px;color:var(--ink-2);line-height:1.5}
 /* Lange Listen — etwa die Vereinsauswahl beim Berater — muessen innerhalb des
    Fensters scrollen, statt unten herauszulaufen. */
-.choices{display:flex;flex-direction:column;gap:8px;min-height:0;overflow-y:auto}
+.choices{display:flex;flex-direction:column;gap:8px;flex:0 0 auto;max-height:55%;min-height:0;overflow-y:auto}
 .choice{text-align:left;padding:13px;border-radius:13px;border:1px solid var(--line);background:var(--surface-2);width:100%}
 .choice b{display:block;font-size:14.5px;font-weight:600}
 .choice span{display:block;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.35}
@@ -1516,6 +1522,28 @@ function erholung() {
   const basis = (6.8 + kondi() * .04) * stabWert('ernaehrung', [1.08, 1.18, 1.32]);
   return basis * (.55 + (100 - S.p.energie) / 55);
 }
+/* Wie voll eine Pause den Tank wieder macht. Bis 29 ganz, danach immer
+   weniger: Ein alternder Koerper erholt sich nicht mehr vollstaendig —
+   dasselbe Prinzip wie bei der Anfaelligkeit nach Verletzungen und bei der
+   Ausdauer, die ab 31 jede Saison von selbst nachgibt. */
+function pausenEnergie() {
+  return Math.round(clamp(100 - Math.max(0, S.p.alter - 29) * 2, 86, 100));
+}
+
+/* Die Winterpause: zwei Wochen ohne Pflichtspiel. Sie fuellt den Tank, so
+   weit das Alter es hergibt, und kostet Spielrhythmus — wer aus der Pause
+   kommt, ist frisch, aber nicht im Fluss. Vorher gab die Pause gar nichts;
+   Energie kam nur, wenn zufaellig das Ereignis „Zwei Wochen frei“ gezogen
+   wurde. */
+function winterpause() {
+  const p = S.p;
+  const voll = pausenEnergie();
+  p.energie = Math.max(p.energie, voll);
+  p.fitness = clamp(p.fitness - 4, 12, 100);
+  log('Winterpause — zwei Wochen ohne Pflichtspiel. Energie bei ' + voll
+    + (voll < 100 ? ' (mehr gibt der Körper mit ' + p.alter + ' nicht mehr her)' : '') + '.', 'good');
+}
+
 function konditionsGewinn(faktor) {
   const p = S.p;
   const alterF = p.alter <= 23 ? 1.2 : p.alter <= 28 ? 1 : p.alter <= 32 ? .6 : .3;
@@ -3048,9 +3076,11 @@ const EREIGNISSE = [
   { id: 'winterpause', gewicht: 14, wenn: () => Math.abs(S.woche - S.winterWoche) <= 1, eyebrow: 'Winterpause', titel: 'Zwei Wochen frei',
     text: () => 'Die Liga pausiert. Zwei Wochen ohne Pflichtspiel — und die Frage, was du damit anfängst.',
     wahl: [
-      { l: 'Sonne, Strand, abschalten', h: 'Erholung', run: () => ({ text: 'Du kommst braun und ausgeruht zurück, aber nicht in Form.', eff: { energie: 30, moral: 10, fitness: -6 } }) },
-      { l: 'Individuelles Programm', h: 'Arbeit', run: () => ({ text: 'Laufen, Kraft, Technik. Der Athletiktrainer schickt dir jeden Tag den Plan.', eff: { kondition: 3.5, physis: .6, energie: 8 } }) },
-      { l: 'Familie und Heimatverein', h: 'Wurzeln', run: () => ({ text: 'Du trainierst eine Woche lang die E-Jugend deines alten Vereins. Kein Fotograf weit und breit.', eff: { moral: 12, energie: 18, ruf: 2 } }) }
+      /* Die Energie füllt die Pause selbst. Hier geht es nur noch darum, was
+         du aus den zwei Wochen sonst mitnimmst. */
+      { l: 'Sonne, Strand, abschalten', h: 'Kopf frei', run: () => ({ text: 'Du kommst braun zurück und hast zwei Wochen an nichts gedacht — dafür fühlt sich der erste Ball fremd an.', eff: { moral: 15, mentalitaet: .3, fitness: -5 } }) },
+      { l: 'Individuelles Programm', h: 'Arbeit', run: () => ({ text: 'Laufen, Kraft, Technik. Der Athletiktrainer schickt dir jeden Tag den Plan — und du schickst jeden Abend die Werte zurück.', eff: { kondition: 4.5, physis: .8, fitness: 4, moral: -3 } }) },
+      { l: 'Familie und Heimatverein', h: 'Wurzeln', run: () => ({ text: 'Du trainierst eine Woche lang die E-Jugend deines alten Vereins. Kein Fotograf weit und breit.', eff: { moral: 12, ruf: 3, mentalitaet: .4 } }) }
     ] },
   { id: 'kabinendj', gewicht: 2, eyebrow: 'Kabine', titel: 'Die Musikfrage',
     text: () => 'Der Kabinen-DJ ist gewechselt und spielt etwas, das die halbe Mannschaft nicht erträgt. Alle schauen zu dir.',
@@ -3406,7 +3436,7 @@ async function wocheVor() {
     starsSpieltag();
     euroWoche(w);
     wochenAbschluss();
-    if (w === S.winterWoche) await transferfenster(false);
+    if (w === S.winterWoche) { winterpause(); await transferfenster(false); }
     if (w === Math.round(S.saisonWochen * .65) && S.saisonZiel) {
       const st = zielStand();
       if (st && st.platz > st.ziel + 4 && chance(.55)) {
@@ -4886,7 +4916,10 @@ async function saisonEnde() {
   p.anfaellig = Math.max(0, (p.anfaellig || 0) - .06);
   p.potenzial = clamp(p.potenzial + ri(-1, 1), 40, 99);
   kaderAltern();
-  p.energie = clamp(p.energie + 10, 0, 100);
+  /* Die Sommerpause war zehn Punkte Energie — wer ausgelaugt in den Mai ging,
+     startete ausgelaugt in den August. Jetzt füllt sie den Tank so weit, wie
+     der Körper es im jeweiligen Alter noch hergibt. */
+  p.energie = Math.max(p.energie, pausenEnergie());
   p.fitness = clamp(p.fitness - 8, 12, 100);
   p.formNoten = [];
 
