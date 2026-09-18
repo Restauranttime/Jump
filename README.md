@@ -962,8 +962,32 @@ beenden mit 36 ihre Laufbahn. Wer dann fehlt, wird durch einen erzeugten Nachfol
 
 Die Umrechnung läuft bewusst ohne Zufall, damit dieselbe Abfrage innerhalb einer Saison immer
 dasselbe Ergebnis liefert. Bei Bayern sind 2026 noch 20 Spieler namentlich echt, 2036 elf und
-ab 2046 keiner mehr. Saison 1 entspricht dabei exakt der Vorlage — geprüft über alle 1.315
-Einträge.
+ab 2046 keiner mehr. Saison 1 entspricht dabei exakt der Vorlage.
+
+**Der Bestand: 2.332 echte Spieler in 122 Vereinen.** Die fünf großen Ligen und die
+österreichische Bundesliga sind mit vollen Kadern von zwanzig bis zweiundzwanzig Spielern
+hinterlegt, vorher waren es zwölf. Vierzehn Vereine der Vorlage stehen im Spiel eine Liga
+tiefer — Schalke, Elversberg, Hull City, Málaga — und bekommen ihre Kader dort. Damit haben
+auch zweite Ligen echte Namen.
+
+**Die Balance ändert sich dadurch nicht.** Ein Kader wird immer auf dieselbe Größe
+aufgefüllt: Mehr echte Spieler ersetzen erfundene, statt zusätzlich zu kommen. Gemessen über
+je sechs Laufbahnen pro Position ist die Zahl der Konkurrenten auf der eigenen Position vorher
+wie nachher identisch (Torwart 3,0 · Innenverteidiger 4,0 · Sechser 2,0). Auch die
+Kaderstärke passt zur Vereinsstärke: Median drei Punkte Abweichung, nur zwei von 121 Vereinen
+liegen mehr als acht daneben.
+
+**Ein Satz zu jedem Spieler.** 2.164 Beschreibungen, angezeigt dort, wo man den Spieler sieht:
+in der Rangfolge auf der eigenen Position und im Kader. Sie hängen am Namen, nicht am
+Kadereintrag — ein Spieler wechselt im Lauf einer Karriere den Verein, sein Satz bleibt
+derselbe. Und sie landen nie im Spielstand: Der liegt vorher wie nachher bei 111 KB, gegen
+eine Grenze von 256.
+
+**Achtundsiebzig weitere Herkunftsländer.** Die echten Kader bringen Dänen, Senegalesen und
+Schotten mit — Länder, die keine spielbare Nationalelf sind. Sie stehen in einem schmalen
+Register mit Name und Flagge, ohne Stärke und Namenspool, damit die Nationalelf-Logik sie
+nicht mitschleppen muss. Die Flagge entsteht aus dem Ländercode selbst; nur die britischen
+Landesteile und der Kosovo brauchen eine eigene.
 
 **Wechsel zwischen den Vereinen.** Zwischen zwei Saisons wechseln vier bis fünf echte Spieler
 den Klub: nach oben, wer seinem Verein entwachsen ist, nach unten, wer ihn überschritten hat,
