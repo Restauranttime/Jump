@@ -5969,7 +5969,7 @@ function renderMarkt() {
   /* Bezahlt wird der Spieler von seinem Stammverein — bei einer Leihe steht
      hier sonst der Verein, mit dem er gar keinen Vertrag hat. */
   const vertragsClub = S.leihe ? CL(S.leihe.heim) : club;
-  html += '<section><div class="sect-title"><h3>Vertrag</h3></div><div class="card attrs">'
+  html += '<section data-tut="markt"><div class="sect-title"><h3>Vertrag</h3></div><div class="card attrs">'
     + '<div class="attr"><span class="k">Verein</span><span class="small ink2 truncate">' + esc(vertragsClub.name)
       + (S.leihe ? ' <span class="muted">(verliehen)</span>' : '') + '</span><span class="v"></span></div>'
     + '<div class="attr"><span class="k">Gehalt</span><span class="small ink2">' + money(p.vertrag.gehalt) + ' / Jahr</span><span class="v"></span></div>'
@@ -6030,7 +6030,7 @@ function renderMarkt() {
   const bleibt = wochenEinnahmen() - wochenKosten();
   const zeile = (k, v, farbe, summe) => '<div' + (summe ? ' class="summe"' : '') + '><span class="k">' + k + '</span><span class="v"'
     + (farbe ? ' style="color:' + farbe + '"' : '') + '>' + v + '</span></div>';
-  html += '<section data-tut="markt"><div class="sect-title"><h3>Wochenbilanz</h3><span class="small muted">Kontostand ' + money(p.geld) + '</span></div>'
+  html += '<section><div class="sect-title"><h3>Wochenbilanz</h3><span class="small muted">Kontostand ' + money(p.geld) + '</span></div>'
     + '<div class="card bilanz">'
     + zeile('Gehalt & Werbung', money(brutto), 'var(--good)')
     + (passiv ? zeile('Anlagen', money(passiv), 'var(--good)') : '')
@@ -6772,11 +6772,11 @@ const TUTORIAL = {
     tipp: 'Unter 40 wird es eng mit der Startelf. Ein erfüllter Auftrag bringt vier Punkte.' },
 
   verein: {
-    text: 'Hier steht, wer dir den Platz streitig macht: Ist jemand auf deiner Position stärker, sitzt du öfter auf der Bank. Darunter dein Vertrag und dein Berater — der besorgt dir einen Wechsel, wenn es hier nicht mehr weitergeht.' },
+    text: 'Hier steht, wer dir den Platz streitig macht: Ist jemand auf deiner Position stärker, sitzt du öfter auf der Bank. Darunter der ganze Kader — so siehst du sofort, wer im Sommer neu gekommen ist und wer gegangen ist.' },
   welt: {
     text: 'Alle Tabellen, deine eigene hervorgehoben. Am Saisonende kommt hier der Rundgang durch Europa dazu: Meister, Torschützenkönige, Auf- und Absteiger in allen dreiundzwanzig Ligen.' },
   markt: {
-    text: 'Die Wochenbilanz zeigt, was rein- und rausgeht. Pass auf: Personal kostet jede Woche Gehalt, nicht einmal. Wer sich zu viel Stab leistet, steht irgendwann bei null — dann wird zurückgestuft und entlassen.',
+    text: 'Oben dein Vertrag, darunter dein Berater — der besorgt dir einen Wechsel, wenn es beim Verein nicht mehr weitergeht. Ganz unten die Wochenbilanz: Pass auf, Personal kostet jede Woche Gehalt, nicht einmal. Wer sich zu viel Stab leistet, steht irgendwann bei null — dann wird zurückgestuft und entlassen.',
     tipp: 'Stell erst jemanden ein, wenn die Wochenbilanz das dauerhaft trägt.' },
   presse: {
     text: 'Follower und Ruf entscheiden, ob Sponsoren anfragen — ab 25.000 melden sich die ersten. Die Weltrangliste ist die Wertung der Fachpresse: Wer sie am Saisonende anführt, bekommt den Goldenen Ball.' },
@@ -6824,6 +6824,11 @@ function tutorialZeigen() {
     const id = ziel.dataset.tut;
     if (t.gesehen[id] || !TUTORIAL[id]) continue;
     ziel.insertAdjacentHTML('beforebegin', tutBlase(id, TUTORIAL[id]));
+    /* Steht die Blase unter der Bildkante, sieht der Spieler nach dem
+       "Verstanden" davor scheinbar nichts passieren. Also hinscrollen. */
+    const blase = ziel.previousElementSibling;
+    const r = blase.getBoundingClientRect();
+    if (r.top < 60 || r.bottom > innerHeight - 70) blase.scrollIntoView({ block: 'center' });
     return;
   }
 }

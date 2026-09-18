@@ -57,6 +57,8 @@ sieben Plänen, der zu den Zustandswerten über den vier Zahlen — mit einer Sp
 Er blockiert nichts: Der Bildschirm bleibt bedienbar, während die Blase dasteht, und wenn auf
 einem Bildschirm mehrere Dinge neu sind, kommt erst die eine und nach „Verstanden" die
 nächste. Drei Erklärungen auf einmal wären auf einem Telefon mehr Erklärung als Spiel.
+Läge die nächste Blase unter der Bildkante, scrollt der Bildschirm zu ihr — sonst sähe es
+so aus, als wäre nach dem „Verstanden" nichts passiert.
 
 Im Spieltag gibt es keine Blasen. Dort ist der Fuß der Ort, an dem ohnehin alles steht und
 getippt wird — die Hinweise nutzen deshalb dieselbe Bauform wie die Ansage des Trainers vor
@@ -74,7 +76,8 @@ Sechzehn Hinweise, verteilt über die erste Saison:
 | Erstellung | Position · Spielertyp · Herkunftsweg |
 | Heim | Die Woche als Runde · die vier Zustandswerte · Wochenplan · Schwerpunkt |
 | Verein | Trainer und Saisonziel · wer dir den Platz streitig macht |
-| Welt / Markt / Presse / Profil | je einer |
+| Markt | Vertrag, Berater und Wochenbilanz — die Blase sitzt über dem Vertrag, wo die Seite anfängt |
+| Welt / Presse / Profil | je einer |
 | Spieltag | vor dem Anpfiff · beim ersten Schlüsselmoment · zur Note |
 
 In jeder Blase steht ein zweiter Knopf **„Tutorial beenden"**, und hinter dem Zahnrad lässt
