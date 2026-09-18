@@ -417,9 +417,57 @@ darunter, mit dem echten Platz und einer Zeile darüber, wie viele es insgesamt 
 
 **Es gab keine Torhüter.** Der Positionstopf der Weltstars war `ST, ST, FL, FL, OM, ZM, IV` —
 ein Torwart spielte gegen ein Feld, in dem seine Position nicht vorkam, und wurde an Toren
-gemessen, die er nie schießen wird. Jetzt sind zwei bis drei der 22 Torhüter, und sie
-rechnen in derselben Währung wie er: die Null zählt für den Torwart, was das Tor für den
-Stürmer zählt. In der Tabelle steht bei ihnen die Zahl der Spiele zu Null.
+gemessen, die er nie schießen wird. Jetzt sind es rund zehn von 54, und sie rechnen in
+derselben Währung wie er: die Null zählt für den Torwart, was das Tor für den Stürmer zählt.
+In der Tabelle steht bei ihnen die Zahl der Spiele zu Null.
+
+**Die Weltstars bekamen ihre Saison auf einmal.** `starsSaison()` würfelte jedem seine
+kompletten Saisonzahlen in dem Moment, in dem die alte Saison endete — während die
+Ligatorjäger seit jeher Spieltag für Spieltag mitwachsen. In den ersten Wochen einer neuen
+Saison stand man deshalb mit null Toren gegen Stürmer mit 26, aus einer Saison, die noch
+niemand gespielt hatte. Gemessen über 598 Saisons, jeweils in **Woche 3**:
+
+| | bester Stern | eigener Platz (Median) |
+|---|---|---|
+| vorher | 26 Tore | 23. von 23 |
+| jetzt | 3 Tore | 19. von 55 |
+
+Derselbe Fehler entschied den Goldenen Ball: Der Weltrang wurde erst berechnet, nachdem die
+Weltspitze gealtert und neu ausgewürfelt war — die abgelaufene Saison des eigenen Spielers
+wurde also gegen die Zahlen der *nächsten* verglichen. Jetzt wird erst gewertet, dann
+gealtert. Für einen meisterhaft gespielten Spieler steigt die Quote dadurch von 10,2 auf
+15,4 % aller Saisons, weil beide Seiten dieselbe Saison zeigen.
+
+**Das Feld hatte keine Mitte.** 22 Weltstars zwischen Stärke 83 und 93 — und du. Dazwischen
+nichts. Ein gewöhnlich gespielter Spieler (Höchststärke 71) stand damit in 98 % aller
+Saisons auf dem letzten Platz, zwanzig Jahre lang, ohne dass sich je etwas bewegte. Eine
+Liste, auf der man sich nicht bewegen kann, sagt nichts. Jetzt sind es 54 in drei Stufen:
+
+| Stufe | Anzahl | Stärke | Vereine |
+|---|---|---|---|
+| Weltspitze | 22 | 83–93 | ab Stärke 76 |
+| internationale Klasse | 16 | 76–84 | 66–86 |
+| solide Stammspieler | 16 | 69–77 | 55–75 |
+
+Gemessen über 598 Saisons je Spielweise:
+
+| | Median-Platz | bester Platz einer Laufbahn | unter den ersten 10 | Goldener Ball |
+|---|---|---|---|---|
+| gewöhnlich (Stärke 71) | 45. von 55 | 28. | 1,3 % | 0 % |
+| meisterhaft (Stärke 94) | 22. von 55 | 9. | 25,4 % | 15,4 % |
+
+Aus einem toten letzten Platz wird damit eine Leiter: Eine gewöhnliche Laufbahn klettert von
+etwa 50 auf 28, eine meisterhafte bis ganz nach oben. Der Spielstand wächst dadurch von 109
+auf 117 KB — die Raten der Sterne sind aus Stärke, Position und Saisonlänge ableitbar und
+werden deshalb nicht mitgespeichert.
+
+**Ein Fehler beim Wintertransfer.** `starteSaisonTeilweise()` sichert vor dem Ligawechsel
+Tabelle und Weltdaten und stellt sie danach zurück. Für die Sterne genügte das nicht:
+`weltAufsetzen()` baut ein neues Objekt, der alte Verweis bleibt also heil — `starsSaisonStart()`
+setzt die Sterne dagegen *an Ort und Stelle* zurück, und ein zweiter Verweis auf dasselbe
+Feld zeigt danach auf dieselben genullten Objekte. Gemessen stand der beste Torschütze der
+Welt in Woche 10 bei acht Toren und in Woche 20 bei zwei. Jetzt wird eine echte Kopie
+gesichert; die Kurve läuft über 34 Spieltage monoton 0 → 4 → 8 → 14 → 23.
 
 **Die Legacy-Stufen.** Am Karriereende steht eine von fünf Stufen. Zwei davon waren
 unerreichbar: Die beste je erreichte Stärke zählte mal drei, das waren für jeden, der
@@ -769,6 +817,10 @@ eine durchgespielte Karriere:
   Angebote über eine ganze Laufbahn, keine Karriere ohne Angebot. Die Werbung bleibt trotzdem
   ein Zubrot: 9,8 Mio € über die Karriere gegen 19,3 Mio € Gehalt — mehr Anfragen, dafür
   kleinere Verträge. Kontostand am Ende im Median 1,2 Mio €, vorher 1,5.
+- Die Weltrangliste ist eine Leiter, keine Decke. Gemessen über 598 Saisons je Spielweise:
+  gewöhnlich gespielt Median-Platz 45 von 55 mit dem besten Jahr auf 28, meisterhaft Median 22
+  mit dem besten Jahr auf 9 und dem Goldenen Ball in 15,4 % aller Saisons. Vorher: 23 von 23
+  in 98 % aller Saisons, unabhängig davon, wie gut man spielte.
 - Die fünf Legacy-Stufen sind alle erreichbar. Gemessen über 90 durchgespielte Laufbahnen in
   drei Spielweisen: Solider Profi 22, Großer seiner Liga 46, Weltklassespieler 9, Legende 13;
   die Spanne reicht von 311 bis 3.620 Punkten, der Median liegt bei 810. Die unterste Stufe

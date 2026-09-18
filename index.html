@@ -1876,6 +1876,7 @@ function starteSaison(neueEuroQuali) {
   if (!S.trainer) S.trainer = trainerErzeugen(CL(S.p.clubId));
   weltAufsetzen();
   torjaegerAufsetzen();
+  starsSaisonStart();
   S.spieleCache = null;
   S.titelDieseSaison = [];
   S.pokalWeg = [];
@@ -3312,6 +3313,7 @@ async function wocheVor() {
     simLigaSpieltag(w);
     weltSpieltag();
     torjaegerSpieltag();
+    starsSpieltag();
     euroWoche(w);
     wochenAbschluss();
     if (w === S.winterWoche) await transferfenster(false);
@@ -3643,7 +3645,17 @@ function starteSaisonTeilweise(euroDrin) {
   const woche = S.woche, stats = S.stats, natStats = S.natStats, titel = S.titelDieseSaison;
   const pokalAlt = S.pokal, euroAlt = S.euro;
   const weltAlt = S.welt, ligaAlt = S.liga;
+  /* Der Vereinswechsel setzt die eigene Saison neu auf, nicht die der Welt:
+     Die Weltspitze hat ihre Spieltage schon gespielt. weltAufsetzen() und der
+     Rest bauen sich neue Objekte, ein Verweis darauf reicht also. Die Sterne
+     werden dagegen an Ort und Stelle zurueckgesetzt — ein zweiter Verweis auf
+     dasselbe Feld rettet sie nicht, es braucht eine echte Kopie. Ohne sie
+     verlor die Weltspitze beim Wintertransfer ihre halbe Saison: gemessen
+     stand der beste Torschuetze der Welt in Woche 10 bei acht Toren und in
+     Woche 20 bei zwei. */
+  const starsAlt = S.stars.map(x => Object.assign({}, x));
   starteSaison(euroDrin);
+  S.stars = starsAlt;
   S.stats = stats; S.natStats = natStats; S.titelDieseSaison = titel;
   S.woche = Math.min(woche, S.saisonWochen);
   S.pokal.drin = pokalAlt.drin; S.pokal.runde = pokalAlt.runde;
@@ -4237,55 +4249,129 @@ function rivaleAbschliessen() {
 /* ========================== WELTSTARS & AUSZEICHNUNGEN ========================== */
 /* In der Weltspitze stand kein einziger Torwart. Ein Torhueter spielte damit
    gegen ein Feld, in dem seine Position gar nicht vorkam — gemessen wurde er
-   an Toren, die er nie schiessen wird. Zwei bis drei der zweiundzwanzig sind
-   jetzt Torhueter, und sie werden an der Null gemessen wie er. */
+   an Toren, die er nie schiessen wird. Zwei bis drei je Stufe sind jetzt
+   Torhueter, und sie werden an der Null gemessen wie er. */
 const STAR_POS = ['ST', 'ST', 'FL', 'FL', 'OM', 'ZM', 'IV', 'TW'];
 
-function neuerStar(top, alter) {
+/* Das Feld bestand aus zweiundzwanzig Weltstars zwischen Staerke 83 und 93 —
+   und dir. Dazwischen war nichts. Gemessen ueber 230 Saisons stand ein
+   gewoehnlich gespielter Spieler (Hoechststaerke 71) in achtundneunzig Prozent
+   aller Saisons auf dem letzten Platz, zwanzig Jahre lang, ohne dass sich je
+   etwas bewegte. Eine Liste, auf der man sich nicht bewegen kann, sagt nichts.
+   Jetzt reicht das Feld von der Weltspitze bis knapp ueber Zweitligaformat:
+   eine Leiter mit Sprossen statt einer Decke. */
+const STAR_STUFEN = [
+  { n: 22, ovr: [83, 93], unten: 80, clubs: [76, 99] },  /* Weltspitze */
+  { n: 16, ovr: [76, 84], unten: 73, clubs: [66, 86] },  /* internationale Klasse */
+  { n: 16, ovr: [69, 77], unten: 65, clubs: [55, 75] }   /* solide Stammspieler */
+];
+const STAR_ANZAHL = STAR_STUFEN.reduce((a, x) => a + x.n, 0);
+
+function starClubs(st) {
+  const l = CLUBS.filter(c => c.staerke >= st.clubs[0] && c.staerke <= st.clubs[1]);
+  return l.length ? l : CLUBS;
+}
+
+function neuerStar(stufe, alter) {
+  const st = STAR_STUFEN[stufe] || STAR_STUFEN[0];
   const nat = pick(NATIONEN), nm = zufallsname(nat.pool);
-  return { name: nm.v + ' ' + nm.n, natId: nat.id, clubId: pick(top).id, alter,
-    ovr: ri(83, 93), pos: pick(STAR_POS), tore: 0, vorlagen: 0, zuNull: 0, punkte: 0 };
+  return { name: nm.v + ' ' + nm.n, natId: nat.id, clubId: pick(starClubs(st)).id, alter, stufe,
+    ovr: ri(st.ovr[0], st.ovr[1]), pos: pick(STAR_POS), tore: 0, vorlagen: 0, zuNull: 0, natTore: 0, punkte: 0 };
 }
 
 function baueStars() {
   S.stars = [];
-  const top = CLUBS.filter(c => c.staerke >= 76);
-  for (let i = 0; i < 22; i++) S.stars.push(neuerStar(top, ri(21, 32)));
+  STAR_STUFEN.forEach((st, i) => { for (let k = 0; k < st.n; k++) S.stars.push(neuerStar(i, ri(21, 32))); });
 }
 /* Die Weltspitze erneuert sich ueber zwanzig Jahre. Ohne das stand dieselbe
-   Liste mit denselben zweiundzwanzig Namen und denselben Werten 2046 noch
-   genauso da wie 2026, waehrend der eigene Spieler laengst an ihr vorbeigezogen
-   war — die Weltrangliste wurde damit zur Formsache. */
+   Liste mit denselben Namen und denselben Werten 2046 noch genauso da wie
+   2026, waehrend der eigene Spieler laengst an ihr vorbeigezogen war — die
+   Weltrangliste wurde damit zur Formsache. */
 function starsAltern() {
-  const top = CLUBS.filter(c => c.staerke >= 76);
   S.stars.forEach((s, i) => {
+    const st = STAR_STUFEN[s.stufe || 0] || STAR_STUFEN[0];
     s.alter++;
-    if (s.alter <= 25) s.ovr = clamp(s.ovr + ri(0, 2), 78, 96);
-    else if (s.alter >= 30) s.ovr = clamp(s.ovr - ri(1, 3), 60, 96);
-    if (chance(.18)) s.clubId = pick(top).id;
-    if (s.alter > 34 || s.ovr < 80) S.stars[i] = neuerStar(top, ri(20, 25));
+    if (s.alter <= 25) s.ovr = clamp(s.ovr + ri(0, 2), 40, 96);
+    else if (s.alter >= 30) s.ovr = clamp(s.ovr - ri(1, 3), 40, 96);
+    if (chance(.18)) s.clubId = pick(starClubs(st)).id;
+    /* Jede Stufe hat ihre eigene Untergrenze. Mit der einen Schwelle von 80
+       waere ein solider Stammspieler mit Staerke 72 noch im Jahr seiner
+       Erschaffung wieder verschwunden. */
+    if (s.alter > 34 || s.ovr < st.unten) S.stars[i] = neuerStar(s.stufe || 0, ri(20, 25));
   });
 }
 
-function starsSaison() {
+/* Ein Weltstar bekam seine ganze Saison in dem Moment, in dem die alte endete
+   — waehrend die Ligatorjaeger seit jeher Spieltag fuer Spieltag mitwachsen.
+   In den ersten Wochen einer neuen Saison stand der eigene Spieler damit mit
+   null Toren gegen Stuermer mit fuenfundzwanzig, aus einer Saison, die noch
+   niemand gespielt hatte. Jetzt gilt fuer beide dasselbe: einmal je Saison
+   eine Rate, danach Woche fuer Woche fortgeschrieben. */
+/* Die Rate ist aus Staerke, Position und Saisonlaenge ableitbar und gehoert
+   damit nicht in den Spielstand — gespeichert wuerde sie vierundfuenfzig Mal
+   vier Kommazahlen kosten. */
+function starZiel(s) {
+  const tw = s.pos === 'TW';
+  const ang = POS(s.pos).angriff;
+  return {
+    tore: tw ? 0 : clamp((s.ovr - 70) * ang * .95, .2, 26),
+    vorlagen: tw ? 0 : clamp((s.ovr - 70) * .5, .2, 14),
+    zuNull: tw ? clamp((s.ovr - 72) * .78, 2, 20) : 0,
+    natTore: tw ? 0 : clamp((s.ovr - 76) * .35, 0, 9)
+  };
+}
+
+function starsSaisonStart() {
   for (const s of S.stars) {
-    const tw = s.pos === 'TW';
-    const ang = POS(s.pos).angriff;
-    s.tore = tw ? 0 : Math.round(poisson(clamp((s.ovr - 70) * ang * .95, .2, 26)));
-    s.vorlagen = tw ? 0 : Math.round(poisson(clamp((s.ovr - 70) * .5, .2, 14)));
-    s.zuNull = tw ? Math.round(poisson(clamp((s.ovr - 72) * .78, 2, 20))) : 0;
-    const titel = chance(.22) ? 1 : 0;
-    /* Auch ein Weltstar hat eine Saisonnote und schiesst Laendertore. Ohne
-       beides stand auf der einen Seite der Rechnung ein Notenbonus von bis zu
-       65 Punkten und auf der anderen nichts: Gemessen gewann ein gut
-       gespielter Spieler den Goldenen Ball in 44 Prozent aller Saisons. */
-    s.note = clamp(3.5 - (s.ovr - 80) * .075 - (tw ? s.zuNull * .028 : s.tore * .018) + rnd(-.3, .3), 1.1, 4.4);
-    s.natTore = tw ? 0 : Math.round(poisson(clamp((s.ovr - 76) * .35, 0, 9)));
-    /* Dieselbe Waehrung wie in meinePunkte(): die Null zaehlt fuer den
-       Torhueter, was das Tor fuer den Stuermer zaehlt. */
-    const eigen = tw ? s.zuNull * 3.6 : s.tore * 3.2 + s.vorlagen * 2;
-    s.punkte = Math.round(eigen + Math.max(0, NOTE_MITTE + .2 - s.note) * 24
-      + s.ovr * 1.35 + CL(s.clubId).staerke * .3 + titel * 14 + s.natTore * 2.2 + rnd(-6, 10));
+    const z = starZiel(s);
+    s.tore = 0; s.vorlagen = 0; s.zuNull = 0; s.natTore = 0;
+    s.titel = chance(.22) ? 1 : 0;
+    /* Die Note steht fuer die ganze Saison fest — wie beim eigenen Spieler,
+       wo sie ein Schnitt ist und nicht mit den Toren mitwaechst. Sie rechnet
+       deshalb mit der erwarteten Ausbeute, nicht mit der bisherigen. */
+    s.note = clamp(3.5 - (s.ovr - 80) * .075
+      - (s.pos === 'TW' ? z.zuNull * .028 : z.tore * .018) + rnd(-.3, .3), 1.1, 4.4);
+    s.wurf = rnd(-6, 10);
+    starPunkte(s);
+  }
+  S.stars.sort((a, b) => b.punkte - a.punkte);
+}
+
+/* Aeltere Spielstaende kennen nur die zweiundzwanzig der Weltspitze, und ihre
+   Sterne tragen die ganze Saison auf einmal statt einer Rate. Das Feld wird
+   aufgefuellt und der Stand auf die laufende Woche gebracht — einmal, beim
+   ersten Laden nach der Umstellung. */
+function starsNachruesten() {
+  S.stars.forEach(x => { if (typeof x.stufe !== 'number') x.stufe = 0; });
+  STAR_STUFEN.forEach((st, stufe) => {
+    let da = S.stars.filter(x => x.stufe === stufe).length;
+    while (da < st.n) { S.stars.push(neuerStar(stufe, ri(21, 32))); da++; }
+  });
+  starsSaisonStart();
+  starsSpieltag(Math.max(0, (S.woche || 1) - 1));
+}
+
+function starPunkte(s) {
+  const tw = s.pos === 'TW';
+  /* Dieselbe Waehrung wie in meinePunkte(): die Null zaehlt fuer den
+     Torhueter, was das Tor fuer den Stuermer zaehlt. */
+  const eigen = tw ? (s.zuNull || 0) * 3.6 : s.tore * 3.2 + s.vorlagen * 2;
+  s.punkte = Math.round(eigen + Math.max(0, NOTE_MITTE + .2 - s.note) * 24
+    + s.ovr * 1.35 + ((CL(s.clubId) || {}).staerke || 70) * .3
+    + (s.titel || 0) * 14 + (s.natTore || 0) * 2.2 + (s.wurf || 0));
+}
+
+function starsSpieltag(spieltage) {
+  const n = (spieltage === undefined ? 1 : spieltage) / Math.max(1, S.saisonWochen || 38);
+  if (n <= 0) return;
+  for (const s of S.stars) {
+    if (typeof s.wurf !== 'number') continue;
+    const z = starZiel(s);
+    s.tore += poisson(z.tore * n);
+    s.vorlagen += poisson(z.vorlagen * n);
+    s.zuNull = (s.zuNull || 0) + poisson(z.zuNull * n);
+    s.natTore = (s.natTore || 0) + poisson(z.natTore * n);
+    starPunkte(s);
   }
   S.stars.sort((a, b) => b.punkte - a.punkte);
 }
@@ -4537,10 +4623,12 @@ async function saisonEnde() {
 
   /* Saisonbericht */
   const tj = torjaegerListe();
-  starsAltern();
-  starsSaison();
+  /* Der Weltrang gehoert zu der Saison, die gerade zu Ende ging. Vorher wurde
+     die Weltspitze erst gealtert und neu ausgewuerfelt und der Goldene Ball
+     dann gegen die Zahlen der naechsten Saison vergeben. */
   const rang = weltrangliste();
   const meinWeltRang = rang.findIndex(r => r.ich) + 1;
+  starsAltern();
 
   const zeilen = [
     'Abschlussplatz: ' + platz + '. in der ' + lg.name,
@@ -6368,7 +6456,6 @@ function karriereStarten() {
   S.kader = kaderErzeugen(club.id);
   S.rivale = rivalenWaehlen(NEU.pos);
   baueStars();
-  starsSaison();
   starteSaison();
   log('Profivertrag bei ' + club.name + ' unterschrieben: ' + money(gehalt) + ' pro Jahr.', 'gold');
   speichern();
@@ -6399,6 +6486,7 @@ function migriere() {
   if (!POS(p.pos)) p.pos = 'ZM';
   if (typeof p.alter !== 'number') p.alter = 17;
   if (!S.stars.length) baueStars();
+  if (S.stars.length < STAR_ANZAHL || S.stars.some(x => typeof x.wurf !== 'number')) starsNachruesten();
   if (typeof S.sponsorPause !== 'number') S.sponsorPause = 0;
   S.ligaTausch = S.ligaTausch || {};
   S.staerkeTausch = S.staerkeTausch || {};
