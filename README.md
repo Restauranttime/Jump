@@ -41,6 +41,46 @@ geöffnet, meldet er sich still ab und das Spiel läuft wie zuvor.
 (180 für iOS, 192 und 512 für das Manifest, dazu eine Maskable-Fassung, bei der das Motiv
 auf 80 % geschrumpft in der Sicherheitszone der Android-Maske liegt).
 
+## Das Tutorial
+
+Wer auf einen freien Platz tippt, wird zuerst gefragt: **„Zum ersten Mal hier?"** Zwei Knöpfe —
+Tutorial mitnehmen oder nicht. Die Frage steht dort und nicht auf der Startseite, weil genau
+dort eine neue Karriere beginnt; jeder der drei Plätze entscheidet für sich.
+
+Es ist **kein eigener Modus und kein Probelauf.** Die Hinweise erscheinen in der richtigen
+Karriere, jeder genau einmal und genau dann, wenn die Sache zum ersten Mal vor einem steht.
+Man lernt am eigenen Spieler statt an einem Beispiel, und nichts davon wird hinterher
+verworfen.
+
+**Sprechblasen an der Stelle, um die es geht.** Der Hinweis zum Wochenplan sitzt über den
+sieben Plänen, der zu den Zustandswerten über den vier Zahlen — mit einer Spitze nach unten.
+Er blockiert nichts: Der Bildschirm bleibt bedienbar, während die Blase dasteht, und wenn auf
+einem Bildschirm mehrere Dinge neu sind, kommt erst die eine und nach „Verstanden" die
+nächste. Drei Erklärungen auf einmal wären auf einem Telefon mehr Erklärung als Spiel.
+
+Im Spieltag gibt es keine Blasen. Dort ist der Fuß der Ort, an dem ohnehin alles steht und
+getippt wird — die Hinweise nutzen deshalb dieselbe Bauform wie die Ansage des Trainers vor
+dem Anpfiff. Der Hinweis zur Note hängt sich unter den Notenkasten, statt ihn zu löschen.
+
+**Gesprochen wird vom Berater.** Er gehört schon zum Spiel, hat einen eigenen Bereich und darf
+auch über Dinge reden, die den Trainer nichts angehen — Kontostand, Sponsoren, Sicherungscode.
+Jeder Hinweis erklärt und **empfiehlt**, ohne zu erzwingen: „Für den Anfang: Techniktraining.
+Solide, günstig, und du siehst den Fortschritt sofort." Was du tust, bleibt deine Sache.
+
+Sechzehn Hinweise, verteilt über die erste Saison:
+
+| Wo | Was |
+|---|---|
+| Erstellung | Position · Spielertyp · Herkunftsweg |
+| Heim | Die Woche als Runde · die vier Zustandswerte · Wochenplan · Schwerpunkt |
+| Verein | Trainer und Saisonziel · wer dir den Platz streitig macht |
+| Welt / Markt / Presse / Profil | je einer |
+| Spieltag | vor dem Anpfiff · beim ersten Schlüsselmoment · zur Note |
+
+In jeder Blase steht ein zweiter Knopf **„Tutorial beenden"**, und im Profil lässt es sich
+jederzeit wieder einschalten — auch mitten in einer laufenden Karriere. Bestehende Spielstände
+bekommen kein Tutorial: Die Migration setzt es auf aus.
+
 ## Speichern
 
 Der Spielstand wird nach jeder Woche automatisch gesichert, über drei Stufen:

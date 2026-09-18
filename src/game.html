@@ -192,6 +192,21 @@ a{color:var(--accent)}
 .opt-t{font-weight:600;font-size:15px}
 .opt-d{font-size:12.5px;color:var(--muted);margin-top:2px}
 .opt-m{font-family:var(--font-data);font-size:11.5px;color:var(--accent-2);margin-top:5px;letter-spacing:.03em}
+/* Die Sprechblase des Tutorials. Sie sitzt ueber der Stelle, um die es geht,
+   mit einer Spitze nach unten, und blockiert nichts: Der Bildschirm bleibt
+   bedienbar, waehrend sie dasteht. */
+.tut{position:relative;border:1px solid rgba(239,169,44,.45);border-radius:13px;padding:13px 14px;margin-bottom:16px;
+  background:linear-gradient(180deg,rgba(239,169,44,.15),rgba(239,169,44,.05))}
+.tut::after{content:"";position:absolute;left:26px;bottom:-7px;width:12px;height:12px;background:rgba(239,169,44,.06);
+  border-right:1px solid rgba(239,169,44,.45);border-bottom:1px solid rgba(239,169,44,.45);transform:rotate(45deg)}
+.tut-kopf{font-family:var(--font-data);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-2)}
+.tut-text{font-size:14px;line-height:1.5;color:var(--ink);margin-top:5px}
+.tut-tipp{font-size:13.5px;line-height:1.45;color:var(--accent-2);margin-top:9px;font-weight:600}
+.tut-knoepfe{display:flex;gap:8px;margin-top:12px}
+.tut-knoepfe .btn{min-height:38px;font-size:13px;width:auto;flex:none}
+/* Im Spieltagsfuss zeigt die Blase auf nichts — dort steht sie unter der Note. */
+.tut-fuss{margin:0}
+.tut-fuss::after{display:none}
 
 /* ---------- Spiel-Shell ---------- */
 #topbar{padding:calc(10px + var(--sat)) 14px 9px;border-bottom:1px solid var(--line-soft);background:rgba(15,28,21,.72);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:flex;flex-direction:column;gap:8px}
@@ -5354,6 +5369,7 @@ async function spielAustragen(fx) {
   /* Der Auftrag stand nur als eine Zeile im Ticker und ging dort unter. Jetzt
      ist er ein eigener Bildschirm, durch den man klicken muss — und weil sein
      Knopf der Anpfiff selbst ist, kostet er keinen zusaetzlichen Druck. */
+  if (spielt) await tutAnsage('spiel_anpfiff');
   if (auftrag) {
     const coach = ts.nat ? (S.natTrainer && S.natTrainer.name) : (S.trainer && S.trainer.name);
     tickerEintrag(0, 'Der Auftrag', (coach ? coach + ': ' : '') + '\u201E' + auftrag.text + '\u201C', 'ev-you');
@@ -5401,6 +5417,7 @@ async function spielAustragen(fx) {
     if (ausgewechselt) continue;
     const m = e.vorlage;
     tickerEintrag(e.min, 'Dein Moment', m.t, 'ev-you');
+    await tutAnsage('spiel_moment');
     const idx = await warteWahl(m.t, m.w);
     const wahl = m.w[idx];
     const attrWert = p.attr[wahl.a];
@@ -5653,6 +5670,7 @@ async function spielAustragen(fx) {
       + '<div class="small muted">Ohne Einsatz</div></div>';
   }
   f.appendChild(box);
+  if (spielt) tutNotiz(f, 'spiel_note');
   log(wettbewerbName(fx) + ': ' + heimClub.kurz + ' ' + (fx.heim ? toreMein : toreGegner) + ':' + (fx.heim ? toreGegner : toreMein) + ' ' + gastClub.kurz
     + (spielt ? ' · Note ' + note(noteWert) + (meineTore ? ' · ' + meineTore + ' Tor(e)' : '') : ''), ergebnis === 'sieg' ? 'good' : ergebnis === 'niederlage' ? 'bad' : '');
   await warteKnopf('Abpfiff', 'btn btn-primary', true);
@@ -5729,6 +5747,7 @@ function render() {
     '<span class="pill">' + followers(p.follower) + ' Follower</span>'
   ].join('');
   ({ home: renderHome, club: renderClub, world: renderWelt, market: renderMarkt, social: renderSocial, profile: renderProfil })[aktiveAnsicht]();
+  tutorialZeigen();
 }
 
 function renderHome() {
@@ -5745,7 +5764,7 @@ function renderHome() {
       + '<button class="btn" data-act="neustart">Neue Karriere beginnen</button>';
   } else {
     const anz = spiele.length;
-    html += '<div class="next-card"><div class="row-between"><span class="eyebrow">Woche ' + S.woche + ' von ' + S.saisonWochen + '</span>'
+    html += '<div class="next-card" data-tut="heim_naechstes"><div class="row-between"><span class="eyebrow">Woche ' + S.woche + ' von ' + S.saisonWochen + '</span>'
       + '<span class="pill pill-accent">' + (anz ? (anz > 1 ? 'Englische Woche' : 'Spieltag') : 'Trainingswoche') + '</span></div>';
     if (spiele.length) {
       const fx = spiele[0], g = CL(fx.gegnerId);
@@ -5760,7 +5779,7 @@ function renderHome() {
     }
     html += '</div>';
 
-    html += '<section><div class="sect-title"><h3>Zustand</h3><span class="small muted">' + rolleNachStaerke() + '</span></div>'
+    html += '<section data-tut="heim_zustand"><div class="sect-title"><h3>Zustand</h3><span class="small muted">' + rolleNachStaerke() + '</span></div>'
       + '<div class="card cond cond-2">'
       + '<div class="cond-item"><span class="k">Energie</span><span class="v">' + Math.round(p.energie) + '</span>' + meter(p.energie, zustandsKlasse(p.energie)) + '</div>'
       + '<div class="cond-item"><span class="k">Ausdauer</span><span class="v">' + Math.round(kondi()) + '</span>' + meter(kondi(), kondi() >= 65 ? 'good' : '') + '</div>'
@@ -5798,11 +5817,11 @@ function renderHome() {
         + esc(p.verletzung.name) + ' — noch ' + zahlwort(p.verletzung.wochen, 'Woche', 'Wochen')
         + '. Training fällt aus, du arbeitest mit dem Physio.</p></div>';
     } else {
-      html += '<section><div class="sect-title"><h3>Wochenplan</h3></div><div class="plan-grid">'
+      html += '<section data-tut="heim_plan"><div class="sect-title"><h3>Wochenplan</h3></div><div class="plan-grid">'
         + PLAENE.map(pl => '<button class="plan" data-plan="' + pl.id + '" aria-pressed="' + (S.plan === pl.id) + '"><b>' + esc(pl.name) + '</b><span>' + esc(pl.text) + '</span></button>').join('')
         + '</div>';
       if (PLAN(S.plan) && PLAN(S.plan).train && !PLAN(S.plan).athletik) {
-        html += '<div class="sect-title" style="margin-top:14px"><h3>Schwerpunkt</h3></div><div class="chips">'
+        html += '<div class="sect-title" style="margin-top:14px"><h3>Schwerpunkt</h3></div><div class="chips" data-tut="heim_fokus">'
           + ATTR_KEYS.map(k => '<button class="chip" data-fokus="' + k + '" aria-pressed="' + (S.trainFokus === k) + '">' + AL(k) + ' ' + Math.round(p.attr[k]) + '</button>').join('')
           + '</div>';
       }
@@ -5845,7 +5864,7 @@ function renderClub() {
   /* Trainer und Saisonziel */
   if (S.trainer) {
     const st = STIL(S.trainer.stil), nat = NAT(S.trainer.natId);
-    html += '<section><div class="sect-title"><h3>Trainer</h3><span class="small muted">'
+    html += '<section data-tut="verein_trainer"><div class="sect-title"><h3>Trainer</h3><span class="small muted">'
       + (S.trainer.jahre ? S.trainer.jahre + '. Jahr im Amt' : 'erste Saison') + '</span></div>'
       + '<div class="card"><div class="row-between" style="align-items:flex-start">'
       + '<div class="grow"><div style="font-family:var(--font-data);font-weight:700;font-size:15px">'
@@ -5880,7 +5899,7 @@ function renderClub() {
   const reihe = konk.map(k => ({ name: k.name, ovr: k.ovr, alter: k.alter, natId: k.natId }))
     .concat([{ name: p.vorname + ' ' + p.nachname, ovr: OVR(), alter: p.alter, natId: p.natId, ich: 1 }])
     .sort((a, b) => b.ovr - a.ovr);
-  html += '<section><div class="sect-title"><h3>Deine Position</h3><span class="small muted">' + POS(p.pos).name + '</span></div>'
+  html += '<section data-tut="verein"><div class="sect-title"><h3>Deine Position</h3><span class="small muted">' + POS(p.pos).name + '</span></div>'
     + '<div class="card">' + reihe.map((k, i) => spielerZeile(k, i + 1)).join('')
     + '<p class="tiny muted" style="margin-top:10px">' + (reihe.length > 1
       ? (platzInRangfolge() === 1
@@ -5975,7 +5994,7 @@ function renderMarkt() {
   const bleibt = wochenEinnahmen() - wochenKosten();
   const zeile = (k, v, farbe, summe) => '<div' + (summe ? ' class="summe"' : '') + '><span class="k">' + k + '</span><span class="v"'
     + (farbe ? ' style="color:' + farbe + '"' : '') + '>' + v + '</span></div>';
-  html += '<section><div class="sect-title"><h3>Wochenbilanz</h3><span class="small muted">Kontostand ' + money(p.geld) + '</span></div>'
+  html += '<section data-tut="markt"><div class="sect-title"><h3>Wochenbilanz</h3><span class="small muted">Kontostand ' + money(p.geld) + '</span></div>'
     + '<div class="card bilanz">'
     + zeile('Gehalt & Werbung', money(brutto), 'var(--good)')
     + (passiv ? zeile('Anlagen', money(passiv), 'var(--good)') : '')
@@ -6055,7 +6074,7 @@ function renderSocial() {
                 : 'Platz für einen weiteren Werbepartner — dafür brauchst du ' + followers(schwelle) + ' Follower. Dir fehlen noch ' + followers(schwelle - p.follower) + '.');
   }
 
-  html += '<section><div class="sect-title"><h3>Sponsoren</h3>'
+  html += '<section data-tut="presse"><div class="sect-title"><h3>Sponsoren</h3>'
     + (p.sponsoren.length ? '<span class="small muted">' + p.sponsoren.length + ' von 3</span>' : '') + '</div>'
     + '<div class="stack-sm">'
     + p.sponsoren.map(s => '<div class="card row-between"><div><div style="font-weight:600;font-size:14px">' + esc(s.firma) + '</div>'
@@ -6191,7 +6210,7 @@ function renderProfil() {
     + '<div class="row" style="margin-top:12px;gap:8px"><span class="pill">Entwicklung ' + ('★'.repeat(sterne) + '☆'.repeat(5 - sterne)) + '</span>'
     + '<span class="pill">' + esc((ARCH(p.archetyp) || { name: 'Spielertyp' }).name) + '</span></div></div>';
 
-  html += '<section><div class="sect-title"><h3>Attribute</h3></div><div class="card attrs">'
+  html += '<section data-tut="profil"><div class="sect-title"><h3>Attribute</h3></div><div class="card attrs">'
     + ATTR_KEYS.map(k => '<div class="attr"><span class="k">' + AL(k) + '</span>' + meter(p.attr[k], p.attr[k] >= 78 ? 'good' : p.attr[k] >= 40 ? '' : 'warn')
       + '<span class="v">' + Math.round(p.attr[k]) + '</span></div>').join('')
     + '<div class="attr" style="margin-top:4px;padding-top:9px;border-top:1px solid var(--line-soft)">'
@@ -6340,7 +6359,8 @@ function renderProfil() {
     + '<span class="small ink2 grow">' + esc(speicherText()) + '</span></div>'
     + '<div class="btn-row"><button class="btn btn-sm" data-act="speichern">Jetzt speichern</button>'
     + '<button class="btn btn-sm" data-act="code">Sicherungscode</button>'
-    + '<button class="btn btn-sm" data-act="platzwechsel">Karriere wechseln</button></div>'
+    + '<button class="btn btn-sm" data-act="platzwechsel">Karriere wechseln</button>'
+    + '<button class="btn btn-sm" data-act="tutorial">Tutorial ' + (S.tut && S.tut.an ? 'ausschalten' : 'einschalten') + '</button></div>'
     + '</div></section>';
   html += '<button class="btn btn-quiet" data-act="loeschen">Karriere löschen und neu beginnen</button>';
   el('view-profile').innerHTML = html;
@@ -6405,7 +6425,7 @@ function renderWelt() {
   const laender = [];
   LEAGUES.forEach(l => { if (laender.indexOf(l.land) < 0) laender.push(l.land); });
   const land = auswahl === 'euro' ? (S.weltLand || LG(eigene).land) : LG(auswahl).land;
-  let html = '<section><div class="chips chips-quer">'
+  let html = '<section data-tut="welt"><div class="chips chips-quer">'
     + laender.map(l => '<button class="chip" data-weltland="' + l + '" aria-pressed="'
       + (auswahl !== 'euro' && land === l) + '" style="flex:none">'
       + LEAGUES.find(x => x.land === l).flag + ' ' + esc(l) + '</button>').join('')
@@ -6540,6 +6560,11 @@ async function aktion(name) {
   }
   if (name === 'code') return sicherungscode();
   if (name === 'platzwechsel') return zurueckZurStartseite();
+  if (name === 'tutorial') {
+    S.tut.an = !S.tut.an;
+    toast(S.tut.an ? 'Tutorial an — Hinweise kommen wieder' : 'Tutorial aus');
+    speichern(); render(); return;
+  }
   if (name === 'loeschen' || name === 'neustart') {
     const idx = await frage({ eyebrow: 'Achtung', titel: 'Karriere löschen?', text: 'Der aktuelle Spielstand wird unwiderruflich gelöscht.', wahlen: [{ label: 'Abbrechen' }, { label: 'Löschen und neu starten' }] });
     if (idx === 1) { await standLoeschen(); S = null; el('screen-game').hidden = true; el('screen-start').hidden = false; startseite(); }
@@ -6655,6 +6680,121 @@ async function sicherungscode() {
   }
 }
 
+/* ========================== TUTORIAL ==========================
+   Kein eigener Modus und kein Probelauf: Die Hinweise erscheinen in der
+   richtigen Karriere, jeder genau einmal und genau dann, wenn die Sache zum
+   ersten Mal vor einem steht. Gesprochen wird vom Berater — er gehoert schon
+   zum Spiel und darf auch ueber Dinge reden, die den Trainer nichts angehen.
+   Jeder Hinweis erklaert und empfiehlt, aber keiner haelt jemanden auf: Die
+   Blase blockiert nichts, und "Tutorial beenden" steht in jeder. */
+const TUTORIAL = {
+  erst_pos: {
+    text: 'Deine Position entscheidet, was im Spiel überhaupt auf dich zukommt. Einem Stürmer werden Abschlüsse vorgelegt, einem Innenverteidiger Zweikämpfe — und der Torwart spielt ein komplett anderes Spiel.',
+    tipp: 'Fürs erste Mal: Mittelstürmer. Tore sind die Währung, an der du deinen Fortschritt am schnellsten abliest.' },
+  erst_typ: {
+    text: 'Der Spielertyp verteilt ein paar Startpunkte auf deine Fächer und gibt dir eine Richtung. Umbauen kannst du dich später über das Training — der Typ ist ein Vorsprung, keine Fessel.',
+    tipp: '„Der Komplette" hat keine Schwäche und keine Spitze. Damit machst du nichts falsch.' },
+  erst_weg: {
+    text: 'Der Herkunftsweg bestimmt, wo du anfängst — und wie hoch dein verborgenes Potenzial reicht. Der Straßenkicker startet in der dritten Liga, hat aber den höchsten Deckel. Das Wunderkind beginnt oben und ist früher da.',
+    tipp: 'Fürs erste Mal: Nachwuchsleistungszentrum. Zweite Liga, ordentliches Potenzial — und du spielst von Anfang an regelmäßig.' },
+
+  heim_naechstes: {
+    text: 'Das hier ist deine Woche. Jede Woche ist eine Runde: Du stellst ein, woran du arbeitest, und drückst unten auf den Knopf. Dann läuft alles ab — Training, Spiel, alles, was drumherum passiert.',
+    tipp: 'Zwanzig Jahre bestehen aus rund achthundert solcher Wochen. Lass dir bei den ersten Zeit.' },
+  heim_zustand: {
+    text: 'Vier Werte, und sie tun völlig Verschiedenes. Energie unter 55 macht dich schwächer, unter 35 fliegst du fast sicher aus der Startelf. Rhythmus bekommst du ausschließlich durch Spielminuten. Moral wirkt am stärksten in deinen Momenten im Spiel. Ausdauer zählt nicht in die Stärke — sie senkt nur den Verbrauch.',
+    tipp: 'Fällt die Energie unter 50, nimm eine Regenerationswoche. Das ist die häufigste Falle überhaupt.' },
+  heim_plan: {
+    text: 'Der Wochenplan sagt, woran du arbeitest — und was es an Energie kostet. Doppelschichten bringen fast doppelt so viel wie Techniktraining, kosten aber dreizehn Energie und erhöhen das Verletzungsrisiko.',
+    tipp: 'Diese Woche: Techniktraining. Solide, günstig, und du siehst den Fortschritt sofort.' },
+  heim_fokus: {
+    text: 'Und hier wählst du, welches Fach trainiert wird. Die Zahl daneben ist dein aktueller Wert. Jedes Fach hat eine Decke — dein verborgenes Potenzial plus das, was ein guter Trainer noch herausholt.',
+    tipp: 'Trainiere das Fach, das deine Position am schwersten gewichtet. Beim Stürmer ist das der Abschluss.' },
+  verein_trainer: {
+    text: 'Dein Stand beim Trainer entscheidet, ob du aufgestellt wirst. Er steigt mit guten Noten und erfüllten Aufträgen und fällt mit schlechten. Darunter steht das Saisonziel des Vereins: Wird es erreicht, gibt es eine Prämie — liegt ihr deutlich dahinter, kann der Trainer mitten in der Saison gehen, und beim nächsten fängst du bei null an.',
+    tipp: 'Unter 40 wird es eng mit der Startelf. Ein erfüllter Auftrag bringt vier Punkte.' },
+
+  verein: {
+    text: 'Hier steht, wer dir den Platz streitig macht: Ist jemand auf deiner Position stärker, sitzt du öfter auf der Bank. Darunter dein Vertrag und dein Berater — der besorgt dir einen Wechsel, wenn es hier nicht mehr weitergeht.' },
+  welt: {
+    text: 'Alle Tabellen, deine eigene hervorgehoben. Am Saisonende kommt hier der Rundgang durch Europa dazu: Meister, Torschützenkönige, Auf- und Absteiger in allen dreiundzwanzig Ligen.' },
+  markt: {
+    text: 'Die Wochenbilanz zeigt, was rein- und rausgeht. Pass auf: Personal kostet jede Woche Gehalt, nicht einmal. Wer sich zu viel Stab leistet, steht irgendwann bei null — dann wird zurückgestuft und entlassen.',
+    tipp: 'Stell erst jemanden ein, wenn die Wochenbilanz das dauerhaft trägt.' },
+  presse: {
+    text: 'Follower und Ruf entscheiden, ob Sponsoren anfragen — ab 25.000 melden sich die ersten. Die Weltrangliste ist die Wertung der Fachpresse: Wer sie am Saisonende anführt, bekommt den Goldenen Ball.' },
+  profil: {
+    text: 'Deine Fächer, die Formkurve der letzten Spiele und alles, was du bisher erreicht hast. Ganz unten liegt der Sicherungscode — damit holst du deine Karriere in jedem Browser zurück.' },
+
+  spiel_anpfiff: {
+    text: 'Gleich läuft der Ticker. Du spielst nicht jede Minute mit: Das Spiel läuft ab, und an ein paar Stellen bist du am Ball — dort musst du entscheiden.',
+    tipp: 'Ein Knopfdruck je Tor und je eigener Aktion. Der Rest läuft von selbst.' },
+  spiel_moment: {
+    text: 'Das ist ein Schlüsselmoment. Jede Antwort hängt an einem deiner Fächer, und daneben steht, wie schwer sie ist. Je weiter dein Wert über der Anforderung liegt, desto wahrscheinlicher gelingt sie.',
+    tipp: 'Nimm die Antwort, bei der dein Fach am weitesten über der Anforderung liegt — nicht die, die am besten klingt.' },
+  spiel_note: {
+    text: 'Nach jedem Spiel steht eine Note wie in der Schule: 1,0 ist die beste, 6,0 die schlechteste. Sie treibt fast alles — das Vertrauen des Trainers, deine Moral, deine Form und deinen Marktwert.' }
+};
+
+/* Waehrend der Erstellung gibt es noch kein S. Der Stand liegt deshalb bis zum
+   Karrierestart in NEU und wandert dann mit hinueber. */
+function tutStand() {
+  if (S && S.tut) return S.tut;
+  if (!NEU._tut) NEU._tut = { an: false, gesehen: {} };
+  return NEU._tut;
+}
+
+function tutBlase(id, h) {
+  return '<div class="tut"><p class="tut-kopf">Dein Berater</p>'
+    + '<p class="tut-text">' + esc(h.text) + '</p>'
+    + (h.tipp ? '<p class="tut-tipp">' + esc(h.tipp) + '</p>' : '')
+    + '<div class="tut-knoepfe"><button class="btn btn-primary btn-sm" data-tut-ok="' + id + '">Verstanden</button>'
+    + '<button class="btn btn-quiet btn-sm" data-tut-aus="1">Tutorial beenden</button></div></div>';
+}
+
+/* Immer nur eine Blase: die erste unbekannte Stelle im gerade sichtbaren
+   Bereich. Danach die naechste — drei Erklaerungen auf einmal waeren auf einem
+   Telefon mehr Erklaerung als Spiel. */
+function tutorialZeigen() {
+  document.querySelectorAll('.tut').forEach(x => x.remove());
+  const t = tutStand();
+  if (!t.an) return;
+  const bereich = !el('screen-create').hidden ? el('create-body')
+    : !el('screen-game').hidden ? document.querySelector('#main .view:not([hidden])') : null;
+  if (!bereich) return;
+  for (const ziel of bereich.querySelectorAll('[data-tut]')) {
+    const id = ziel.dataset.tut;
+    if (t.gesehen[id] || !TUTORIAL[id]) continue;
+    ziel.insertAdjacentHTML('beforebegin', tutBlase(id, TUTORIAL[id]));
+    return;
+  }
+}
+
+/* Im Spieltag gibt es keine Sprechblasen — dort ist der Fuss der Ort, an dem
+   ohnehin alles steht und getippt wird. Dieselbe Bauform wie die Ansage des
+   Trainers vor dem Anpfiff. */
+/* Nach dem Spiel steht die Note im Fuss — eine Ansage wuerde sie loeschen.
+   Dieser Hinweis haengt sich deshalb darunter, statt den Fuss zu leeren. */
+function tutNotiz(f, id) {
+  const t = tutStand();
+  if (!t.an || t.gesehen[id] || !TUTORIAL[id]) return;
+  t.gesehen[id] = 1;
+  const d = document.createElement('div');
+  d.className = 'tut tut-fuss';
+  const k = document.createElement('p'); k.className = 'tut-kopf'; k.textContent = 'Dein Berater';
+  const x = document.createElement('p'); x.className = 'tut-text'; x.textContent = TUTORIAL[id].text;
+  d.appendChild(k); d.appendChild(x);
+  f.appendChild(d);
+}
+
+async function tutAnsage(id) {
+  const t = tutStand();
+  if (!t.an || t.gesehen[id] || !TUTORIAL[id]) return;
+  t.gesehen[id] = 1;
+  if (S) speichern();
+  await warteAnsage('Dein Berater', TUTORIAL[id].text, TUTORIAL[id].tipp, 'Verstanden');
+}
+
 /* ========================== KARRIERE ANLEGEN ========================== */
 const NEU = { vorname: '', nachname: '', natId: 'DE', fuss: 'rechts', pos: 'ST', archetyp: 'komplett',
   land: 'Deutschland', weg: null, clubId: null, schritt: 1 };
@@ -6673,6 +6813,28 @@ function startClubs() {
 function renderCreate() {
   const s = NEU.schritt;
   document.querySelectorAll('.steps i').forEach((i, idx) => i.classList.toggle('on', idx < s));
+  /* Schritt 0: die Frage vor allem anderen. Sie steht hier und nicht auf der
+     Startseite, weil genau hier eine neue Karriere beginnt — und jeder der
+     drei Plaetze entscheidet fuer sich. */
+  if (s === 0) {
+    el('create-step-label').textContent = 'Bevor es losgeht';
+    el('create-title').textContent = 'Zum ersten Mal hier?';
+    el('create-back').hidden = true;
+    el('create-next').hidden = true;
+    el('create-body').innerHTML =
+      '<p class="sheet-text">Flutlicht ist ein Karrierespiel: ein Spieler, zwanzig Jahre, jede Woche eine Entscheidung. '
+      + 'Wenn du willst, erklärt dir dein Berater die erste Saison lang, was gerade ansteht — jeweils an der Stelle, um die es geht.</p>'
+      + '<div class="stack-sm">'
+      + '<button class="opt" data-tut-start="1"><div class="grow"><div class="opt-t">Tutorial mitnehmen</div>'
+      + '<div class="opt-d">Rund fünfzehn kurze Hinweise, verteilt über die erste Saison. Jeder kommt einmal und dann nie wieder.</div>'
+      + '<div class="opt-m">Abbrechen kannst du jederzeit</div></div></button>'
+      + '<button class="opt" data-tut-start="0"><div class="grow"><div class="opt-t">Ich kenne das Spiel</div>'
+      + '<div class="opt-d">Direkt zur Spielererstellung, ohne Hinweise.</div>'
+      + '<div class="opt-m">Im Profil später einschaltbar</div></div></button>'
+      + '</div>';
+    return;
+  }
+  el('create-next').hidden = false;
   el('create-step-label').textContent = 'Schritt ' + s + ' von 3 · ' + ['Herkunft', 'Spielertyp', 'Der erste Verein'][s - 1];
   el('create-title').textContent = ['Wer bist du?', 'Wie spielst du?', 'Wo fängt es an?'][s - 1];
   el('create-back').hidden = s === 1;
@@ -6691,14 +6853,14 @@ function renderCreate() {
       + '</div></div>';
   }
   if (s === 2) {
-    html += '<div class="field"><label>Position</label><div class="chips">'
+    html += '<div class="field" data-tut="erst_pos"><label>Position</label><div class="chips">'
       + POSITIONEN.map(p => '<button class="chip" data-set="pos:' + p.id + '" aria-pressed="' + (NEU.pos === p.id) + '">' + p.kurz + '</button>').join('')
       + '</div><p class="small muted">' + esc(POS(NEU.pos).name) + ' · '
       + Object.keys(POS(NEU.pos).w).sort((a, b) => POS(NEU.pos).w[b] - POS(NEU.pos).w[a]).slice(0, 3).map(k => AL(k, NEU.pos)).join(', ')
       + ' zählen am meisten.'
       + (NEU.pos === 'TW' ? ' Im Tor heißen dieselben Fächer anders — und die Note rechnet sich aus Paraden, Gegentoren und der Null.' : '')
       + '</p></div>'
-      + '<div class="field"><label>Spielertyp</label><div class="stack-sm">'
+      + '<div class="field" data-tut="erst_typ"><label>Spielertyp</label><div class="stack-sm">'
       + ARCH_LISTE(NEU.pos).map(a => '<button class="opt" data-set="archetyp:' + a.id + '" aria-pressed="' + (NEU.archetyp === a.id) + '"><div class="grow">'
         + '<div class="opt-t">' + esc(a.name) + '</div><div class="opt-d">' + esc(a.text) + '</div>'
         + '<div class="opt-m">' + Object.keys(a.boni).filter(k => a.boni[k] > 0).map(k => AL(k, NEU.pos) + ' +' + a.boni[k]).join(' · ') + '</div></div></button>').join('')
@@ -6714,7 +6876,7 @@ function renderCreate() {
       + '</div><p class="small muted">' + PYRAMIDEN[NEU.land].length + ' Ligen: '
       + PYRAMIDEN[NEU.land].map(id => esc(LG(id).name)).join(' · ')
       + '. Wechseln kannst du später überallhin.</p></div>';
-    html += '<div class="field"><label>Herkunftsweg</label><div class="stack-sm">'
+    html += '<div class="field" data-tut="erst_weg"><label>Herkunftsweg</label><div class="stack-sm">'
       + STARTWEGE.map(w => '<button class="opt" data-set="weg:' + w.id + '" aria-pressed="' + (NEU.weg === w.id) + '"><div class="grow">'
         + '<div class="opt-t">' + esc(w.name) + '</div><div class="opt-d">' + esc(w.text) + '</div>'
         + '<div class="opt-m">Start in der ' + esc(LG(startLiga(w.id)).name) + ' · ' + esc(w.meta) + '</div></div></button>').join('')
@@ -6730,6 +6892,7 @@ function renderCreate() {
     }
   }
   el('create-body').innerHTML = html;
+  tutorialZeigen();
 }
 
 function karriereStarten() {
@@ -6745,6 +6908,7 @@ function karriereStarten() {
   const gehalt = Math.max(24000, Math.round(Math.exp(club.staerke * .11) * 530 * .35 / 1000) * 1000);
   S = {
     v: 2, jahr: 2026, woche: 1, plan: 'technik', reha: 'plan', trainFokus: top2[0], sponsorPause: 0,
+    tut: { an: !!(NEU._tut && NEU._tut.an), gesehen: Object.assign({}, (NEU._tut || {}).gesehen) },
     beendet: false, leihe: null, ligaTausch: {}, staerkeTausch: {}, transfers: {}, verlauf: [], karriere: [], stars: [], hoehepunkte: [],
     p: {
       vorname: NEU.vorname, nachname: NEU.nachname, natId: NEU.natId, pos: NEU.pos, fuss: NEU.fuss, archetyp: NEU.archetyp,
@@ -6791,6 +6955,8 @@ function migriere() {
   if (!S.stars.length) baueStars();
   if (S.stars.length < STAR_ANZAHL || S.stars.some(x => typeof x.wurf !== 'number')) starsNachruesten();
   if (typeof S.sponsorPause !== 'number') S.sponsorPause = 0;
+  if (!S.tut || typeof S.tut !== 'object') S.tut = { an: false, gesehen: {} };
+  if (!S.tut.gesehen) S.tut.gesehen = {};
   if (typeof S.p.aufbau !== 'number') S.p.aufbau = 0;
   if (typeof S.p.ohneSpiel !== 'number') S.p.ohneSpiel = 0;
   S.ligaTausch = S.ligaTausch || {};
@@ -7140,7 +7306,8 @@ function neueKarriereAnlegen() {
   const n = zufallsname('de');
   if (!NEU.vorname) NEU.vorname = n.v;
   if (!NEU.nachname) NEU.nachname = n.n;
-  NEU.schritt = 1;
+  NEU.schritt = 0;
+  NEU._tut = { an: false, gesehen: {} };
   el('screen-start').hidden = true;
   el('screen-create').hidden = false;
   renderCreate();
@@ -7186,6 +7353,33 @@ if (window.visualViewport) visualViewport.addEventListener('resize', hoeheAnpass
 
 /* ========================== START ========================== */
 function verdrahten() {
+  /* Die Tutorial-Knoepfe liegen auf dem ganzen Dokument statt in den einzelnen
+     Bereichen: Die Blase erscheint auf dem Erstellungs- und auf allen sechs
+     Spielbildschirmen, und jeder bringt seine eigene Klickverteilung mit. */
+  document.addEventListener('click', e => {
+    const start = e.target.closest('[data-tut-start]');
+    if (start) {
+      NEU._tut = { an: start.dataset.tutStart === '1', gesehen: {} };
+      NEU.schritt = 1;
+      renderCreate();
+      return;
+    }
+    const ok = e.target.closest('[data-tut-ok]');
+    if (ok) {
+      tutStand().gesehen[ok.dataset.tutOk] = 1;
+      if (S) speichern();
+      tutorialZeigen();
+      return;
+    }
+    const aus = e.target.closest('[data-tut-aus]');
+    if (aus) {
+      tutStand().an = false;
+      if (S) speichern();
+      tutorialZeigen();
+      toast('Tutorial beendet — im Profil wieder einschaltbar');
+    }
+  });
+
   el('slots').addEventListener('click', async e => {
     const weg = e.target.closest('[data-loeschen]');
     if (weg) {
