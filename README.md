@@ -58,6 +58,25 @@ Der Spielstand wird nach jeder Woche automatisch gesichert, über drei Stufen:
 
 Das Profil zeigt jederzeit an, wo der Stand liegt, und erlaubt manuelles Speichern.
 
+**Drei Plätze nebeneinander.** Die Startseite zeigt drei Zeilen: belegte mit Wappen, Name,
+Verein, Saison und Woche, freie als „Platz 2 — frei". Ein Tipp setzt fort oder legt an, der
+Papierkorb daneben löscht genau diesen Platz. Im Spiel führt „Karriere wechseln" im Profil
+zurück zur Auswahl — vorher wird gespeichert.
+
+Jeder Platz ist **ein eigenes Dokument**, kein Feld in einem gemeinsamen: Ein Dokument des
+dauerhaften Speichers darf 256 KiB groß sein, und ein einzelner Spielstand liegt gemessen
+schon bei 117 bis 150 KB. Drei Stände in einem Dokument würden die Grenze sprengen.
+
+Platz 1 behält bewusst die alten Schlüssel (`flutlicht.karriere.v1`) und den alten
+Dokumentpfad (`spielstand/karriere`). Ein vorhandener Spielstand **ist** damit Platz 1, ohne
+dass irgendetwas umkopiert wird — es gibt keinen Moment, in dem er zwischen zwei Orten
+unterwegs wäre. Die Plätze 2 und 3 hängen `.p2` / `.p3` an.
+
+Der Sicherungscode fragt beim Einfügen, auf welchen Platz er soll, und zeigt dabei, was dort
+gerade steht; ein freier Platz wird hervorgehoben. Gefragt wird erst, nachdem der Code
+gelesen wurde — bei einem unlesbaren Code soll niemand vorher aussuchen, welche Karriere er
+dafür opfert.
+
 ## Gestaltung
 
 Ein dunkles Grün-Schwarz mit Bernstein als einziger Akzentfarbe, Anton für Zahlen und
