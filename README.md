@@ -209,8 +209,11 @@ Vereinsstärke. Der Kader altert über die Jahre, Spieler gehen und kommen.
 **Spieltag** — 34 bis 38 Ligaspieltage plus Pokal und Europapokal. Ob du spielst, entscheidet sich
 aus deiner Stärke im Vergleich zum Kader, dem Trainer-Vertrauen, deiner Form und deiner
 Energie. Als Startelfspieler bekommst du zwei **Schlüsselmomente**, als Einwechselspieler
-einen — aus einem Vorrat von 45 Situationen mit je drei Optionen: Kopfball, Volley oder
-ablegen; grätschen, leiten oder Tempoduell. Der Ausgang hängt am passenden Attribut, an der
+einen — aus einem Vorrat von **127 Situationen** mit je drei Optionen: Kopfball, Volley oder
+ablegen; grätschen, leiten oder Tempoduell. Ein Teil davon gehört nur einer einzigen Position:
+Der Außenverteidiger hinterläuft und wird überlaufen, der Innenverteidiger räumt ab und rückt
+aus der Kette, der Sechser zerstört, der Zehner erfindet. Je nach Position stehen damit 24 bis
+27 verschiedene Situationen zur Auswahl statt vorher 14 bis 16. Der Ausgang hängt am passenden Attribut, an der
 Schwierigkeit und am Zufall und reicht vom Traumtor über Abseits und herausgeholten Elfmeter
 bis zur eigenen Verletzung, die dich vom Platz holt. Nicht alle Ausgänge sind gleich
 wahrscheinlich: Ein Querpass gelingt bis zu 86 %, eine Vorlage höchstens 68 %, ein Torschuss
@@ -268,6 +271,57 @@ Länderspieldebüt, Rekordtransfer, schwere Verletzung, jedes 50. Karrieretor un
 Potenzial, ab 29 baut der Körper ab. Saisonbilanz mit Torschützenkönig, Spieler der Saison
 und Goldenem Ball, Weltrangliste, Titelvitrine, Karrieretabelle über alle Saisons.
 Am Schluss: Rücktritt und Legacy-Punkte.
+
+## Was im Laufe der Jahre passiert
+
+Zwischen den Spieltagen zieht das Spiel Wochenereignisse: Der Trainer bittet dich ins Büro,
+ein Routinier stellt dich in der Kabine bloss, ein Sponsor klopft an. Der Topf war dafür zu
+klein. Gemessen über zehn volle Laufbahnen:
+
+| | vorher | jetzt |
+|---|---|---|
+| Ereignisse im Topf | 43 | **87** |
+| Ziehungen je Laufbahn | 212 | 171 |
+| davon verschiedene | 38 | **66** |
+| häufigstes Ereignis je Laufbahn | 13–19 mal | **7–10 mal** |
+
+In Saison drei war die Welt noch neu, ab Saison acht kannte man jeden Text. Die Wiederholung
+ist jetzt etwa halbiert.
+
+**Die neuen Ereignisse hängen an der Lebensphase.** Sie ziehen nur, solange sie passen —
+damit wiederholen sie sich nicht nur seltener, sie stehen auch dort, wo der Spieler gerade
+wirklich steht:
+
+- **Die frühen Jahre** (bis etwa 22): der erste Profivertrag, die erste eigene Wohnung, die
+  Abschlussprüfung mitten in der Rückrunde, das erste Trikot mit deinem Namen auf dem
+  Rücken, der alte Jugendtrainer am Zaun, die U21, das erste richtige Geld, der Freund aus
+  der Jugend, der es nicht geschafft hat.
+- **Die mittleren Jahre** (22 bis 31): die Beziehung, die unter dem Beruf leidet, Nachwuchs,
+  das erste eigene Haus, die grosse Berateragentur, der sichere Tipp eines Mitspielers, die
+  freigewordene Rückennummer, die Frage, wer die Elfmeter schießt.
+- **Die späten Jahre** (ab 30): der Trainerschein, der Körper, der länger braucht, das
+  Angebot aus Übersee, ein Platz in der Geschäftsstelle, die Rolle als Ältester in der
+  Kabine, das Abschiedsspiel, der letzte Vertrag mit weniger Gehalt — und das erste
+  Punktspiel des eigenen Kindes.
+- **Ohne Altersgrenze:** die Dopingkontrolle um sechs Uhr morgens, der liegengebliebene
+  Mannschaftsbus, das Gehalt, das drei Wochen später kommt, das Wiedersehen mit dem
+  Ex-Verein, der Sprachkurs und das Heimweh im Ausland, die Autogrammstunde im Regen.
+
+**Manches gibt es nur einmal.** Dreiundzwanzig Ereignisse tragen ein Kennzeichen, das sie
+nach dem ersten Mal aus dem Topf nimmt — den ersten Profivertrag zweimal zu unterschreiben
+wäre albern. Gemessen über zwölf Laufbahnen: kein einziger Verstoß.
+
+**Was die Balance dazu sagt.** Ein größerer Topf verschiebt leicht das ganze Spiel. Gemessen
+über je zehn Laufbahnen und rund 3.500 Spiele pro Position, gegen denselben Aufbau vorher:
+
+- Die neuen Ereignisse gaben anfangs **3,33 Moral je Wahl** gegen 1,43 im Bestand — das
+  Privatleben war schlicht zu warm. Die großen Momente dürfen groß bleiben, weil sie nur
+  einmal kommen; die wiederkehrenden liegen jetzt bei 1,67 gegen 1,49.
+- Die neuen Spielsituationen hoben zuerst den Flügelstürmer (+22 % Tore), den Zehner
+  (+30 %) und die Vorlagen des Außenverteidigers (+53 %). Sechs Ausgänge wurden
+  zurückgenommen; danach liegt alles im Rauschen des Messverfahrens selbst, das bei zehn
+  Laufbahnen 10 bis 20 % beträgt. Die Durchschnittsnoten aller acht Positionen bewegen sich
+  um höchstens 0,1 — und an der Note hängt alles Weitere.
 
 ## Die Saison in Europa
 
@@ -407,7 +461,7 @@ weiter — der Abschlusstrainer trainiert beim Torwart eben den Abschlag.
 **Eigene Spielertypen:** Der Rückhalt (Reflexe), der mitspielende Torwart (Spielöffnung und
 Abschlag), der Strafraumbeherrscher, der Unerschütterliche, der Komplette.
 
-**Sechzehn eigene Schlüsselmomente,** in denen es nie ums Toreschießen geht: die Flanke in
+**Sechsundzwanzig eigene Schlüsselmomente,** in denen es fast nie ums Toreschießen geht: die Flanke in
 den Fünfer, das Eins gegen eins, der abgefälschte Schuss, der Rückpass unter Druck, die
 Mauer beim Freistoß, das Zeitspiel in Führung, die Viererkette, die zu weit auseinander
 steht. Nicht jeder Patzer ist gleich ein Tor: Zwischen Parade und Gegentor liegt der

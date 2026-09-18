@@ -2226,7 +2226,47 @@ const MOMENTE = {
     { t: 'Elfmeter gegen euch. Du gehst auf die Linie, das Stadion pfeift ihn an.', elfer: true, w: [
       { l: 'Die Ecke ahnen und früh abtauchen', h: 'Mentalität', a: 'mentalitaet', s: 56, gut: 'rettung', schlecht: 'gegentor' },
       { l: 'Bis zuletzt stehen bleiben', h: 'Reflexe', a: 'tempo', s: 60, gut: 'rettung', schlecht: 'gegentor' },
-      { l: 'Ihn vorher aus dem Konzept bringen', h: 'Eins gegen eins', a: 'zweikampf', s: 58, gut: 'rettung', schlecht: 'gegentor' } ] }
+      { l: 'Ihn vorher aus dem Konzept bringen', h: 'Eins gegen eins', a: 'zweikampf', s: 58, gut: 'rettung', schlecht: 'gegentor' } ] },
+    { t: 'Vor zehn Minuten ist dir ein Ball durch die Finger gerutscht. Jetzt kommt die nächste Flanke genauso.', w: [
+      { l: 'Diesmal festhalten, koste es was es wolle', h: 'Fangsicherheit · Kopfsache', a: 'mentalitaet', s: 64, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Auf Nummer sicher gehen und wegfausten', h: 'Fangsicherheit', a: 'dribbling', s: 48, gut: 'aktion', schlecht: 'nachschuss' },
+      { l: 'Rausgehen und den Ball früh abfangen', h: 'Strafraum · mutig', a: 'physis', s: 66, gut: 'rettung', schlecht: 'gegentor' } ] },
+    { t: 'Ihr liegt zurück, 92. Minute, letzte Ecke. Dein Trainer winkt dich nach vorn.', w: [
+      { l: 'Mitlaufen und in den Fünfer gehen', h: 'Strafraum · alles oder nichts', a: 'physis', s: 74, gut: 'tor', schlecht: 'gegentor' },
+      { l: 'An der Mittellinie stehen bleiben', h: 'Mentalität · sicher', a: 'mentalitaet', s: 34, gut: 'aktion', schlecht: 'aktion' },
+      { l: 'Mitgehen, aber am Sechzehner lauern', h: 'Abschätzen', a: 'mentalitaet', s: 58, gut: 'assist', schlecht: 'gegentor' } ] },
+    { t: 'Kopfball aus fünf Metern aufs kurze Eck. Du hast den Bruchteil einer Sekunde.', w: [
+      { l: 'Kurzes Eck zumachen und stehen bleiben', h: 'Reflexe', a: 'tempo', s: 66, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Groß machen und den Winkel nehmen', h: 'Strafraum', a: 'physis', s: 60, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Mit dem Fuß reflexartig hoch', h: 'Fangsicherheit · unorthodox', a: 'dribbling', s: 70, gut: 'rettung', schlecht: 'nachschuss' } ] },
+    { t: 'Flutlicht, nasser Ball, hohe Flanke direkt in den Lichtkegel. Du siehst ihn spät.', w: [
+      { l: 'Trotzdem rausgehen', h: 'Strafraum · riskant', a: 'physis', s: 70, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Auf der Linie warten, bis du ihn siehst', h: 'Reflexe', a: 'tempo', s: 56, gut: 'aktion', schlecht: 'nachschuss' },
+      { l: 'Blind in die Flugbahn fausten', h: 'Fangsicherheit', a: 'dribbling', s: 62, gut: 'rettung', schlecht: 'ballverlust' } ] },
+    { t: 'Der Ball geht über die gesamte Abwehr, dein letzter Mann ist zwanzig Meter zu weit vorn.', w: [
+      { l: 'Weit rauslaufen und vor dem Stürmer klären', h: 'Eins gegen eins · Tempo', a: 'tempo', s: 68, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Auf Höhe des Sechzehners abwarten', h: 'Mentalität', a: 'mentalitaet', s: 56, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Rauslaufen und den Ball nach vorn spielen', h: 'Spielöffnung · mutig', a: 'pass', s: 72, gut: 'aktion', schlecht: 'gegentor' } ] },
+    { t: 'Dein Innenverteidiger spielt dir den Ball quer vor die Füße — mitten ins Zentrum, der Stürmer kommt.', w: [
+      { l: 'Sofort ins Seitenaus dreschen', h: 'Abschlag · sicher', a: 'schuss', s: 34, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Einmal ausweichen und dann spielen', h: 'Fangsicherheit · eng', a: 'dribbling', s: 72, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Ruhig annehmen und den Außenverteidiger suchen', h: 'Spielöffnung', a: 'pass', s: 62, gut: 'aktion', schlecht: 'gegentor' } ] },
+    { t: 'Ein Flatterball aus dreissig Metern. Er trudelt, springt auf und ändert zweimal die Richtung.', w: [
+      { l: 'Sicher nach vorn abklatschen', h: 'Fangsicherheit', a: 'dribbling', s: 52, gut: 'aktion', schlecht: 'nachschuss' },
+      { l: 'Festhalten, egal wie er kommt', h: 'Fangsicherheit · schwer', a: 'dribbling', s: 70, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Auf die Reflexe vertrauen und spät abtauchen', h: 'Reflexe', a: 'tempo', s: 62, gut: 'rettung', schlecht: 'gegentor' } ] },
+    { t: 'Du hältst den ersten Schuss stark — und der Ball prallt genau vor die Füße des nächsten Angreifers.', w: [
+      { l: 'Sofort hoch und in den Schuss werfen', h: 'Reflexe · sehr schwer', a: 'tempo', s: 74, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Liegen bleiben und das Tor groß machen', h: 'Eins gegen eins', a: 'zweikampf', s: 64, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Nach dem Ball greifen, bevor er schießt', h: 'Strafraum · riskant', a: 'physis', s: 70, gut: 'rettung', schlecht: 'karte' } ] },
+    { t: 'Du hast den Ball in der Hand, der Gegner läuft dich an und stellt die kurze Anspielstation zu.', w: [
+      { l: 'Lang und hoch über alles hinweg', h: 'Abschlag · sicher', a: 'schuss', s: 38, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Den freien Sechser im Halbraum suchen', h: 'Spielöffnung · schwer', a: 'pass', s: 66, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Mit dem Ball andribbeln und ihn locken', h: 'Fangsicherheit · Wahnsinn', a: 'dribbling', s: 78, gut: 'aktion', schlecht: 'gegentor' } ] },
+    { t: 'Freistoss aus sechzehn Metern, direkt an der Strafraumkante. Die Mauer steht sehr nah.', w: [
+      { l: 'Vier Mann in die Mauer und dein Eck decken', h: 'Mentalität', a: 'mentalitaet', s: 56, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Nur zwei Mann, dafür freie Sicht', h: 'Reflexe · riskant', a: 'tempo', s: 68, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Einen Spieler hinter der Mauer liegen lassen', h: 'Strafraum · unorthodox', a: 'physis', s: 62, gut: 'rettung', schlecht: 'gegentor' } ] },
   ],
   Angriff: [
     { t: 'Die Flanke kommt scharf von rechts herein. Du löst dich am Fünfer vom Verteidiger.', w: [
@@ -2292,7 +2332,79 @@ const MOMENTE = {
     { t: 'Elfmeter! Das Stadion hält den Atem an. Du legst dir den Ball zurecht.', elfer: true, w: [
       { l: 'Volle Wucht ins Eck', h: 'Abschluss', a: 'schuss', s: 46, gut: 'tor', schlecht: 'elferfehl' },
       { l: 'Ruhig flach in die Ecke', h: 'Mentalität', a: 'mentalitaet', s: 44, gut: 'tor', schlecht: 'elferfehl' },
-      { l: 'Panenka in die Mitte', h: 'Mentalität · Wahnsinn', a: 'mentalitaet', s: 74, gut: 'traumtor', schlecht: 'elferfehl' } ] }
+      { l: 'Panenka in die Mitte', h: 'Mentalität · Wahnsinn', a: 'mentalitaet', s: 74, gut: 'traumtor', schlecht: 'elferfehl' } ] },
+    { t: 'Du hast heute noch keinen einzigen Ball sinnvoll verarbeitet. Jetzt kommt eine Flanke in deine Richtung.', w: [
+      { l: 'Alles auf diese eine Karte setzen', h: 'Abschluss · Kopfsache', a: 'mentalitaet', s: 64, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'Sicher weiterleiten und wieder reinkommen', h: 'Passspiel', a: 'pass', s: 44, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Den Körper reinstellen und festmachen', h: 'Physis', a: 'physis', s: 54, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Abseitsfalle. Du startest, die Fahne bleibt unten — aber der Ball ist einen Schritt zu weit.', w: [
+      { l: 'Sprinten und ihn trotzdem erlaufen', h: 'Tempo · schwer', a: 'tempo', s: 68, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'Abbremsen und auf den Mitspieler warten', h: 'Mentalität', a: 'mentalitaet', s: 46, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Den Torwart unter Druck setzen', h: 'Zweikampf · riskant', a: 'zweikampf', s: 62, gut: 'tor', schlecht: 'eigenverletzung' } ] },
+    { t: 'Der Videoschiedsrichter prüft deinen Treffer auf Abseits. Das Stadion hält den Atem an.', w: [
+      { l: 'Ruhig abwarten und dich sammeln', h: 'Mentalität', a: 'mentalitaet', s: 42, gut: 'aktion', schlecht: 'abseits' },
+      { l: 'Schon mal jubeln gehen', h: 'Mentalität · riskant', a: 'mentalitaet', s: 64, gut: 'tor', schlecht: 'abseits' },
+      { l: 'Sofort weiterdenken und dich neu postieren', h: 'Klug', a: 'tempo', s: 50, gut: 'aktion', schlecht: 'abseits' } ] },
+    { t: 'Ihr führt klar, der Trainer hat Schonung angekündigt. Trotzdem liegt dir der Ball im Strafraum vor dem Fuß.', w: [
+      { l: 'Den Abschluss suchen', h: 'Abschluss', a: 'schuss', s: 58, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'Auf den Mitspieler legen, der noch keinen hat', h: 'Passspiel · Kabine', a: 'pass', s: 48, gut: 'assist', schlecht: 'vergeben' },
+      { l: 'Den Ball halten und Zeit nehmen', h: 'Sicher', a: 'mentalitaet', s: 34, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Du bekommst den Ball am Flügel, der Außenverteidiger stellt sich dir mit weitem Stand entgegen.', pos: ['FL'], w: [
+      { l: 'Außen vorbei und in die Grundlinie', h: 'Tempo', a: 'tempo', s: 60, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Nach innen ziehen und abschliessen', h: 'Abschluss', a: 'schuss', s: 64, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'Ihn im Eins gegen eins ausspielen', h: 'Dribbling · schwer', a: 'dribbling', s: 70, gut: 'traumtor', schlecht: 'ballverlust' } ] },
+    { t: 'Man doppelt dich: Außenverteidiger und Sechser kommen zu zweit auf dich zu.', pos: ['FL'], w: [
+      { l: 'Den freien Mitspieler in der Mitte finden', h: 'Passspiel', a: 'pass', s: 54, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Beide in einer Bewegung ausspielen', h: 'Dribbling · Wahnsinn', a: 'dribbling', s: 78, gut: 'traumtor', schlecht: 'ballverlust' },
+      { l: 'Das Foul ziehen und Zeit gewinnen', h: 'Mentalität · sicher', a: 'mentalitaet', s: 42, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Konter, drei gegen zwei. Du hast den Ball auf dem Flügel, in der Mitte läuft alles mit.', pos: ['FL'], w: [
+      { l: 'Den Querpass in die Mitte spielen', h: 'Passspiel', a: 'pass', s: 50, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Selbst abschliessen', h: 'Abschluss · egoistisch', a: 'schuss', s: 66, gut: 'aktion', schlecht: 'vergeben' },
+      { l: 'Noch einen Gegner ausspielen und dann legen', h: 'Dribbling', a: 'dribbling', s: 62, gut: 'assist', schlecht: 'ballverlust' } ] },
+    { t: 'Dein Gegenspieler hat schon Gelb und geht trotzdem hart rein. Du kannst ihn provozieren.', pos: ['FL'], w: [
+      { l: 'Immer wieder ins Eins gegen eins gehen', h: 'Dribbling', a: 'dribbling', s: 60, gut: 'tor', schlecht: 'ballverlust' },
+      { l: 'Ihn mit Tempo ins nächste Foul laufen lassen', h: 'Tempo · clever', a: 'tempo', s: 64, gut: 'foulok', schlecht: 'ballverlust' },
+      { l: 'Die Seite wechseln und ihn ausblenden', h: 'Mentalität', a: 'mentalitaet', s: 46, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Die Flanke kommt von der anderen Seite, du läufst am zweiten Pfosten ein. Niemand hat dich gesehen.', pos: ['FL'], w: [
+      { l: 'Direkt volley abnehmen', h: 'Abschluss · schwer', a: 'schuss', s: 70, gut: 'traumtor', schlecht: 'vergeben' },
+      { l: 'Den Kopf hinhalten', h: 'Physis', a: 'physis', s: 56, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'Zurücklegen an die Strafraumkante', h: 'Passspiel', a: 'pass', s: 48, gut: 'assist', schlecht: 'vergeben' } ] },
+    { t: 'Der Trainer will, dass du die Seiten wechselst — auf deinen schwachen Fuß.', pos: ['FL'], w: [
+      { l: 'Es annehmen und es dort versuchen', h: 'Technik · schwer', a: 'dribbling', s: 68, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Auf der gewohnten Seite bleiben', h: 'Mentalität · Diskussion', a: 'mentalitaet', s: 56, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Ständig durchwechseln und beide bespielen', h: 'Tempo · Energie', a: 'tempo', s: 62, gut: 'tor', schlecht: 'vergeben' } ] },
+    { t: 'Einwurf tief in der gegnerischen Hälfte. Du kannst dich lösen oder in der Tiefe starten.', pos: ['FL'], w: [
+      { l: 'In die Tiefe starten', h: 'Tempo', a: 'tempo', s: 58, gut: 'tor', schlecht: 'abseits' },
+      { l: 'Entgegenkommen und festmachen', h: 'Physis', a: 'physis', s: 46, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'In den Rückraum abkippen und flanken', h: 'Passspiel', a: 'pass', s: 54, gut: 'assist', schlecht: 'ballverlust' } ] },
+    { t: 'Du hast heute zweimal aus guter Position vergeben. Jetzt liegt der dritte Ball vor dir.', pos: ['ST'], w: [
+      { l: 'Einfach halten und flach ins Eck', h: 'Abschluss · Kopfsache', a: 'mentalitaet', s: 58, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'Diesmal mit voller Wucht', h: 'Abschluss', a: 'schuss', s: 66, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'Den besser postierten Mitspieler bedienen', h: 'Passspiel · uneitel', a: 'pass', s: 44, gut: 'assist', schlecht: 'vergeben' } ] },
+    { t: 'Zwei Innenverteidiger nehmen dich in die Zange. Der lange Ball kommt trotzdem auf dich.', pos: ['ST'], w: [
+      { l: 'Festmachen und auf Unterstützung warten', h: 'Physis', a: 'physis', s: 62, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Direkt in den Lauf des Mitspielers verlängern', h: 'Passspiel · schwer', a: 'pass', s: 66, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Zwischen beiden durchdrehen', h: 'Dribbling · Wahnsinn', a: 'dribbling', s: 76, gut: 'traumtor', schlecht: 'ballverlust' } ] },
+    { t: 'Der gegnerische Torwart spielt riskant mit dem Fuss heraus. Du stehst zehn Meter entfernt.', pos: ['ST'], w: [
+      { l: 'Sofort anlaufen und ihn stellen', h: 'Tempo', a: 'tempo', s: 60, gut: 'tor', schlecht: 'ballverlust' },
+      { l: 'Den Passweg zustellen und abwarten', h: 'Mentalität · klug', a: 'mentalitaet', s: 52, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Zurückfallen und die Ordnung halten', h: 'Sicher', a: 'mentalitaet', s: 34, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Du stehst in der Mitte, drei Verteidiger um dich herum — aber die Flanke segelt genau auf deinen Kopf.', pos: ['ST'], w: [
+      { l: 'Hochsteigen und pressen', h: 'Physis', a: 'physis', s: 62, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'Den Kopfball aufs lange Eck legen', h: 'Abschluss · schwer', a: 'schuss', s: 68, gut: 'traumtor', schlecht: 'vergeben' },
+      { l: 'Verlängern auf den einlaufenden Mitspieler', h: 'Passspiel', a: 'pass', s: 50, gut: 'assist', schlecht: 'vergeben' } ] },
+    { t: 'Du bist seit einer Stunde ohne Ballkontakt. Deine Mitspieler suchen dich schlicht nicht.', pos: ['ST'], w: [
+      { l: 'Weiter die Läufe machen, auch ins Leere', h: 'Mentalität', a: 'mentalitaet', s: 52, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Tief abkippen und dir die Bälle holen', h: 'Passspiel', a: 'pass', s: 56, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Lautstark einfordern, dass sie dich sehen', h: 'Mentalität · riskant', a: 'mentalitaet', s: 64, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Der Verteidiger grätscht, der Ball springt hoch über ihn hinweg — und bleibt in der Luft stehen.', pos: ['ST'], w: [
+      { l: 'Den Fallrückzieher wagen', h: 'Abschluss · Wahnsinn', a: 'schuss', s: 82, gut: 'traumtor', schlecht: 'vergeben' },
+      { l: 'Mit der Brust mitnehmen und dann schiessen', h: 'Technik', a: 'dribbling', s: 60, gut: 'tor', schlecht: 'ballverlust' },
+      { l: 'Köpfen, so gut es geht', h: 'Physis', a: 'physis', s: 54, gut: 'tor', schlecht: 'vergeben' } ] },
+    { t: 'Du brauchst noch ein Tor für den Dreierpack. Der Ball kommt — aber ein Mitspieler steht besser.', pos: ['ST'], w: [
+      { l: 'Selbst abschliessen, das ist deine Chance', h: 'Abschluss · egoistisch', a: 'schuss', s: 64, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'Abgeben — die Mannschaft zählt', h: 'Passspiel · Kabine', a: 'pass', s: 44, gut: 'assist', schlecht: 'vergeben' },
+      { l: 'Andribbeln und spät entscheiden', h: 'Dribbling', a: 'dribbling', s: 60, gut: 'tor', schlecht: 'ballverlust' } ] },
   ],
   Mittelfeld: [
     { t: 'Der Ball tropft dir 25 Meter vor dem Tor vor die Füße. Die Schusslinie ist frei.', w: [
@@ -2354,7 +2466,91 @@ const MOMENTE = {
     { t: 'Hoher Ball ins Zentrum, du und der gegnerische Sechser steigen gleichzeitig hoch.', w: [
       { l: 'Kopfball nach vorn verlängern', h: 'Physis', a: 'physis', s: 56, gut: 'assist', schlecht: 'ballverlust' },
       { l: 'Ihn am Absprung hindern', h: 'Zweikampf · Karte droht', a: 'zweikampf', s: 60, gut: 'aktion', schlecht: 'karte' },
-      { l: 'Auf den zweiten Ball lauern', h: 'Mentalität', a: 'mentalitaet', s: 48, gut: 'aktion', schlecht: 'ballverlust' } ] }
+      { l: 'Auf den zweiten Ball lauern', h: 'Mentalität', a: 'mentalitaet', s: 48, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Der Gegner presst euch hoch an. Dein Innenverteidiger sucht dich mit einem scharfen Pass.', w: [
+      { l: 'Andrehen und die Pressinglinie überspielen', h: 'Dribbling · schwer', a: 'dribbling', s: 68, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Erst klären lassen, dann neu aufbauen', h: 'Sicher', a: 'mentalitaet', s: 34, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Direkt auf den freien Außen weiterleiten', h: 'Passspiel', a: 'pass', s: 56, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Halbzeitpfiff steht kurz bevor, ihr führt knapp. Der Ball läuft ruhig in euren eigenen Reihen.', w: [
+      { l: 'Das Tempo hochhalten und nachlegen', h: 'Passspiel · riskant', a: 'pass', s: 62, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Ruhe reinbringen und die Zeit nehmen', h: 'Mentalität', a: 'mentalitaet', s: 42, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Selbst andribbeln und die Linie testen', h: 'Dribbling', a: 'dribbling', s: 58, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Der Ball springt nach einem Kopfballduell hoch in den Halbraum. Du bist als Erster da.', w: [
+      { l: 'Direkt aus der Luft weiterleiten', h: 'Technik · schwer', a: 'dribbling', s: 66, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Mitnehmen und den Kopf heben', h: 'Passspiel', a: 'pass', s: 50, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Volley aus der Distanz probieren', h: 'Abschluss · Wahnsinn', a: 'schuss', s: 78, gut: 'traumtor', schlecht: 'vergeben' } ] },
+    { t: 'Der gegnerische Spielmacher bekommt zum dritten Mal in Ruhe den Ball zwischen den Reihen.', pos: ['DM'], w: [
+      { l: 'Ihn ab jetzt in Manndeckung nehmen', h: 'Zweikampf', a: 'zweikampf', s: 58, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Den Passweg zu ihm zustellen', h: 'Mentalität · klug', a: 'mentalitaet', s: 54, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Ihn einmal deutlich spüren lassen', h: 'Physis · Karte droht', a: 'physis', s: 62, gut: 'rettung', schlecht: 'karte' } ] },
+    { t: 'Der Konter des Gegners rollt, du bist der Einzige, der noch zwischen Ball und Abwehr steht.', pos: ['DM'], w: [
+      { l: 'Sauber den Ball spitzeln', h: 'Zweikampf · schwer', a: 'zweikampf', s: 68, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Das taktische Foul ziehen', h: 'Gelb sicher', a: 'mentalitaet', s: 44, gut: 'foulok', schlecht: 'karte' },
+      { l: 'Nur verzögern und zurückweichen', h: 'Mentalität', a: 'mentalitaet', s: 52, gut: 'aktion', schlecht: 'gegentor' } ] },
+    { t: 'Ihr habt den Ball erobert. Alle schreien nach vorn — aber der schnelle Pass ist eng.', pos: ['DM'], w: [
+      { l: 'Den Vertikalpass trotzdem wagen', h: 'Passspiel · schwer', a: 'pass', s: 66, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Erst sichern, dann verlagern', h: 'Passspiel · sicher', a: 'pass', s: 38, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Selbst in den freien Raum treiben', h: 'Dribbling', a: 'dribbling', s: 58, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Dein Trainer brüllt, die Kette steht zu tief. Du bist der Mann, der davor aufräumen soll.', pos: ['DM'], w: [
+      { l: 'Die Kette nach vorn schieben', h: 'Mentalität · Führung', a: 'mentalitaet', s: 56, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Selbst tiefer gehen und den Raum zumachen', h: 'Mentalität', a: 'mentalitaet', s: 46, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Vorn drauf und die Eröffnung stören', h: 'Tempo · riskant', a: 'tempo', s: 66, gut: 'rettung', schlecht: 'gegentor' } ] },
+    { t: 'Freistoss aus fast dreissig Metern. Der Trainer hat eigentlich einen anderen Schützen benannt.', pos: ['DM'], w: [
+      { l: 'Dem Schützen den Ball überlassen', h: 'Mentalität · sicher', a: 'mentalitaet', s: 30, gut: 'aktion', schlecht: 'aktion' },
+      { l: 'Dir den Ball nehmen und draufhalten', h: 'Abschluss · schwer', a: 'schuss', s: 74, gut: 'traumtor', schlecht: 'vergeben' },
+      { l: 'Kurz ausführen und den Raum bespielen', h: 'Passspiel', a: 'pass', s: 52, gut: 'assist', schlecht: 'ballverlust' } ] },
+    { t: 'Zweikampf an der Mittellinie, ihr geht beide voll rein. Der Schiedsrichter lässt laufen.', pos: ['DM'], w: [
+      { l: 'Aufstehen und sofort nachsetzen', h: 'Physis', a: 'physis', s: 58, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Liegen bleiben und reklamieren', h: 'Mentalität · riskant', a: 'mentalitaet', s: 64, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Den zweiten Ball erobern', h: 'Zweikampf', a: 'zweikampf', s: 56, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Du bekommst den Ball im Zentrum, um dich herum ist es eng. Drei Gegner stehen in Passwegen.', pos: ['ZM'], w: [
+      { l: 'Drehen und das Spiel verlagern', h: 'Passspiel', a: 'pass', s: 58, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Mit einem Kontakt weiterleiten', h: 'Technik · schwer', a: 'dribbling', s: 66, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Ein Foul ziehen und Ruhe reinbringen', h: 'Mentalität · sicher', a: 'mentalitaet', s: 40, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Ihr habt seit zwanzig Minuten nur reagiert. Der Trainer schaut dich an der Seitenlinie an.', pos: ['ZM'], w: [
+      { l: 'Das Tempo selbst anziehen', h: 'Mentalität · Führung', a: 'mentalitaet', s: 60, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Mehr Bälle fordern, auch die schweren', h: 'Passspiel', a: 'pass', s: 56, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Erst die Ordnung wiederherstellen', h: 'Sicher', a: 'mentalitaet', s: 38, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Du läufst dreissig Meter mit dem Ball am Fuß, niemand stellt dich. Der Sechzehner kommt näher.', pos: ['ZM'], w: [
+      { l: 'Weiterlaufen, bis jemand kommt', h: 'Dribbling', a: 'dribbling', s: 60, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Aus zwanzig Metern abziehen', h: 'Abschluss · schwer', a: 'schuss', s: 68, gut: 'traumtor', schlecht: 'vergeben' },
+      { l: 'Den Schnittstellenpass spielen', h: 'Passspiel', a: 'pass', s: 58, gut: 'assist', schlecht: 'ballverlust' } ] },
+    { t: 'Dein Nebenmann im Mittelfeld hat zweimal den Ball verloren und wird von der Kurve gepfiffen.', pos: ['ZM'], w: [
+      { l: 'Ihm bewusst den nächsten Ball geben', h: 'Mentalität · Führung', a: 'mentalitaet', s: 54, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Ab jetzt selbst mehr Verantwortung nehmen', h: 'Passspiel', a: 'pass', s: 60, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Ihn laut zusammenstauchen', h: 'Mentalität · riskant', a: 'mentalitaet', s: 66, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Ecke für euch, du sollst sie treten. Im Fünfer steht euer größter Spieler, kurz bietet sich der Flügel an.', pos: ['ZM'], w: [
+      { l: 'Scharf auf den ersten Pfosten', h: 'Passspiel', a: 'pass', s: 58, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Kurz ausführen und neu aufbauen', h: 'Sicher', a: 'pass', s: 38, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Direkt aufs Tor ziehen', h: 'Abschluss · Wahnsinn', a: 'schuss', s: 80, gut: 'traumtor', schlecht: 'vergeben' } ] },
+    { t: 'Der Gegner hat umgestellt und presst jetzt deinen Sechser an. Die Eröffnung steht still.', pos: ['ZM'], w: [
+      { l: 'Dich fallen lassen und anspielbar machen', h: 'Mentalität · klug', a: 'mentalitaet', s: 50, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Hoch bleiben und auf den langen Ball warten', h: 'Physis', a: 'physis', s: 56, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Selbst den Ball beim Torwart abholen', h: 'Technik · riskant', a: 'dribbling', s: 68, gut: 'aktion', schlecht: 'gegentor' } ] },
+    { t: 'Du stehst zwischen den Linien, mit dem Rücken zum Tor. Der Sechser des Gegners klebt an dir.', pos: ['OM'], w: [
+      { l: 'Klatschen lassen und in den Raum starten', h: 'Passspiel', a: 'pass', s: 54, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Aufdrehen und ihn ausspielen', h: 'Dribbling · schwer', a: 'dribbling', s: 68, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Das Foul ziehen — gute Freistossposition', h: 'Mentalität', a: 'mentalitaet', s: 48, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Dein Stürmer startet in die Schnittstelle. Das Fenster ist eine halbe Sekunde lang offen.', pos: ['OM'], w: [
+      { l: 'Den Ball sofort durchstecken', h: 'Passspiel · schwer', a: 'pass', s: 66, gut: 'assist', schlecht: 'abseits' },
+      { l: 'Noch einen Kontakt nehmen', h: 'Technik', a: 'dribbling', s: 58, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Den sicheren Ball nach außen spielen', h: 'Sicher', a: 'pass', s: 36, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Freistoss, zweiundzwanzig Meter, halbrechts — genau deine Entfernung.', pos: ['OM'], w: [
+      { l: 'Über die Mauer ins Eck zirkeln', h: 'Abschluss · schwer', a: 'schuss', s: 70, gut: 'traumtor', schlecht: 'vergeben' },
+      { l: 'Flach unter der springenden Mauer durch', h: 'Abschluss · unorthodox', a: 'schuss', s: 64, gut: 'aktion', schlecht: 'vergeben' },
+      { l: 'In den Strafraum flanken', h: 'Passspiel', a: 'pass', s: 52, gut: 'assist', schlecht: 'ballverlust' } ] },
+    { t: 'Du hast den Ball am Sechzehner, zwei Mitspieler laufen sich frei, und vor dir ist eine Lücke.', pos: ['OM'], w: [
+      { l: 'Selbst durch die Lücke ziehen', h: 'Dribbling', a: 'dribbling', s: 64, gut: 'tor', schlecht: 'ballverlust' },
+      { l: 'Den freieren der beiden bedienen', h: 'Passspiel', a: 'pass', s: 52, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Aus der zweiten Reihe abziehen', h: 'Abschluss', a: 'schuss', s: 62, gut: 'aktion', schlecht: 'vergeben' } ] },
+    { t: 'Der Trainer hat dir gesagt, du sollst mehr nach hinten arbeiten. Der Gegner kontert über deine Seite.', pos: ['OM'], w: [
+      { l: 'Zurückarbeiten und nachsetzen', h: 'Tempo · Energie', a: 'tempo', s: 58, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Vorn stehen bleiben für den nächsten Konter', h: 'Mentalität · riskant', a: 'mentalitaet', s: 62, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Den Passweg zustellen, ohne zu sprinten', h: 'Mentalität · klug', a: 'mentalitaet', s: 50, gut: 'aktion', schlecht: 'gegentor' } ] },
+    { t: 'Es steht 0:0, die 80. Minute läuft, und alles im Stadion wartet darauf, dass du etwas erfindest.', pos: ['OM'], w: [
+      { l: 'Das Risiko suchen und den schweren Ball spielen', h: 'Passspiel · schwer', a: 'pass', s: 70, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Einen Zweikampf suchen und Tempo machen', h: 'Dribbling', a: 'dribbling', s: 62, gut: 'tor', schlecht: 'ballverlust' },
+      { l: 'Ruhig bleiben und den Ball laufen lassen', h: 'Mentalität', a: 'mentalitaet', s: 44, gut: 'aktion', schlecht: 'ballverlust' } ] },
   ],
   Abwehr: [
     { t: 'Der Stürmer wird steil geschickt und zieht an dir vorbei Richtung Strafraum.', w: [
@@ -2412,7 +2608,75 @@ const MOMENTE = {
     { t: 'Standard für euch, du darfst mit nach vorn. Der Trainer hat es ausdrücklich erlaubt.', w: [
       { l: 'In den Rückraum laufen', h: 'Abschluss', a: 'schuss', s: 66, gut: 'tor', schlecht: 'vergeben' },
       { l: 'Den Block für den Mitspieler stellen', h: 'Physis', a: 'physis', s: 48, gut: 'assist', schlecht: 'vergeben' },
-      { l: 'An der Mittellinie absichern', h: 'Kein Risiko', a: 'mentalitaet', s: 26, gut: 'aktion', schlecht: 'aktion' } ] }
+      { l: 'An der Mittellinie absichern', h: 'Kein Risiko', a: 'mentalitaet', s: 26, gut: 'aktion', schlecht: 'aktion' } ] },
+    { t: 'Der Gegner spielt den langen Ball auf den kopfballstarken Stürmer. Ihr steigt beide hoch.', w: [
+      { l: 'Ihn früh anspringen und den Ball nehmen', h: 'Physis', a: 'physis', s: 60, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Den Abpraller erwarten statt mitgehen', h: 'Mentalität', a: 'mentalitaet', s: 50, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Ihn stehen lassen und den Raum zumachen', h: 'Zweikampf', a: 'zweikampf', s: 54, gut: 'rettung', schlecht: 'gegentor' } ] },
+    { t: 'Ihr führt 1:0, es läuft die 85. Minute. Der Ball kommt in eurem Sechzehner zu dir.', w: [
+      { l: 'Weit ins Nichts klären', h: 'Sicher', a: 'physis', s: 28, gut: 'aktion', schlecht: 'aktion' },
+      { l: 'Sauber herausspielen und Zeit laufen lassen', h: 'Passspiel · kalt', a: 'pass', s: 58, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Den Ball an der Eckfahne festmachen', h: 'Zweikampf · Karte droht', a: 'zweikampf', s: 52, gut: 'aktion', schlecht: 'karte' } ] },
+    { t: 'Der Schiedsrichter hat euch zwei fragwürdige Entscheidungen gegeben — die Kurve des Gegners kocht.', w: [
+      { l: 'Ruhig bleiben und weiter verteidigen', h: 'Mentalität', a: 'mentalitaet', s: 44, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Die Mannschaft lautstark einstellen', h: 'Mentalität · Führung', a: 'mentalitaet', s: 58, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Jetzt erst recht härter einsteigen', h: 'Zweikampf · riskant', a: 'zweikampf', s: 66, gut: 'rettung', schlecht: 'karte' } ] },
+    { t: 'Der Gegner wechselt einen frischen, schnellen Stürmer ein. Du hast achtzig Minuten in den Beinen.', w: [
+      { l: 'Ein paar Meter tiefer stehen', h: 'Mentalität · klug', a: 'mentalitaet', s: 48, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Das Tempoduell trotzdem annehmen', h: 'Tempo · schwer', a: 'tempo', s: 70, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Ihn von Anfang an körperlich empfangen', h: 'Physis', a: 'physis', s: 58, gut: 'rettung', schlecht: 'karte' } ] },
+    { t: 'Dein Nebenmann ist herausgerückt und hat ein Loch hinterlassen. Der Pass läuft genau dorthin.', pos: ['IV'], w: [
+      { l: 'Quer herausrücken und den Raum decken', h: 'Tempo', a: 'tempo', s: 62, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Auf der eigenen Position bleiben', h: 'Mentalität · Disziplin', a: 'mentalitaet', s: 50, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Ihn laut nach hinten dirigieren', h: 'Mentalität · Führung', a: 'mentalitaet', s: 56, gut: 'rettung', schlecht: 'gegentor' } ] },
+    { t: 'Du bekommst den Ball in der Innenverteidigung, vor dir liegen dreissig Meter freier Rasen.', pos: ['IV'], w: [
+      { l: 'Andribbeln, bis dich jemand stellt', h: 'Dribbling', a: 'dribbling', s: 56, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Den Steilpass in die Spitze suchen', h: 'Passspiel · schwer', a: 'pass', s: 68, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Quer zum Nebenmann und neu aufbauen', h: 'Sicher', a: 'pass', s: 30, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Der Stürmer lässt sich fallen und zieht dich aus der Kette. Hinter dir startet der Flügel.', pos: ['IV'], w: [
+      { l: 'Mitgehen und ihn nicht aufdrehen lassen', h: 'Zweikampf', a: 'zweikampf', s: 60, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Ihn übergeben und die Kette halten', h: 'Mentalität', a: 'mentalitaet', s: 54, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Weit mitgehen und den Ball abfangen', h: 'Tempo · riskant', a: 'tempo', s: 68, gut: 'rettung', schlecht: 'gegentor' } ] },
+    { t: 'Zweikampf an der Mittellinie, beide kommen spät. Du triffst zuerst den Ball, dann den Mann.', pos: ['IV'], w: [
+      { l: 'Sofort die Hände heben und dich erklären', h: 'Mentalität', a: 'mentalitaet', s: 46, gut: 'foulok', schlecht: 'karte' },
+      { l: 'Aufstehen und weiterspielen, als wäre nichts', h: 'Mentalität · kalt', a: 'mentalitaet', s: 58, gut: 'aktion', schlecht: 'karte' },
+      { l: 'Dem Gegner aufhelfen', h: 'Fairplay', a: 'mentalitaet', s: 38, gut: 'foulok', schlecht: 'aktion' } ] },
+    { t: 'Standard gegen euch. Der Trainer hat dir den gefährlichsten Kopfballspieler zugeteilt.', pos: ['IV'], w: [
+      { l: 'Manndecken, Arm am Mann', h: 'Zweikampf', a: 'zweikampf', s: 58, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Vor ihm stehen und den Ball attackieren', h: 'Physis', a: 'physis', s: 62, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Ihn abdrängen, sobald der Ball fliegt', h: 'Physis · Elfmeter droht', a: 'physis', s: 66, gut: 'rettung', schlecht: 'karte' } ] },
+    { t: 'Ihr liegt 0:2 zurück, zwanzig Minuten sind noch zu spielen. Der Trainer schiebt dich nach vorn in den Sturm.', pos: ['IV'], w: [
+      { l: 'Als Zielspieler die langen Bälle festmachen', h: 'Physis', a: 'physis', s: 60, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'In den Fünfer gehen und auf die Flanke warten', h: 'Abschluss', a: 'schuss', s: 68, gut: 'tor', schlecht: 'vergeben' },
+      { l: 'Lieber hinten bleiben und nicht noch mehr riskieren', h: 'Mentalität · sicher', a: 'mentalitaet', s: 32, gut: 'aktion', schlecht: 'aktion' } ] },
+    { t: 'Du hast den Ball am Flügel, dein Außenstürmer startet nach innen und macht dir die Bahn frei.', pos: ['AV'], w: [
+      { l: 'Ihn hinterlaufen und die Grundlinie suchen', h: 'Tempo', a: 'tempo', s: 60, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Sofort die Flanke schlagen', h: 'Passspiel', a: 'pass', s: 56, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Zurücklegen und die Position halten', h: 'Sicher', a: 'pass', s: 32, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Der gegnerische Flügelstürmer ist der schnellste Mann auf dem Platz und stellt sich dir frontal gegenüber.', pos: ['AV'], w: [
+      { l: 'Ihn nach außen auf den schwachen Fuß leiten', h: 'Mentalität', a: 'mentalitaet', s: 56, gut: 'aktion', schlecht: 'gegentor' },
+      { l: 'Ihn früh attackieren, bevor er Tempo aufnimmt', h: 'Zweikampf · riskant', a: 'zweikampf', s: 66, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Abstand lassen und auf die Hilfe warten', h: 'Sicher', a: 'mentalitaet', s: 42, gut: 'aktion', schlecht: 'gegentor' } ] },
+    { t: 'Du bist weit aufgerückt, der Ball geht verloren. Der Konter läuft genau über deine Seite.', pos: ['AV'], w: [
+      { l: 'Alles geben und zurücksprinten', h: 'Tempo · Energie', a: 'tempo', s: 64, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Den Gegenspieler taktisch foulen', h: 'Karte droht', a: 'zweikampf', s: 54, gut: 'foulok', schlecht: 'karte' },
+      { l: 'Die Mitte zulaufen und den Pass zustellen', h: 'Mentalität', a: 'mentalitaet', s: 58, gut: 'aktion', schlecht: 'gegentor' } ] },
+    { t: 'Einwurf in der gegnerischen Hälfte. Du hast lange Arme — und der Fünfer ist voll.', pos: ['AV'], w: [
+      { l: 'Weit in den Strafraum werfen', h: 'Physis', a: 'physis', s: 58, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Kurz und schnell auf den Flügel', h: 'Passspiel', a: 'pass', s: 44, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Auf das Zeichen des Trainers warten', h: 'Mentalität · sicher', a: 'mentalitaet', s: 34, gut: 'aktion', schlecht: 'ballverlust' } ] },
+    { t: 'Dein direkter Gegenspieler hat dich in der ersten Halbzeit zweimal vernascht. Die Kurve hat es gemerkt.', pos: ['AV'], w: [
+      { l: 'Von vorn beginnen und nicht daran denken', h: 'Mentalität', a: 'mentalitaet', s: 58, gut: 'rettung', schlecht: 'gegentor' },
+      { l: 'Ihn sofort beim ersten Ball hart nehmen', h: 'Zweikampf · Karte droht', a: 'zweikampf', s: 64, gut: 'rettung', schlecht: 'karte' },
+      { l: 'Um Hilfe vom Sechser bitten', h: 'Mentalität · klug', a: 'pass', s: 46, gut: 'aktion', schlecht: 'gegentor' } ] },
+    { t: 'Du überläufst die Seite und stehst frei an der Grundlinie. In der Mitte warten drei Mitspieler.', pos: ['AV'], w: [
+      { l: 'Flach in den Rückraum legen', h: 'Passspiel', a: 'pass', s: 54, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Scharf vor den Fünfer ziehen', h: 'Passspiel · schwer', a: 'pass', s: 64, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Selbst aus spitzem Winkel abziehen', h: 'Abschluss · Wahnsinn', a: 'schuss', s: 76, gut: 'traumtor', schlecht: 'vergeben' } ] },
+    { t: 'Der gegnerische Außenverteidiger schiebt weit auf. Hinter ihm ist eine ganze Hälfte frei.', pos: ['AV'], w: [
+      { l: 'Den Ball erobern und selbst durchstarten', h: 'Tempo', a: 'tempo', s: 62, gut: 'aktion', schlecht: 'ballverlust' },
+      { l: 'Den Diagonalball in den freien Raum spielen', h: 'Passspiel · schwer', a: 'pass', s: 66, gut: 'assist', schlecht: 'ballverlust' },
+      { l: 'Position halten und ihn kommen lassen', h: 'Sicher', a: 'mentalitaet', s: 36, gut: 'aktion', schlecht: 'gegentor' } ] },
   ]
 };
 
@@ -2633,7 +2897,10 @@ function baueSpielverlauf(fx, einsatz, auftrag) {
   const autoChancen = Math.max(1, Math.round(chancenMein - anzMomente * .7));
   for (let i = 0; i < autoChancen; i++) ev.push({ art: 'chance', mein: true, min: ri(2, 92), tor: chance(pMein) });
   for (let i = 0; i < chancenGegen; i++) ev.push({ art: 'chance', mein: false, min: ri(2, 92), tor: chance(pGegen) });
-  const alle = MOMENTE[POS(p.pos).gruppe];
+  /* Der Topf der Gruppe, dazu die Situationen, die nur diese eine Position
+     erlebt: Ein Aussenverteidiger hinterlaeuft, ein Innenverteidiger raeumt
+     ab. Ein Moment ohne pos gilt fuer die ganze Gruppe. */
+  const alle = MOMENTE[POS(p.pos).gruppe].filter(m => !m.pos || m.pos.indexOf(p.pos) >= 0);
   const ohneElfer = shuffle(alle.filter(m => !m.elfer));
   const gewaehlt = [];
   /* Wer einen Auftrag hat, bekommt auch Gelegenheiten dazu: Bis zu zwei der
@@ -2903,6 +3170,368 @@ function wochenKosten() { return stabKosten() + unterhaltKosten(); }
 function frischGespielt() { return (S.p.ohneSpiel || 0) <= 2 && !S.p.aufbau; }
 
 const EREIGNISSE = [
+  /* ---------- Ohne Altersgrenze ---------- */
+  { id: 'dopingkontrolle', gewicht: 2,
+    eyebrow: 'Verband', titel: 'Sechs Uhr morgens',
+    text: () => 'Es klingelt um kurz nach sechs. Zwei Kontrolleure stehen vor der Tür — unangemeldete Trainingskontrolle.',
+    wahl: [
+      { l: 'Ruhig durchziehen', h: 'Routine', run: () => ({ text: 'Eine Stunde Papierkram und ein Becher. Um halb acht bist du wieder im Bett.', eff: { energie: -4 } }) },
+      { l: 'Dich beschweren', h: 'Genervt', run: () => ({ text: 'Du redest dich in Rage. Es ändert nichts, außer dass der Tag mies beginnt.', eff: { moral: -6, energie: -5 } }) }
+    ] },
+  { id: 'busfahrt', gewicht: 3,
+    eyebrow: 'Auswärts', titel: 'Der Bus steht',
+    text: () => 'Sechs Stunden Fahrt, und auf halber Strecke bleibt der Mannschaftsbus liegen. Anpfiff ist in vier Stunden.',
+    wahl: [
+      { l: 'Die Stimmung hochhalten', h: 'Kabine', run: () => ({ text: 'Du machst Musik an und redest dagegen an. Als der Ersatzbus kommt, lacht die halbe Mannschaft wieder.', eff: { moral: 8, trainer: 5, energie: -6 } }) },
+      { l: 'Kopfhörer auf und schlafen', h: 'Energie', run: () => ({ text: 'Du verschläfst das ganze Theater und kommst als Einziger ausgeruht an.', eff: { energie: 7, moral: -3 } }) },
+      { l: 'Mit dem Trainer zusammen umplanen', h: 'Führung', run: () => ({ text: 'Ihr organisiert Taxis für die Startelf. Er vergisst nicht, wer in dem Moment mitgedacht hat.', eff: { trainer: 9, energie: -8, mentalitaet: .4 } }) }
+    ] },
+  { id: 'vereinskrise', gewicht: 2, wenn: () => CL(S.p.clubId).staerke < 72,
+    eyebrow: 'Verein', titel: 'Das Gehalt kommt später',
+    text: () => CL(S.p.clubId).name + ' teilt der Mannschaft mit, dass die Gehaltszahlung diesen Monat um drei Wochen verschoben wird. Es gibt eine lange Erklärung dazu.',
+    wahl: [
+      { l: 'Ruhig bleiben und abwarten', h: 'Geduld', run: () => ({ text: 'Es kommt später, aber es kommt. Ein paar Mitspieler haben die Miete trotzdem nicht bezahlt bekommen.', eff: { moral: -5 } }) },
+      { l: 'Mit dem Mannschaftsrat Druck machen', h: 'Kollektiv', run: () => chance(.55)
+          ? ({ text: 'Zwei Tage später ist das Geld da. Die Geschäftsführung ist sauer, die Kabine dankbar.', eff: { moral: 9, ruf: 2, trainer: -4 } })
+          : ({ text: 'Ihr bekommt eine Standpauke über Vereinstreue. Das Geld kommt trotzdem erst in drei Wochen.', eff: { moral: -9, trainer: -6 } }) },
+      { l: 'Deinem Berater Bescheid geben', h: 'Ausstieg', run: () => { S.p.wechselwunsch = true; return { text: 'Ein Verein, der nicht pünktlich zahlt, ist kein Ort für eine Karriere. Er sondiert.', eff: { trainer: -5, moral: -2 } }; } }
+    ] },
+  { id: 'sportdirektor', gewicht: 3,
+    eyebrow: 'Verein', titel: 'Der Neue oben',
+    text: () => 'Der Verein stellt einen neuen Sportdirektor vor. Er bittet jeden Spieler einzeln zu einem Gespräch von zwanzig Minuten.',
+    wahl: [
+      { l: 'Ehrlich sagen, was nicht läuft', h: 'Offen', run: () => chance(.55)
+          ? ({ text: 'Er hört zu und schreibt mit. Drei Wochen später ändert sich tatsächlich etwas.', eff: { moral: 8, trainer: 3, ruf: 2 } })
+          : ({ text: 'Alles, was du gesagt hast, liegt am nächsten Tag beim Trainer auf dem Tisch.', eff: { trainer: -11, moral: -6 } }) },
+      { l: 'Freundlich und unverbindlich bleiben', h: 'Vorsichtig', run: () => ({ text: 'Zwanzig höfliche Minuten. Er weiß danach nichts über dich, und du nichts über ihn.', eff: {} }) },
+      { l: 'Deine Zukunft ansprechen', h: 'Direkt', run: () => ({ text: 'Du fragst ihn geradeheraus, ob er mit dir plant. Er sagt ja — und meint es vermutlich sogar.', eff: { moral: 7, trainer: 2 } }) }
+    ] },
+  { id: 'exverein', gewicht: 3, wenn: () => S.karriere.length >= 3,
+    eyebrow: 'Wiedersehen', titel: 'Gegen die alte Liebe',
+    text: () => 'Am Wochenende geht es gegen einen deiner früheren Vereine. Die Kurve dort hat angekündigt, dich zu begrüßen — ob freundlich, weiß niemand.',
+    wahl: [
+      { l: 'Vorher hingehen und die Kurve grüßen', h: 'Herz', run: () => ({ text: 'Du gehst beim Aufwärmen zum Zaun. Neunzig Minuten später pfeifen sie dich als Einzigen nicht aus.', eff: { moral: 6, ruf: 4, follower: Math.round(S.p.follower * .05 + 2000) } }) },
+      { l: 'Es ausblenden', h: 'Profi', run: () => ({ text: 'Du machst dein Spiel und schaust kein einziges Mal in die Kurve.', eff: { mentalitaet: .7, trainer: 3 } }) },
+      { l: 'Bei einem Tor nicht jubeln', h: 'Respekt', run: () => ({ text: 'Du hast es dir fest vorgenommen. Ob du dich dran hältst, entscheidet sich in einer halben Sekunde.', eff: { ruf: 3, moral: 4 } }) }
+    ] },
+  { id: 'sprachkurs', gewicht: 3, wenn: () => LG(CL(S.p.clubId).liga).land !== NAT(S.p.natId).name,
+    eyebrow: 'Ausland', titel: 'Die Sprache',
+    text: () => 'In der Kabine wird ' + LG(CL(S.p.clubId).liga).land + 'isch gesprochen, in den Besprechungen auch. Du verstehst die Hälfte und nickst bei der anderen.',
+    wahl: [
+      { l: 'Jeden Tag eine Stunde lernen', h: 'Mühsam', run: () => ({ text: 'Nach drei Monaten verstehst du die Taktikbesprechung. Nach sechs machst du die Witze mit.', eff: { energie: -8, moral: 9, trainer: 8, mentalitaet: .6 } }) },
+      { l: 'Beim Dolmetscher bleiben', h: 'Bequem', run: () => ({ text: 'Es geht auch so. Nur sitzt du beim Mittagessen weiterhin am Rand.', eff: { moral: -5, trainer: -3, energie: 3 } }) }
+    ] },
+  { id: 'heimweh', gewicht: 3, wenn: () => LG(CL(S.p.clubId).liga).land !== NAT(S.p.natId).name,
+    eyebrow: 'Ausland', titel: 'Weit weg',
+    text: () => 'Es ist der Geburtstag deiner Mutter, und du sitzt zweitausend Kilometer entfernt in einer möblierten Wohnung, in der nichts dir gehört.',
+    wahl: [
+      { l: 'Nach dem Spiel hinfliegen', h: 'Kostet Erholung', run: () => ({ text: 'Zwei Flüge, achtzehn Stunden, ein Abend. Du kommst müde und deutlich leichter zurück.', eff: { geld: -6000, energie: -14, moral: 9 } }) },
+      { l: 'Die Familie einfliegen lassen', h: 'Teurer', run: () => ({ text: 'Sie bleiben eine Woche und stellen fest, dass es dir besser geht, als du am Telefon klingst.', eff: { geld: -14000, moral: 7, energie: -4 } }) },
+      { l: 'Telefonieren und weiterarbeiten', h: 'Hart', run: () => ({ text: 'Vierzig Minuten Videoanruf. Danach sitzt du lange in einer sehr stillen Wohnung.', eff: { moral: -9, mentalitaet: .5 } }) }
+    ] },
+  { id: 'trauerfall', gewicht: 1,
+    eyebrow: 'Verein', titel: 'Trauerflor',
+    text: () => 'Ein langjähriger Zeugwart des Vereins ist gestorben. Er hat vierzig Jahre lang die Trikots gewaschen und jeden Spieler beim Vornamen gekannt.',
+    wahl: [
+      { l: 'Zur Beerdigung gehen', h: 'Respekt', run: () => ({ text: 'Die halbe Mannschaft steht in Schwarz auf einem kleinen Friedhof. Danach ist die Kabine anders.', eff: { moral: 4, trainer: 5, mentalitaet: .6, energie: -4 } }) },
+      { l: 'Ihm ein Tor widmen', h: 'Geste', run: () => ({ text: 'Du nimmst dir vor, beim nächsten Treffer zum Himmel zu zeigen. Das Stadion versteht es sofort.', eff: { moral: 6, ruf: 3, mentalitaet: .4 } }) }
+    ] },
+  { id: 'fanclub', einmal: 1, gewicht: 2, wenn: () => S.p.ruf > 30,
+    eyebrow: 'Fans', titel: 'Ein Fanclub mit deinem Namen',
+    text: () => 'In einem Dorf zwei Stunden entfernt hat sich ein Fanclub gegründet, der nach dir benannt ist. Sie laden dich zur Gründungsfeier ein.',
+    wahl: [
+      { l: 'Hinfahren', h: 'Sonntagnachmittag', run: () => ({ text: 'Ein Vereinsheim, sechzig Leute, Schnitzel. Du bleibst länger, als du vorhattest.', eff: { moral: 9, ruf: 4, follower: Math.round(S.p.follower * .04 + 1500), energie: -6 } }) },
+      { l: 'Ein Videogruß schicken', h: 'Schnell', run: () => ({ text: 'Vierzig Sekunden Handyvideo. Sie freuen sich trotzdem und zeigen es allen.', eff: { ruf: 2, follower: 600 } }) },
+      { l: 'Trikots schicken', h: 'Geste', run: () => ({ text: 'Ein Paket mit signierten Trikots. Es hängt zwei Wochen später gerahmt im Vereinsheim.', eff: { geld: -2000, ruf: 3, moral: 4 } }) }
+    ] },
+  { id: 'autogramme', gewicht: 2,
+    eyebrow: 'Termin', titel: 'Autogrammstunde im Regen',
+    text: () => 'Der Verein hat eine Autogrammstunde auf dem Marktplatz angesetzt. Es regnet seit dem Morgen, und trotzdem stehen dreihundert Leute da.',
+    wahl: [
+      { l: 'Bleiben, bis der Letzte dran war', h: 'Zwei Stunden mehr', run: () => ({ text: 'Du bist nass bis auf die Haut und der Letzte in der Schlange bekommt dasselbe Lächeln wie der Erste.', eff: { ruf: 6, follower: Math.round(S.p.follower * .05 + 2500), moral: 6, energie: -9 } }) },
+      { l: 'Pünktlich Schluss machen', h: 'Plan', run: () => ({ text: 'Um vier ist Schluss, wie abgesprochen. Vierzig Leute stehen noch da, als du fährst.', eff: { ruf: -3, energie: -3 } }) }
+    ] },
+  { id: 'schlafcoach', gewicht: 2,
+    eyebrow: 'Betreuung', titel: 'Der Schlafcoach',
+    text: () => 'Der Verein hat jemanden verpflichtet, der sich nur um Schlaf kümmert. Er will deine Nächte vier Wochen lang messen.',
+    wahl: [
+      { l: 'Mitmachen und alles umstellen', h: 'Konsequent', run: () => ({ text: 'Keine Bildschirme nach zehn, kühleres Zimmer, feste Zeiten. Nach vier Wochen ist der Unterschied messbar.', eff: { energie: 14, kondition: 2, moral: -3 } }) },
+      { l: 'Messen lassen, aber nichts ändern', h: 'Halb', run: () => ({ text: 'Die Auswertung sagt dir, was du längst weißt. Du änderst trotzdem nichts.', eff: { energie: 3 } }) },
+      { l: 'Ablehnen', h: 'Privat', run: () => ({ text: 'Was du nachts machst, geht den Verein nichts an. Der Coach nimmt es sportlich.', eff: { moral: 2 } }) }
+    ] },
+  { id: 'kanaele', gewicht: 2, wenn: () => S.p.follower > 40000,
+    eyebrow: 'Social Media', titel: 'Die Agentur will übernehmen',
+    text: () => 'Eine Agentur bietet an, deine Kanäle zu führen: tägliche Beiträge, professionelle Bilder, Reichweite. Dafür klingt nichts davon mehr nach dir.',
+    wahl: [
+      { l: 'Übergeben', h: 'Reichweite', run: () => ({ text: 'Die Zahlen steigen sofort. Deine Schwester fragt, wer das schreibt.', eff: { geld: -18000, follower: Math.round(S.p.follower * .45 + 12000), ruf: 4, moral: -4 } }) },
+      { l: 'Selbst weitermachen', h: 'Echt', run: () => ({ text: 'Weniger Beiträge, schlechtere Bilder, aber jedes Wort gehört dir. Die Leute merken den Unterschied.', eff: { follower: Math.round(S.p.follower * .08 + 1500), moral: 6, mentalitaet: .3 } }) },
+      { l: 'Alles löschen', h: 'Radikal', run: () => ({ text: 'Du nimmst die Apps vom Telefon. Der Kopf wird ruhiger, die Reichweite kleiner.', eff: { follower: -Math.round(S.p.follower * .3), moral: 10, mentalitaet: .8, energie: 5 } }) }
+    ] },
+  { id: 'spielabsage', gewicht: 2,
+    eyebrow: 'Spieltag', titel: 'Kein Spiel',
+    text: () => 'Dauerregen seit zwei Tagen, der Platz steht unter Wasser. Das Spiel wird zwei Stunden vor Anpfiff abgesagt.',
+    wahl: [
+      { l: 'Die freie Zeit zum Regenerieren nutzen', h: 'Körper', run: () => ({ text: 'Massage, Schlaf, nichts. Am Montag fühlst du dich wie ausgewechselt.', eff: { energie: 13, fitness: -3 } }) },
+      { l: 'Trotzdem eine Einheit ziehen', h: 'Ehrgeiz', run: () => ({ text: 'Halle statt Rasen, zwei Stunden Technik. Der Trainer bekommt es mit.', eff: { trainer: 5, dribbling: .4, schuss: .3, energie: -8 } }) },
+      { l: 'Nach Hause fahren', h: 'Frei', run: () => ({ text: 'Ein unerwartet freier Samstagabend. So etwas gibt es in deinem Beruf fast nie.', eff: { moral: 8, energie: 5 } }) }
+    ] },
+  { id: 'torjubel', gewicht: 2, wenn: () => S.p.ruf > 25,
+    eyebrow: 'Nachspiel', titel: 'Der Jubel',
+    text: () => 'Dein Torjubel am Wochenende wird als Provokation gegen die gegnerischen Fans ausgelegt. Der Verband prüft, das Netz diskutiert.',
+    wahl: [
+      { l: 'Erklären, was es wirklich war', h: 'Sachlich', run: () => ({ text: 'Du erzählst die Geschichte dahinter — sie hat nichts mit dem Gegner zu tun. Die Sache verpufft.', eff: { ruf: 3, moral: 3 } }) },
+      { l: 'Stehen lassen und nichts sagen', h: 'Stolz', run: () => chance(.5)
+          ? ({ text: 'Ohne dein Zutun stirbt die Geschichte in zwei Tagen. Deine eigene Kurve findet dich größer als vorher.', eff: { ruf: 6, moral: 5 } })
+          : ({ text: 'Der Verband verhängt eine Geldstrafe, und der Verein zieht sie dir ab.', eff: { geld: -Math.min(S.p.geld * .04, 35000), ruf: -3, trainer: -4 } }) },
+      { l: 'Dich entschuldigen', h: 'Ruhe', run: () => ({ text: 'Zwei Sätze, freundlich formuliert. Die Sache ist am nächsten Tag vorbei.', eff: { trainer: 4, ruf: -2 } }) }
+    ] },
+  /* ---------- Die mittleren Jahre ---------- */
+  { id: 'beziehung', gewicht: 3, wenn: () => S.p.alter >= 22 && S.p.alter <= 31,
+    eyebrow: 'Privat', titel: 'Zwei Leben',
+    text: () => 'Deine Partnerin sagt es ruhig und ohne Vorwurf: Seit anderthalb Jahren richtet sich alles nach Spielplänen, Trainingslagern und deiner Laune nach Niederlagen.',
+    wahl: [
+      { l: 'Zwei Wochen wirklich da sein', h: 'Kostet Training', run: () => ({ text: 'Du gehst nach dem Training nach Hause statt in den Kraftraum. Es ist das Beste, was du seit Monaten entschieden hast.', eff: { moral: 15, energie: 6, trainer: -5, mentalitaet: .5 } }) },
+      { l: 'Sie in deine Welt holen', h: 'Kompromiss', run: () => ({ text: 'Sie kommt zu Auswärtsspielen mit, ihr fahrt zusammen zurück. Es ist nicht dasselbe, aber es ist etwas.', eff: { moral: 7 } }) },
+      { l: 'Sagen, dass es gerade nicht anders geht', h: 'Ehrlich, hart', run: () => ({ text: 'Sie nickt. Ein paar Wochen später ist die Wohnung leerer.', eff: { moral: -16, mentalitaet: .9, trainer: 4 } }) }
+    ] },
+  { id: 'kind', einmal: 1, gewicht: 3, wenn: () => S.p.alter >= 24 && S.p.alter <= 34 && !S.p.kindJahr,
+    eyebrow: 'Privat', titel: 'Nachwuchs',
+    text: () => 'Du wirst Vater. Der errechnete Termin liegt mitten in der englischen Woche.',
+    wahl: [
+      { l: 'Dabei sein, egal was der Trainer sagt', h: 'Familie', run: () => { S.p.kindJahr = S.jahr; merken('sonst', 'Vater geworden.', 1); return { text: 'Du verpasst ein Spiel und bist dabei, als es losgeht. Nichts davon würdest du tauschen.', eff: { moral: 20, trainer: -6, energie: -10, mentalitaet: .8 } }; } },
+      { l: 'Spielen und danach hinfahren', h: 'Profi', run: () => { S.p.kindJahr = S.jahr; merken('sonst', 'Vater geworden.', 1); return { text: 'Du spielst, fährst danach durch die Nacht und kommst gerade rechtzeitig.', eff: { moral: 14, trainer: 6, energie: -14 } }; } }
+    ] },
+  { id: 'hauskauf', einmal: 1, gewicht: 3, wenn: () => S.p.alter >= 23 && S.p.geld > 400000,
+    eyebrow: 'Geld', titel: 'Ein eigenes Haus',
+    text: () => 'Dein Berater legt dir drei Objekte hin. Eines davon könntest du dir wirklich leisten, ohne dass es wehtut.',
+    wahl: [
+      { l: 'Vernünftig kaufen', h: 'Sicher', run: () => { merken('geld', 'Ein eigenes Haus gekauft.', 0); return { text: 'Kein Palast, aber es gehört dir. Zum ersten Mal seit Jahren fühlt sich etwas endgültig an.', eff: { geld: -Math.round(Math.min(S.p.geld * .45, 950000)), moral: 12, mentalitaet: .4 } }; } },
+      { l: 'Größer denken', h: 'Teuer', run: () => ({ text: 'Pool, Kino, sieben Schlafzimmer für zwei Menschen. Die Bilder gehen sofort durch die Netzwerke.', eff: { geld: -Math.round(Math.min(S.p.geld * .8, 2600000)), moral: 9, ruf: 4, follower: Math.round(S.p.follower * .08 + 5000) } }) },
+      { l: 'Weiter zur Miete wohnen', h: 'Beweglich', run: () => ({ text: 'Solange der nächste Wechsel jederzeit kommen kann, willst du nichts, was dich festhält.', eff: { mentalitaet: .4 } }) }
+    ] },
+  { id: 'beraterwechsel', einmal: 1, gewicht: 3, wenn: () => S.p.alter >= 22 && S.p.ruf > 40,
+    eyebrow: 'Berater', titel: 'Die große Agentur',
+    text: () => 'Eine internationale Agentur will dich. Sie hat bessere Kontakte als dein jetziger Berater — der dich seit der Jugend begleitet.',
+    wahl: [
+      { l: 'Wechseln', h: 'Türen öffnen', run: () => ({ text: 'Der Anruf beim Alten dauert vier Minuten und fühlt sich länger an. Dafür klingelt jetzt in ganz Europa das Telefon.', eff: { ruf: 8, moral: -8, geld: -Math.round(Math.min(S.p.geld * .05, 60000)) } }) },
+      { l: 'Beim Alten bleiben', h: 'Loyal', run: () => ({ text: 'Er sagt nur „Danke" und nichts weiter. Ihr arbeitet weiter wie immer.', eff: { moral: 10, mentalitaet: .6 } }) },
+      { l: 'Beide behalten', h: 'Kompliziert', run: () => chance(.45)
+          ? ({ text: 'Es funktioniert erstaunlich gut. Zwei Leute, die sich nicht mögen, arbeiten für dich.', eff: { ruf: 5 } })
+          : ({ text: 'Sie blockieren sich gegenseitig. Zwei Angebote zerfallen, bevor du überhaupt davon erfährst.', eff: { ruf: -4, moral: -6 } }) }
+    ] },
+  { id: 'investition', einmal: 1, gewicht: 3, wenn: () => S.p.geld > 250000 && S.p.alter >= 23,
+    eyebrow: 'Geld', titel: 'Der sichere Tipp',
+    text: () => 'Ein Mitspieler hat in ein Restaurant investiert und redet in der Kabine von nichts anderem. Es sei praktisch risikofrei.',
+    wahl: [
+      { l: 'Mit einsteigen', h: 'Risiko', run: () => { const ein = Math.round(Math.min(S.p.geld * .25, 300000)); return chance(.4)
+          ? ({ text: 'Es läuft. Nicht großartig, aber es läuft — und du hast etwas, das ohne deine Beine funktioniert.', eff: { geld: Math.round(ein * .9), moral: 8, mentalitaet: .3 } })
+          : ({ text: 'Nach vierzehn Monaten ist zu. Der Mitspieler geht dir seitdem aus dem Weg.', eff: { geld: -ein, moral: -11 } }); } },
+      { l: 'Erst prüfen lassen', h: 'Nüchtern', run: () => ({ text: 'Dein Steuerberater braucht zwei Sätze, um dir davon abzuraten. Du folgst ihm.', eff: { geld: -3000, mentalitaet: .5 } }) },
+      { l: 'Ablehnen', h: 'Nein', run: () => ({ text: 'Du bleibst bei dem, was du kannst. In der Kabine wirst du dafür eine Woche lang aufgezogen.', eff: { moral: -2 } }) }
+    ] },
+  { id: 'stiftung', einmal: 1, gewicht: 2, wenn: () => S.p.alter >= 25 && S.p.ruf > 45 && S.p.geld > 600000,
+    eyebrow: 'Verantwortung', titel: 'Eine eigene Stiftung',
+    text: () => 'Dein Umfeld schlägt vor, eine Stiftung zu gründen — Bolzplätze in dem Viertel, aus dem du kommst.',
+    wahl: [
+      { l: 'Gründen und selbst hinfahren', h: 'Echt', run: () => { merken('sonst', 'Eine eigene Stiftung gegründet.', 1); return { text: 'Drei Plätze im ersten Jahr. Du stehst bei jeder Eröffnung selbst dort, auch wenn niemand filmt.', eff: { geld: -Math.round(Math.min(S.p.geld * .2, 400000)), moral: 16, ruf: 9, follower: Math.round(S.p.follower * .1 + 8000) } }; } },
+      { l: 'Gründen und andere machen lassen', h: 'Bequem', run: () => ({ text: 'Dein Name steht drauf, gemacht wird es von einer Agentur. Es hilft trotzdem.', eff: { geld: -Math.round(Math.min(S.p.geld * .12, 220000)), ruf: 5, moral: 3 } }) },
+      { l: 'Später', h: '—', run: () => ({ text: 'Du schiebst es auf das Karriereende. So machen es die meisten.', eff: {} }) }
+    ] },
+  { id: 'trikotnummer', einmal: 1, gewicht: 3, wenn: () => S.p.alter >= 21 && S.p.trainer > 55,
+    eyebrow: 'Verein', titel: 'Die freie Nummer',
+    text: () => 'Die begehrteste Rückennummer des Vereins wird frei. Der Trainer hält sie dir hin — sie gehörte einer Legende, und das Stadion weiß das.',
+    wahl: [
+      { l: 'Nehmen', h: 'Druck', run: () => ({ text: 'Ab sofort wird jeder schlechte Pass mit dem verglichen, der sie vorher trug.', eff: { ruf: 6, mentalitaet: .8, moral: 6, follower: Math.round(S.p.follower * .06 + 2000) } }) },
+      { l: 'Bei deiner bleiben', h: 'Demut', run: () => ({ text: 'Die Kurve findet es gut. Ein jüngerer Mitspieler nimmt sie und hat zwei Monate später Probleme damit.', eff: { moral: 4, trainer: 2 } }) }
+    ] },
+  { id: 'elferschuetze', gewicht: 3, wenn: () => S.p.alter >= 21 && S.p.trainer > 50,
+    eyebrow: 'Verantwortung', titel: 'Wer schießt die Elfmeter?',
+    text: () => 'Der bisherige Schütze hat zwei hintereinander verschossen. Der Trainer fragt in die Runde, wer sie ab jetzt nimmt.',
+    wahl: [
+      { l: 'Aufzeigen', h: 'Verantwortung', run: () => ({ text: 'Ab jetzt schaut bei jedem Pfiff das ganze Stadion zuerst auf dich.', eff: { mentalitaet: 1.0, schuss: .5, ruf: 3, moral: 4 } }) },
+      { l: 'Den Routinier vorschlagen', h: 'Klug', run: () => ({ text: 'Er nimmt sie und trifft. In der Kabine weiß jeder, wer ihn vorgeschlagen hat.', eff: { trainer: 4, moral: 3 } }) },
+      { l: 'Nichts sagen', h: 'Abwarten', run: () => ({ text: 'Jemand anderes meldet sich. Die Frage kommt irgendwann wieder.', eff: {} }) }
+    ] },
+  { id: 'podcast', gewicht: 2, wenn: () => S.p.ruf > 35,
+    eyebrow: 'Medien', titel: 'Zwei Stunden reden',
+    text: () => 'Ein großer Fußball-Podcast will dich zwei Stunden lang — ungeschnitten, ohne Pressechef daneben.',
+    wahl: [
+      { l: 'Hingehen und offen reden', h: 'Reichweite', run: () => chance(.7)
+          ? ({ text: 'Die Folge läuft überall. Die Leute sehen dich danach anders: als Menschen, nicht als Trikot.', eff: { ruf: 8, follower: Math.round(S.p.follower * .18 + 15000), moral: 6, energie: -5 } })
+          : ({ text: 'Ein Satz über deinen Trainer wird ohne Zusammenhang geteilt. Der Rest interessiert niemanden.', eff: { follower: 8000, trainer: -9, moral: -5 } }) },
+      { l: 'Nur mit abgestimmten Fragen', h: 'Sicher', run: () => ({ text: 'Eine saubere Stunde ohne eine einzige Überraschung. Die Hörerzahlen bleiben überschaubar.', eff: { follower: 4000, ruf: 2 } }) },
+      { l: 'Absagen', h: 'Ruhe', run: () => ({ text: 'Sie nehmen einen Mitspieler. Der macht es gut.', eff: {} }) }
+    ] },
+  { id: 'videospiel', einmal: 1, gewicht: 2, wenn: () => S.p.ruf > 60,
+    eyebrow: 'Werbung', titel: 'Das Cover',
+    text: () => 'Ein Spielehersteller will dich für die Landesausgabe seines Fußballspiels aufs Cover. Ein Tag Fotoshooting, viel Geld.',
+    wahl: [
+      { l: 'Zusagen', h: 'Große Bühne', run: () => { merken('sonst', 'Auf dem Cover eines Fußballspiels.', 1); return { text: 'Dein Gesicht liegt in jedem Elektromarkt des Landes. Deine Nichten finden dich plötzlich sehr wichtig.', eff: { geld: 420000, ruf: 10, follower: Math.round(S.p.follower * .25 + 30000), energie: -6 } }; } },
+      { l: 'Absagen, zu viel Zirkus', h: 'Ruhe', run: () => ({ text: 'Der Trainer hört davon und findet es bemerkenswert.', eff: { trainer: 6, moral: -3 } }) }
+    ] },
+  /* ---------- Die spaeten Jahre ---------- */
+  { id: 'trainerlizenz', einmal: 1, gewicht: 4, wenn: () => S.p.alter >= 30,
+    eyebrow: 'Die Zeit danach', titel: 'Der Trainerschein',
+    text: () => 'Der Verband bietet einen Lehrgang an, der über zwei Jahre läuft. Wer ihn macht, hat nach der Karriere eine Tür offen.',
+    wahl: [
+      { l: 'Anmelden und durchziehen', h: 'Kostet Kraft', run: () => { merken('sonst', 'Die Trainerlizenz begonnen.', 0); return { text: 'Abende mit Taktiktafeln statt auf der Couch. Du siehst das Spiel danach mit anderen Augen.', eff: { mentalitaet: 1.2, pass: .4, energie: -12, moral: 5 } }; } },
+      { l: 'Später, du spielst noch', h: 'Fokus', run: () => ({ text: 'Solange die Beine tragen, willst du Spieler sein und nichts anderes.', eff: { trainer: 3, energie: 4 } }) }
+    ] },
+  { id: 'koerper_alter', gewicht: 4, wenn: () => S.p.alter >= 31,
+    eyebrow: 'Körper', titel: 'Es dauert länger',
+    text: () => 'Was früher zwei Tage brauchte, braucht jetzt vier. Der Physio schlägt ein eigenes Programm vor — auf Kosten deiner freien Tage.',
+    wahl: [
+      { l: 'Das Programm mitmachen', h: 'Diszipliniert', run: () => ({ text: 'Jeden Morgen eine Stunde früher da. Nach vier Wochen fühlst du dich zwei Jahre jünger.', eff: { kondition: 3, energie: 10, moral: -3, trainer: 4 } }) },
+      { l: 'Weitermachen wie bisher', h: 'Gewohnheit', run: () => ({ text: 'Du kennst deinen Körper seit fünfzehn Jahren. Meistens stimmt das auch.', eff: { moral: 3, energie: -6 } }) },
+      { l: 'Weniger trainieren, mehr regenerieren', h: 'Ehrlich', run: () => ({ text: 'Du lässt Einheiten aus und kommst frischer in die Spiele. Der Trainer runzelt die Stirn.', eff: { energie: 16, trainer: -6, physis: -.3 } }) }
+    ] },
+  { id: 'uebersee', einmal: 1, gewicht: 3, wenn: () => S.p.alter >= 31 && S.p.ruf > 50,
+    eyebrow: 'Angebot', titel: 'Das große Geld aus der Ferne',
+    text: () => 'Ein Verein weit weg von Europa bietet dir das Dreifache deines jetzigen Gehalts. Sportlich wäre es ein Schritt zurück, finanziell einer, der alles verändert.',
+    wahl: [
+      { l: 'Den Berater verhandeln lassen', h: 'Geld', run: () => { S.p.wechselwunsch = true; return { text: 'Dein Berater nimmt Kontakt auf. Im nächsten Fenster wird es konkret — und dein jetziger Verein weiß es auch.', eff: { moral: 5, trainer: -8, ruf: -3 } }; } },
+      { l: 'Ablehnen, du willst noch oben spielen', h: 'Ehrgeiz', run: () => ({ text: 'Du sagst ab, ohne lange zu überlegen. Es fühlt sich richtig und teuer an.', eff: { mentalitaet: 1.0, moral: 6, trainer: 5 } }) }
+    ] },
+  { id: 'funktionaer', einmal: 1, gewicht: 3, wenn: () => S.p.alter >= 32 && S.p.ruf > 45,
+    eyebrow: 'Die Zeit danach', titel: 'Ein Platz in der Geschäftsstelle',
+    text: () => 'Der Verein bietet dir eine Rolle nach der Karriere an — irgendwo zwischen Nachwuchs und Sportdirektor. Das Angebot gilt jetzt, nicht in drei Jahren.',
+    wahl: [
+      { l: 'Zusagen', h: 'Sicherheit', run: () => { merken('sonst', 'Eine Rolle für die Zeit nach der Karriere zugesagt.', 1); return { text: 'Du weißt, was kommt, wenn es vorbei ist. Das nimmt Druck — und ein bisschen Hunger.', eff: { moral: 12, mentalitaet: -.4, trainer: 6 } }; } },
+      { l: 'Offen lassen', h: 'Frei', run: () => ({ text: 'Du bedankst dich und entscheidest nichts. Noch gehört dir der Platz und nicht das Büro.', eff: { mentalitaet: .5 } }) }
+    ] },
+  { id: 'mentor', gewicht: 4, wenn: () => S.p.alter >= 30 && S.p.trainer > 55,
+    eyebrow: 'Kabine', titel: 'Der Älteste im Raum',
+    text: () => 'Du bist der Älteste in der Kabine. Drei junge Spieler kommen mit allem zu dir — auch mit Dingen, die nichts mit Fußball zu tun haben.',
+    wahl: [
+      { l: 'Die Rolle annehmen', h: 'Verantwortung', run: () => ({ text: 'Du wirst zu dem, der du mit neunzehn gebraucht hättest. Es kostet Zeit und gibt dir mehr zurück.', eff: { trainer: 9, moral: 6, mentalitaet: .7, energie: -6 } }) },
+      { l: 'Höflich Abstand halten', h: 'Fokus', run: () => ({ text: 'Du bist Spieler, nicht Erzieher. Die Jungen gehen zu jemand anderem.', eff: { energie: 4, trainer: -3 } }) }
+    ] },
+  { id: 'experte', einmal: 1, gewicht: 3, wenn: () => S.p.alter >= 31 && S.p.ruf > 55,
+    eyebrow: 'Medien', titel: 'Der Platz im Studio',
+    text: () => 'Ein Sender testet dich als Experten für die Zeit nach der Karriere. Ein Probetag, Kamera, Monitor, jemand im Ohr.',
+    wahl: [
+      { l: 'Hingehen', h: 'Ausprobieren', run: () => chance(.6)
+          ? ({ text: 'Du erklärst eine Szene so, dass sie jeder versteht. Der Redakteur nimmt deine Nummer.', eff: { ruf: 7, follower: Math.round(S.p.follower * .1 + 6000), moral: 7, energie: -5 } })
+          : ({ text: 'Vor der Kamera ist alles anders. Du redest zu schnell und sagst nichts. Sie bedanken sich freundlich.', eff: { moral: -6, energie: -5 } }) },
+      { l: 'Absagen', h: 'Noch nicht', run: () => ({ text: 'Erst der Fußball, dann alles andere. So warst du immer.', eff: { mentalitaet: .3 } }) }
+    ] },
+  { id: 'letztervertrag', gewicht: 4, wenn: () => S.p.alter >= 33 && S.p.vertrag.jahre <= 1,
+    eyebrow: 'Vertrag', titel: 'Noch ein Jahr?',
+    text: () => 'Der Verein bietet dir ein weiteres Jahr an — mit deutlich weniger Gehalt und der Ansage, dass du kein Stammspieler mehr bist.',
+    wahl: [
+      { l: 'Annehmen', h: 'Weiterspielen', run: () => { S.p.vertrag.jahre += 1; S.p.vertrag.gehalt = Math.round(S.p.vertrag.gehalt * .62); return { text: 'Du unterschreibst. Weniger Geld, weniger Spiele, aber noch ein Jahr in dieser Kabine.', eff: { moral: 6, trainer: 5 } }; } },
+      { l: 'Ablehnen und dich umsehen', h: 'Stolz', run: () => { S.p.wechselwunsch = true; return { text: 'Du willst irgendwo spielen, wo man dich noch aufstellt. Dein Berater beginnt zu telefonieren.', eff: { moral: -4, mentalitaet: .6, trainer: -5 } }; } }
+    ] },
+  { id: 'abschiedsspiel', einmal: 1, gewicht: 3, wenn: () => S.p.alter >= 33 && S.p.ruf > 40,
+    eyebrow: 'Die Zeit danach', titel: 'Das Abschiedsspiel',
+    text: () => 'Jemand in der Geschäftsstelle beginnt, von einem Abschiedsspiel zu sprechen. Es ist das erste Mal, dass jemand laut ausspricht, dass es bald vorbei ist.',
+    wahl: [
+      { l: 'Mitplanen', h: 'Annehmen', run: () => ({ text: 'Ein Termin, eine Gegnerelf aus alten Weggefährten, der Erlös an den Nachwuchs. Es fühlt sich gut und seltsam zugleich an.', eff: { moral: 10, ruf: 5, mentalitaet: -.3 } }) },
+      { l: 'Abwinken — du spielst noch', h: 'Trotz', run: () => ({ text: '„Fragt mich in zwei Jahren nochmal." Am Wochenende läufst du wie ein Zwanzigjähriger.', eff: { mentalitaet: 1.1, moral: 6, energie: -6 } }) }
+    ] },
+  { id: 'rekordspieler', einmal: 1, gewicht: 2, wenn: () => S.p.alter >= 31 && S.karriere.length >= 12,
+    eyebrow: 'Ehrung', titel: 'Der Jubiläumsball',
+    text: () => 'Vor dem Heimspiel sollst du in der Stadionmitte geehrt werden — für eine Zahl an Spielen, die du selbst nie mitgezählt hast.',
+    wahl: [
+      { l: 'Die Ehrung annehmen', h: 'Moment', run: () => { merken('jubilaeum', 'Vor dem Spiel im Stadion geehrt.', 1); return { text: 'Das ganze Stadion steht. Du brauchst danach zwanzig Minuten, um wieder an Fußball zu denken.', eff: { moral: 18, ruf: 6, follower: Math.round(S.p.follower * .07 + 4000), energie: -4 } }; } },
+      { l: 'Nach dem Spiel, bitte', h: 'Fokus', run: () => ({ text: 'Du bittest darum, es zu verschieben. Der Verein versteht es, die Marketingabteilung weniger.', eff: { trainer: 4, ruf: -2 } }) }
+    ] },
+  { id: 'kind_spielt', einmal: 1, gewicht: 3, wenn: () => S.p.kindJahr && S.jahr - S.p.kindJahr >= 7,
+    eyebrow: 'Privat', titel: 'Das erste eigene Spiel',
+    text: () => 'Dein Kind spielt jetzt selbst im Verein. Das erste Spiel ist am Samstagvormittag — du hast abends Anpfiff.',
+    wahl: [
+      { l: 'Hinfahren, bevor du in den Bus steigst', h: 'Familie', run: () => ({ text: 'Vierzig Minuten am Spielfeldrand, eine ganze Kindheit auf einmal. Du steigst danach anders in den Bus.', eff: { moral: 17, energie: -7, mentalitaet: .5 } }) },
+      { l: 'Es aufnehmen lassen', h: 'Profi', run: () => ({ text: 'Du siehst das Video im Bus. Es ist nicht dasselbe, und ihr wisst es beide.', eff: { moral: 2, energie: 3 } }) },
+      { l: 'Beim eigenen Verein anfragen', h: 'Ungewöhnlich', run: () => ({ text: 'Der Nachwuchschef lädt dein Kind zum Schnuppertraining ein. Ob das ein Geschenk ist, wird sich zeigen.', eff: { moral: 9, ruf: 2 } }) }
+    ] },
+  /* ---------- Die fruehen Jahre ----------
+     Der Topf war mit 43 Ereignissen fuer 23 Saisons zu klein: gemessen 212
+     Ziehungen, das haeufigste Ereignis bis zu neunzehnmal je Laufbahn. Diese
+     hier ziehen nur, solange der Spieler jung ist — damit wiederholen sie
+     sich nicht nur seltener, sie passen auch zu dem, wo er gerade steht. */
+  { id: 'erster_vertrag', einmal: 1, gewicht: 5, wenn: () => S.p.alter <= 20 && S.karriere.length <= 1,
+    eyebrow: 'Der erste Vertrag', titel: 'Unterschrift',
+    text: () => 'Der Verein legt dir deinen ersten richtigen Profivertrag hin. Dein Vater sitzt daneben und versteht kein Wort davon.',
+    wahl: [
+      { l: 'Sofort unterschreiben', h: 'Dankbar', run: () => ({ text: 'Du unterschreibst, ohne lange zu lesen. Der Sportdirektor freut sich sichtbar.', eff: { trainer: 8, moral: 12, ruf: 2 } }) },
+      { l: 'Erst einen Berater suchen', h: 'Klug', run: () => ({ text: 'Zwei Wochen später steht dasselbe Papier da — mit einer Prämie für Einsätze darin.', eff: { geld: 18000, moral: 6, trainer: -3 } }) },
+      { l: 'Mehr fordern', h: 'Riskant', run: () => chance(.35)
+          ? ({ text: 'Sie geben nach. In der Geschäftsstelle wird man sich daran erinnern.', eff: { geld: 45000, ruf: 3, trainer: -6 } })
+          : ({ text: '„Du hast noch kein einziges Profispiel gemacht." Du unterschreibst am Ende doch das erste Angebot.', eff: { moral: -8, trainer: -8 } }) }
+    ] },
+  { id: 'ausziehen', einmal: 1, gewicht: 4, wenn: () => S.p.alter <= 21,
+    eyebrow: 'Privat', titel: 'Die erste eigene Wohnung',
+    text: () => 'Du könntest ausziehen. Deine Mutter kocht seit achtzehn Jahren jeden Mittag, und die Wohnung am Trainingsgelände ist teuer.',
+    wahl: [
+      { l: 'Ausziehen, näher zum Verein', h: 'Erwachsen', run: () => ({ text: 'Zwölf Minuten statt fünfzig. Du schläfst länger und kommst wacher zum Training.', eff: { geld: -24000, energie: 8, moral: 4, mentalitaet: .5 } }) },
+      { l: 'Zuhause bleiben', h: 'Bequem', run: () => ({ text: 'Die Wäsche ist gemacht, das Essen steht auf dem Tisch. Dafür sitzt du täglich zwei Stunden im Auto.', eff: { geld: 4000, energie: -5, moral: 5 } }) },
+      { l: 'Mit einem Mitspieler zusammenziehen', h: 'Kabine', run: () => ({ text: 'Zwei Profis, eine Wohnung, viel zu wenig Geschirr. Ihr fahrt jeden Tag zusammen zum Training.', eff: { geld: -12000, moral: 9, trainer: 3, energie: 3 } }) }
+    ] },
+  { id: 'schule', einmal: 1, gewicht: 4, wenn: () => S.p.alter <= 20,
+    eyebrow: 'Neben dem Platz', titel: 'Die Prüfung',
+    text: () => 'Deine Abschlussprüfungen stehen an — mitten in der Rückrunde. Lernen kostet Abende, die du sonst auf dem Platz oder im Bett verbringst.',
+    wahl: [
+      { l: 'Richtig lernen und den Abschluss machen', h: 'Absicherung', run: () => { merken('sonst', 'Schulabschluss neben dem Profifußball gemacht.', 0); return { text: 'Du schaffst es. Falls der Fußball eines Tages nicht mehr trägt, steht wenigstens etwas auf dem Papier.', eff: { energie: -14, moral: 8, mentalitaet: 1.0, trainer: -3 } }; } },
+      { l: 'Durchrutschen lassen, Fokus Fußball', h: 'Alles auf eine Karte', run: () => ({ text: 'Du gehst hin, schreibst irgendwas und trainierst weiter. Der Trainer bemerkt, wie frisch du bist.', eff: { trainer: 5, energie: 4, moral: -4 } }) },
+      { l: 'Auf nächstes Jahr verschieben', h: 'Aufschub', run: () => ({ text: 'Du meldest dich ab. Es fühlt sich nach einer Entscheidung an, die du noch bereuen könntest.', eff: { moral: -2 } }) }
+    ] },
+  { id: 'fanpost', einmal: 1, gewicht: 3, wenn: () => S.p.alter <= 22 && S.p.ruf > 12,
+    eyebrow: 'Zum ersten Mal', titel: 'Ein Trikot mit deinem Namen',
+    text: () => 'Auf dem Parkplatz steht ein Junge, vielleicht neun Jahre alt, in einem Trikot mit deinem Namen auf dem Rücken. Selbst aufgebügelt.',
+    wahl: [
+      { l: 'Stehen bleiben und Zeit nehmen', h: 'Herz', run: () => ({ text: 'Zwanzig Minuten, ein Foto, ein Paar Schuhe aus dem Kofferraum. Seine Mutter weint fast.', eff: { moral: 10, ruf: 3, follower: 1800, energie: -3 } }) },
+      { l: 'Kurz winken und weiterfahren', h: 'Eilig', run: () => ({ text: 'Du winkst aus dem Fenster. Im Rückspiegel steht er noch lange da.', eff: { moral: -3 } }) }
+    ] },
+  { id: 'jugendtrainer', einmal: 1, gewicht: 3, wenn: () => S.p.alter <= 23,
+    eyebrow: 'Herkunft', titel: 'Dein alter Trainer',
+    text: () => 'Der Mann, der dich mit zehn Jahren zum ersten Mal aufgestellt hat, steht nach dem Training am Zaun. Er will nichts — er wollte nur mal sehen, wie es dir geht.',
+    wahl: [
+      { l: 'Ihn zum Essen einladen', h: 'Dankbar', run: () => ({ text: 'Drei Stunden alte Geschichten. Du gehst danach leichter aus der Kabine als seit Wochen.', eff: { moral: 11, mentalitaet: .7, energie: -3 } }) },
+      { l: 'Ihn ins Training mitnehmen', h: 'Ungewöhnlich', run: () => ({ text: 'Er schaut zu und sagt dir hinterher einen einzigen Satz über deine Körperhaltung. Er hat recht.', eff: { mentalitaet: .5, pass: .4, zweikampf: .4, moral: 6 } }) },
+      { l: 'Kurz Hallo sagen', h: 'Knapp', run: () => ({ text: 'Zwei Minuten am Zaun. Er nickt und geht.', eff: { moral: 1 } }) }
+    ] },
+  { id: 'u21', einmal: 1, gewicht: 4, wenn: () => S.p.alter <= 21 && OVR() >= 62 && !S.p.nat.dabei,
+    eyebrow: 'Verband', titel: 'Die U21 ruft an',
+    text: () => 'Der U21-Trainer von ' + NAT(S.p.natId).name + ' lädt dich zum Länderspiel-Doppelpack ein. Zwei Flüge, zwei Spiele, eine Woche weg vom Verein.',
+    wahl: [
+      { l: 'Fahren und alles geben', h: 'Schaufenster', run: () => ({ text: 'Zwei Einsätze, eine Vorlage. Der A-Nationaltrainer sitzt beim zweiten Spiel auf der Tribüne.', eff: { ruf: 7, moral: 9, energie: -16, mentalitaet: .6, follower: 4000 } }) },
+      { l: 'Absagen und beim Verein bleiben', h: 'Fokus', run: () => ({ text: 'Du trainierst durch, während die halbe Mannschaft weg ist. Der Trainer bemerkt es.', eff: { trainer: 8, energie: 6, ruf: -4 } }) }
+    ] },
+  { id: 'alter_kumpel', einmal: 1, gewicht: 3, wenn: () => S.p.alter >= 19 && S.p.alter <= 26,
+    eyebrow: 'Privat', titel: 'Der, der es nicht geschafft hat',
+    text: () => 'Dein bester Freund aus der Jugend — damals klar der Bessere von euch beiden — spielt jetzt in der sechsten Liga und arbeitet auf dem Bau. Er meldet sich zum ersten Mal seit zwei Jahren.',
+    wahl: [
+      { l: 'Ihn treffen, wie früher', h: 'Freundschaft', run: () => ({ text: 'Es ist kurz komisch und dann wieder genau wie früher. Du merkst, wie sehr dir das gefehlt hat.', eff: { moral: 12, mentalitaet: .8 } }) },
+      { l: 'Ihm ein Probetraining besorgen', h: 'Hilfe', run: () => chance(.3)
+          ? ({ text: 'Sie schauen ihn an und nehmen ihn für die Zweite. Er ruft dich abends weinend an.', eff: { moral: 14, ruf: 2, trainer: -2 } })
+          : ({ text: 'Es reicht nicht. Er bedankt sich trotzdem — und meldet sich danach nicht mehr.', eff: { moral: -6 } }) },
+      { l: 'Nicht zurückrufen', h: 'Abstand', run: () => ({ text: 'Du schiebst es auf. Irgendwann ist es zu spät, um noch zurückzurufen.', eff: { moral: -7, mentalitaet: -.3 } }) }
+    ] },
+  { id: 'erstes_interview', einmal: 1, gewicht: 3, wenn: () => S.p.alter <= 22 && S.p.ruf > 18,
+    eyebrow: 'Medien', titel: 'Dein erstes großes Interview',
+    text: () => 'Eine überregionale Zeitung will ein langes Gespräch. Der Pressechef legt dir vorher drei Sätze hin, die du sagen sollst.',
+    wahl: [
+      { l: 'Die Sätze sagen', h: 'Sicher', run: () => ({ text: 'Ein sauberes, langweiliges Interview. Niemand regt sich auf, niemand liest es zu Ende.', eff: { ruf: 2, trainer: 3 } }) },
+      { l: 'Ehrlich reden', h: 'Riskant', run: () => chance(.55)
+          ? ({ text: 'Ein Satz über deine Angst vor dem Scheitern geht durch alle Kanäle. Die Leute mögen dich dafür.', eff: { ruf: 9, follower: 12000, moral: 6, trainer: -3 } })
+          : ({ text: 'Dein Satz über die Aufstellung steht am nächsten Tag ohne Zusammenhang in der Überschrift.', eff: { trainer: -10, ruf: 3, moral: -6 } }) },
+      { l: 'Absagen', h: 'Ruhe', run: () => ({ text: 'Der Pressechef ist erleichtert, die Zeitung schreibt trotzdem — nur ohne dich.', eff: { ruf: -2 } }) }
+    ] },
+  { id: 'zimmerkollege', gewicht: 3, wenn: () => S.p.alter <= 23,
+    eyebrow: 'Kabine', titel: 'Der Zimmerkollege',
+    text: () => 'Auf Auswärtsfahrten teilst du dir das Zimmer mit einem Routinier, der abends drei Stunden lang über Fußball redet, statt zu schlafen.',
+    wahl: [
+      { l: 'Zuhören und mitreden', h: 'Lernen', run: () => ({ text: 'Du schläfst schlechter und verstehst das Spiel besser. Ein fairer Tausch.', eff: { mentalitaet: 1.1, pass: .4, energie: -8, moral: 5 } }) },
+      { l: 'Um ein Einzelzimmer bitten', h: 'Schlaf', run: () => ({ text: 'Der Betreuer richtet es ein. Du bist ausgeschlafen und ein Stück weiter weg von der Mannschaft.', eff: { energie: 9, moral: -4, trainer: -2 } }) }
+    ] },
+  { id: 'erstes_geld', einmal: 1, gewicht: 3, wenn: () => S.p.alter <= 22 && S.p.geld > 60000,
+    eyebrow: 'Geld', titel: 'Das erste richtige Geld',
+    text: () => 'Zum ersten Mal steht auf deinem Konto eine Zahl, die dein Vater in einem Jahr nicht verdient. Alle um dich herum haben eine Meinung dazu.',
+    wahl: [
+      { l: 'Das meiste anlegen und nichts anfassen', h: 'Vernünftig', run: () => ({ text: 'Ein langweiliger Termin bei einer langweiligen Bank. In zehn Jahren wirst du froh darüber sein.', eff: { geld: -Math.round(S.p.geld * .3), mentalitaet: .6, moral: -3 } }) },
+      { l: 'Den Eltern das Haus abbezahlen', h: 'Familie', run: () => { merken('sonst', 'Das Haus der Eltern abbezahlt.', 1); return { text: 'Deine Mutter sagt drei Tage lang nichts dazu und dann alles auf einmal.', eff: { geld: -Math.round(Math.min(S.p.geld * .55, 180000)), moral: 16, mentalitaet: .5 } }; } },
+      { l: 'Ausgeben, du hast es verdient', h: 'Jung', run: () => ({ text: 'Uhr, Reisen, eine sehr große Rechnung in einem sehr kleinen Restaurant. Es macht Spaß.', eff: { geld: -Math.round(S.p.geld * .4), moral: 10, ruf: 2, follower: 3000 } }) }
+    ] },
   { id: 'trainergespraech', gewicht: 3, wenn: () => S.p.trainer < 45, eyebrow: 'Trainerbüro', titel: 'Aussprache',
     text: () => 'Der Trainer bittet dich nach dem Training in sein Büro. „Ich sehe dich im Moment nicht in meiner ersten Elf. Sag mir, warum ich das ändern soll."',
     wahl: [
@@ -3336,8 +3965,13 @@ const REHA_EREIGNISSE = [
     ] }
 ];
 
+/* Manches gibt es im Leben nur einmal: der erste Profivertrag, der Auszug von
+   zuhause, die Trainerlizenz. Solche Ereignisse tragen "einmal: 1" und fallen
+   aus dem Topf, sobald sie einmal gespielt wurden. */
+function schonGehabt(id) { return !!(S.ereignisseGehabt && S.ereignisseGehabt[id]); }
 function ausTopfWaehlen(liste) {
-  const moeglich = liste.filter(e => (!e.wenn || e.wenn()) && e.id !== S.letztesEreignis);
+  const moeglich = liste.filter(e => (!e.wenn || e.wenn()) && e.id !== S.letztesEreignis
+    && !(e.einmal && schonGehabt(e.id)));
   if (!moeglich.length) return null;
   const summe = moeglich.reduce((a, e) => a + (e.gewicht || 1), 0);
   let r = Math.random() * summe;
@@ -3685,6 +4319,7 @@ async function rehaEnde(v) {
 
 async function ereignisSpielen(e) {
   S.letztesEreignis = e.id;
+  if (e.einmal) { S.ereignisseGehabt = S.ereignisseGehabt || {}; S.ereignisseGehabt[e.id] = 1; }
   const text = typeof e.text === 'function' ? e.text() : e.text;
   const idx = await frage({
     eyebrow: e.eyebrow, titel: e.titel, text,
@@ -5408,12 +6043,12 @@ async function spielAustragen(fx) {
   if (spielt) await tutAnsage('spiel_anpfiff');
   if (auftrag) {
     const coach = ts.nat ? (S.natTrainer && S.natTrainer.name) : (S.trainer && S.trainer.name);
-    tickerEintrag(0, 'Der Auftrag', (coach ? coach + ': ' : '') + '\u201E' + auftrag.text + '\u201C', 'ev-you');
+    tickerEintrag(0, 'Der Auftrag', (coach ? coach + ': ' : '') + '„' + auftrag.text + '“', 'ev-you');
     el('sb-auftrag').className = 'sb-auftrag';
     el('sb-auftrag').textContent = 'Auftrag: ' + auftrag.kurz;
     el('sb-auftrag').hidden = false;
     await warteAnsage((coach || 'Der Trainer') + ' vor dem Anpfiff',
-      '\u201E' + auftrag.text + '\u201C', auftrag.kurz, 'Anpfiff');
+      '„' + auftrag.text + '“', auftrag.kurz, 'Anpfiff');
   } else {
     el('sb-auftrag').hidden = true;
     await warteKnopf('Anpfiff');
@@ -6637,17 +7272,17 @@ async function einstellungen() {
   const tutAn = !!(S.tut && S.tut.an);
   const idx = await frage({
     eyebrow: 'Einstellungen',
-    titel: 'Platz ' + aktiverPlatz + ' \u00b7 ' + S.p.vorname + ' ' + S.p.nachname,
+    titel: 'Platz ' + aktiverPlatz + ' · ' + S.p.vorname + ' ' + S.p.nachname,
     text: speicherText(),
     wahlen: [
       { label: 'Jetzt speichern', hinweis: 'Sonst geschieht das ohnehin nach jeder Woche' },
-      { label: 'Sicherungscode', hinweis: 'Karriere sichern oder aus einem Code zur\u00fcckholen' },
+      { label: 'Sicherungscode', hinweis: 'Karriere sichern oder aus einem Code zurückholen' },
       { label: 'Tutorial ' + (tutAn ? 'ausschalten' : 'einschalten'),
         hinweis: tutAn ? 'Die Hinweise deines Beraters laufen gerade'
                        : 'Hinweise beim ersten Mal, jeweils an Ort und Stelle' },
-      { label: 'Karriere wechseln', hinweis: 'Speichern und zur\u00fcck zur Platzauswahl' },
-      { label: 'Diese Karriere l\u00f6schen', hinweis: 'Platz ' + aktiverPlatz + ' unwiderruflich leeren' },
-      { label: 'Schlie\u00dfen' }
+      { label: 'Karriere wechseln', hinweis: 'Speichern und zurück zur Platzauswahl' },
+      { label: 'Diese Karriere löschen', hinweis: 'Platz ' + aktiverPlatz + ' unwiderruflich leeren' },
+      { label: 'Schließen' }
     ]
   });
   if (idx === 0) {
@@ -6659,7 +7294,7 @@ async function einstellungen() {
   if (idx === 1) return sicherungscode();
   if (idx === 2) {
     S.tut.an = !tutAn;
-    toast(S.tut.an ? 'Tutorial an \u2014 Hinweise kommen wieder' : 'Tutorial aus');
+    toast(S.tut.an ? 'Tutorial an — Hinweise kommen wieder' : 'Tutorial aus');
     speichern(); render();
     return;
   }
