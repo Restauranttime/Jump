@@ -558,9 +558,31 @@ der angesagten Chance.
 ## Der Auftrag
 
 Der Trainer hat bisher nur entschieden, **ob** du spielst. Sobald angepfiffen war, existierte
-er nicht mehr. Jetzt gibt er der Startelf vor dem Anpfiff eine Aufgabe — sie steht in der
-Anpfiffmeldung, ohne zusätzlichen Knopf, denn vierzig Spiele pro Saison vertragen keine
-weitere Abfrage.
+er nicht mehr. Jetzt gibt er der Startelf vor dem Anpfiff eine Aufgabe.
+
+**Man muss durch sie hindurch.** Anfangs stand der Auftrag als eine Zeile im Ticker — und war
+nach drei Meldungen weggescrollt. Jetzt ist er ein eigener Bildschirm mit dem Namen des
+Trainers, seinem Wortlaut und der Aufgabe hervorgehoben; **sein Knopf ist der Anpfiff selbst**,
+er kostet also keinen zusätzlichen Druck. Vierzig Spiele pro Saison vertragen keine weitere
+Abfrage. Danach bleibt der Auftrag als schmale Leiste unter dem Spielstand stehen, das ganze
+Spiel lang, und wechselt am Ende auf grün oder rot.
+
+**Und man bekommt auch Gelegenheiten dazu.** Die Momente eines Spiels wurden gewürfelt, ohne
+den Auftrag zu kennen — die beiden wussten nichts voneinander. Ein Außenverteidiger mit dem
+Auftrag „Eine Vorlage geben" spielt in der Momentgruppe *Abwehr*, und dort bieten nur **3 von
+14** Momenten überhaupt eine Vorlage an: Die Wahrscheinlichkeit, dass beide gewürfelten
+Momente eine hergaben, lag bei **3 %**. Eine Aufgabe ohne Gelegenheit.
+
+Jeder Auftrag trägt jetzt, welche Momentausgänge ihn erfüllen können, und der Spielverlauf
+wird nach dem Auftrag gebaut statt davor: **Beide Momente eines Startelfspielers bieten einen
+passenden Ausgang an** — gemessen über 3.227 Aufträge in 100 % der Fälle. Auch der Elfmeter,
+der in 12 % der Spiele einen Moment ersetzt, nimmt nicht mehr ausgerechnet den, auf den es
+ankommt.
+
+Das hat einen Preis, und der steht hier: Ein Außenverteidiger kommt dadurch auf 0,17 Tore je
+Spiel statt 0,13, ein offensiver Mittelfeldspieler auf 0,32 statt 0,29 — wer eine echte
+Gelegenheit bekommt, nutzt sie manchmal auch. Die Erfüllungsquote steigt von 53 auf **61 %**
+für den, der für den Auftrag spielt, gegen 52 % für den, der ihn ignoriert.
 
 Dreizehn Aufträge, gefiltert nach Position und gewichtet nach der Spielidee des Trainers: Der
 offensive verlangt ein Tor oder eine Vorlage, der defensive die Null hinten, der akribische
@@ -827,10 +849,10 @@ eine durchgespielte Karriere:
   |---|---|---|---|
   | Mittelstürmer | 0,82–0,89 | 28–30 | 0,6–1,4 |
   | Flügelstürmer | 0,51–0,65 | 18–22 | 2,8–18,5 |
-  | Offensives Mittelfeld | 0,22–0,29 | 7–10 | 5,3–15,1 |
+  | Offensives Mittelfeld | 0,26–0,32 | 9–11 | 5,3–15,1 |
   | Zentrales Mittelfeld | 0,14–0,18 | 5–6 | 6,7–15,5 |
   | Defensives Mittelfeld | 0,08–0,12 | 3–4 | 2,2–9,1 |
-  | Außenverteidiger | 0,08–0,13 | 3–4 | 0–4,3 |
+  | Außenverteidiger | 0,13–0,17 | 4–6 | 0–4,3 |
   | Innenverteidiger | 0,06–0,10 | 2–3 | 0,1–4,7 |
 - Marktwert auf dem Höhepunkt: zweistellige Millionen, mit Weltklasse deutlich darüber.
 - **Die Pausen füllen den Tank.** Die Sommerpause gab früher zehn Punkte Energie, die

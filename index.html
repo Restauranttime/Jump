@@ -406,6 +406,16 @@ table.tbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-
 .sb-score{font-family:var(--font-display);font-size:40px;letter-spacing:.04em;line-height:1;font-variant-numeric:tabular-nums;
   text-shadow:0 0 24px rgba(239,169,44,.3)}
 .sb-min{font-family:var(--font-data);font-size:11px;color:var(--accent);letter-spacing:.1em;text-align:center;margin-top:4px}
+/* Der Auftrag bleibt das ganze Spiel sichtbar — als eine Zeile im Ticker war
+   er nach drei Meldungen weggescrollt. */
+.sb-auftrag{margin-top:11px;padding:7px 10px;border-radius:9px;background:var(--accent-dim);
+  border:1px solid rgba(239,169,44,.32);font-family:var(--font-data);font-size:11.5px;
+  font-weight:600;letter-spacing:.03em;color:var(--accent-2);text-align:center}
+.sb-auftrag.erfuellt{background:rgba(79,190,135,.14);border-color:rgba(79,190,135,.4);color:var(--good)}
+.sb-auftrag.verfehlt{background:rgba(226,97,91,.13);border-color:rgba(226,97,91,.4);color:var(--bad)}
+.ansage-ziel{font-family:var(--font-data);font-size:12.5px;font-weight:600;letter-spacing:.03em;
+  color:var(--accent-2);background:var(--accent-dim);border:1px solid rgba(239,169,44,.32);
+  border-radius:9px;padding:8px 10px;text-align:center}
 /* Der Ticker fuellt sich von unten wie ein Liveticker — beim Anpfiff stand
    sonst eine fast leere Seite. Der Abstandshalter statt justify-content:flex-end,
    weil sonst der obere Teil beim Ueberlaufen nicht mehr erreichbar ist. */
@@ -545,6 +555,7 @@ textarea.input{min-height:120px;font-family:var(--font-data);font-size:12px;resi
         </div>
         <div class="sb-team"><div class="badge" id="sb-badge-a">–</div><span id="sb-name-a">–</span></div>
       </div>
+      <div id="sb-auftrag" class="sb-auftrag" hidden></div>
     </div>
     <div class="ticker" id="ticker"></div>
     <div class="match-foot" id="match-foot"></div>
@@ -2431,22 +2442,30 @@ const ERG_TEXT = art => ((S.p.pos === 'TW' && ERGEBNIS_TEXT_TW[art]) || ERGEBNIS
    Bewusst ohne zusaetzlichen Knopf: Der Auftrag steht in der Anpfiffmeldung.
    Vierzig Spiele pro Saison vertragen keine weitere Abfrage. Geprueft wird
    ausschliesslich gegen Zahlen, die der Spieltag ohnehin fuehrt. */
+/* braucht: die Momentausgaenge, die diesen Auftrag ueberhaupt erfuellen
+   koennen. Die Momente eines Spiels wurden frueher gewuerfelt, ohne den
+   Auftrag zu kennen — ein Aussenverteidiger mit dem Auftrag „Eine Vorlage
+   geben“ spielt in der Gruppe Abwehr, und dort bieten nur drei von vierzehn
+   Momenten ueberhaupt eine Vorlage an. Die Wahrscheinlichkeit, dass beide
+   gewuerfelten Momente eine hergaben, lag damit bei drei Prozent: eine
+   Aufgabe ohne Gelegenheit. Auftraege ohne braucht (gewinnen, ohne Karte,
+   zu Null) haengen nicht an einem bestimmten Moment.*/
 const AUFTRAEGE = [
   { id: 'tor', kurz: 'Ein Tor erzielen', stil: ['offensiv', 'ergebnis'],
     text: 'Ich will ein Tor von dir sehen. Dafür stehst du da vorne.',
-    wenn: () => POS(S.p.pos).angriff >= .7, erfuellt: r => r.tore >= 1 },
+    wenn: () => POS(S.p.pos).angriff >= .7, braucht: ['tor', 'traumtor', 'strafstoss'], erfuellt: r => r.tore >= 1 },
   { id: 'zweiTore', kurz: 'Zwei Tore erzielen', stil: ['offensiv'],
     text: 'Heute reicht mir einer nicht. Ich will zwei von dir.',
     /* Nur an einen Stuermer in seinen besten Jahren. Bei Staerke 70 wurde der
        Auftrag zu drei Prozent erfuellt — das ist keine Aufgabe, sondern eine
        feststehende Niederlage. */
-    wenn: () => POS(S.p.pos).angriff >= .85 && effOvr() > 79, erfuellt: r => r.tore >= 2 },
+    wenn: () => POS(S.p.pos).angriff >= .85 && effOvr() > 79, braucht: ['tor', 'traumtor', 'strafstoss'], erfuellt: r => r.tore >= 2 },
   { id: 'vorlage', kurz: 'Eine Vorlage geben', stil: ['offensiv'],
     text: 'Du spielst heute den letzten Pass. Such den freien Mann, statt selbst abzuziehen.',
-    wenn: () => POS(S.p.pos).angriff >= .28, erfuellt: r => r.vorlagen >= 1 },
+    wenn: () => POS(S.p.pos).angriff >= .28, braucht: ['assist', 'strafstoss'], erfuellt: r => r.vorlagen >= 1 },
   { id: 'beteiligt', kurz: 'An einem Treffer beteiligt sein', stil: ['offensiv', 'ergebnis'],
     text: 'Sei an einem Treffer beteiligt. Wie, ist mir egal.',
-    wenn: () => POS(S.p.pos).angriff >= .28, erfuellt: r => r.tore + r.vorlagen >= 1 },
+    wenn: () => POS(S.p.pos).angriff >= .28, braucht: ['tor', 'traumtor', 'assist', 'strafstoss'], erfuellt: r => r.tore + r.vorlagen >= 1 },
   { id: 'zuNull', kurz: 'Ohne Gegentor bleiben', stil: ['defensiv'],
     text: 'Hinten bleibt die Null stehen. Das ist heute deine einzige Aufgabe.',
     wenn: () => POS(S.p.pos).angriff <= .5, erfuellt: r => r.toreGegner === 0 },
@@ -2455,16 +2474,16 @@ const AUFTRAEGE = [
     wenn: () => POS(S.p.pos).angriff <= .5, erfuellt: r => r.toreGegner <= 1 },
   { id: 'zweikampf', kurz: 'Dich in die Zweikämpfe werfen', stil: ['defensiv', 'akribisch'],
     text: 'Ich will dich in den Zweikämpfen sehen. Geh dahin, wo es wehtut.',
-    wenn: () => S.p.pos !== 'TW', erfuellt: r => r.aktionen >= 1.6 },
+    wenn: () => S.p.pos !== 'TW', braucht: ['aktion', 'rettung', 'foulok'], erfuellt: r => r.aktionen >= 1.6 },
   { id: 'parade', kurz: 'Den Laden hinten zusammenhalten', stil: ['defensiv', 'akribisch'],
     text: 'Wenn einer durchkommt, bist du der Letzte. Ich will sehen, dass du da bist.',
-    wenn: () => S.p.pos === 'TW', erfuellt: r => r.aktionen >= 1.6 },
+    wenn: () => S.p.pos === 'TW', braucht: ['aktion', 'rettung'], erfuellt: r => r.aktionen >= 1.6 },
   { id: 'ruhigAmBall', kurz: 'Auch am Ball ruhig bleiben', stil: ['akribisch', 'talent'],
     text: 'Kein Nervenflattern. Auf der Linie ruhig — und am Ball genauso.',
     wenn: () => S.p.pos === 'TW', erfuellt: r => r.fehler < 1 },
   { id: 'eroeffnen', kurz: 'Das Spiel von hinten eröffnen', stil: ['offensiv', 'talent'],
     text: 'Du bist heute der elfte Feldspieler. Eröffne das Spiel, wirf es nicht weg.',
-    wenn: () => S.p.pos === 'TW', erfuellt: r => r.aktionen >= 1 && r.fehler < 1 },
+    wenn: () => S.p.pos === 'TW', braucht: ['aktion', 'rettung'], erfuellt: r => r.aktionen >= 1 && r.fehler < 1 },
   { id: 'ohneFehler', kurz: 'Ohne Fehler bleiben', stil: ['akribisch', 'defensiv'],
     text: 'Keine Geschenke. Kein einziger unnötiger Ballverlust.',
     wenn: () => true, erfuellt: r => r.fehler < 1 },
@@ -2479,7 +2498,7 @@ const AUFTRAEGE = [
     wenn: () => true, erfuellt: r => r.note <= 2.8 },
   { id: 'mutig', kurz: 'Dich zeigen, statt dich zu verstecken', stil: ['talent'],
     text: 'Du bist jung, also spiel auch so. Ich will dich am Ball sehen, nicht versteckt.',
-    wenn: () => S.p.alter <= 23, erfuellt: r => r.aktionen >= 2 || r.tore + r.vorlagen >= 1 },
+    wenn: () => S.p.alter <= 23, braucht: ['aktion', 'rettung', 'foulok', 'tor', 'traumtor', 'assist'], erfuellt: r => r.aktionen >= 2 || r.tore + r.vorlagen >= 1 },
   { id: 'ruhig', kurz: 'Fehlerfrei und ohne Karte', stil: ['talent', 'akribisch'],
     text: 'Keine Experimente heute. Mach das Einfache, und mach es richtig.',
     wenn: () => S.p.alter <= 21, erfuellt: r => r.fehler < 1 && r.gelb === 0 }
@@ -2544,7 +2563,7 @@ function zuschauer(fx, heimClub) {
   return Math.round(basis * wettbewerb * rnd(.86, 1.12) / 100) * 100;
 }
 
-function baueSpielverlauf(fx, einsatz) {
+function baueSpielverlauf(fx, einsatz, auftrag) {
   const p = S.p, ts = teamStand(fx), club = ts.team, gegner = CL(fx.gegnerId);
   const spielt = einsatz.status === 'startelf' || einsatz.status === 'einwechslung';
   /* Dein Gewicht in der Mannschaft. In der Nationalelf faellt es kleiner aus:
@@ -2588,9 +2607,35 @@ function baueSpielverlauf(fx, einsatz) {
   const alle = MOMENTE[POS(p.pos).gruppe];
   const ohneElfer = shuffle(alle.filter(m => !m.elfer));
   const gewaehlt = [];
-  for (let i = 0; i < anzMomente; i++) gewaehlt.push(ohneElfer[i % ohneElfer.length]);
+  /* Wer einen Auftrag hat, bekommt auch Gelegenheiten dazu: Bis zu zwei der
+     Momente bieten einen Ausgang an, der den Auftrag erfuellen kann. Gibt der
+     Vorrat der Position weniger her, bleibt es bei dem, was da ist — der Rest
+     wird wie bisher gewuerfelt. */
+  if (auftrag && auftrag.braucht) {
+    const passt = m => m.w.some(w => auftrag.braucht.indexOf(w.gut) >= 0);
+    for (const m of ohneElfer) {
+      if (gewaehlt.length >= Math.min(2, anzMomente)) break;
+      if (passt(m)) gewaehlt.push(m);
+    }
+  }
+  for (const m of ohneElfer) {
+    if (gewaehlt.length >= anzMomente) break;
+    if (gewaehlt.indexOf(m) < 0) gewaehlt.push(m);
+  }
+  while (gewaehlt.length < anzMomente) gewaehlt.push(ohneElfer[gewaehlt.length % ohneElfer.length]);
   const elfer = alle.find(m => m.elfer);
-  if (elfer && gewaehlt.length && chance(.12)) gewaehlt[ri(0, gewaehlt.length - 1)] = elfer;
+  if (elfer && gewaehlt.length && chance(.12)) {
+    /* Nicht auf Kosten des Auftrags: Wenn der Elfmeter selbst nichts hergibt,
+       was der Trainer verlangt hat, ersetzt er einen Moment, der es auch nicht
+       tut. Sonst nahm er in zwoelf Prozent der Spiele genau die Gelegenheit
+       weg, die gerade erst zugesichert wurde. */
+    const taugt = m => !auftrag || !auftrag.braucht || m.w.some(w => auftrag.braucht.indexOf(w.gut) >= 0);
+    if (taugt(elfer)) gewaehlt[ri(0, gewaehlt.length - 1)] = elfer;
+    else {
+      const frei = gewaehlt.map((m, i) => i).filter(i => !taugt(gewaehlt[i]));
+      if (frei.length) gewaehlt[pick(frei)] = elfer;
+    }
+  }
   gewaehlt.forEach(m => ev.push({ art: 'moment', min: ri(einsatz.ab + 3, 90), vorlage: m }));
   if (spielt && chance(0.1)) ev.push({ art: 'info', min: ri(20, 80), text: 'Der Trainer brüllt dich von der Seitenlinie an. Mehr Bewegung ohne Ball.' });
   if (einsatz.status === 'einwechslung') ev.push({ art: 'wechsel', min: einsatz.ab, text: 'Du wirst eingewechselt. Die vierte Offizielle hebt deine Nummer hoch.' });
@@ -5204,6 +5249,20 @@ function warteKnopf(label, kl, behalten) {
     b.focus({ preventScroll: true });
   });
 }
+/* Eine Ansage im Spieltagsfuss: Ueberschrift, Text, eine Hervorhebung — und
+   dann der gewoehnliche Knopf. Bewusst KEIN eigenes Promise: Es gibt genau
+   eine blockierende Primitive im Spieltag, und das ist warteKnopf(). Eine
+   zweite daneben haette jeden Testtreiber haengen lassen, der nur warteKnopf
+   ersetzt — und genau das tat sie im ersten Versuch. */
+function warteAnsage(titel, text, hervor, label) {
+  const f = el('match-foot'); f.innerHTML = '';
+  const e = document.createElement('p'); e.className = 'eyebrow'; e.textContent = titel; f.appendChild(e);
+  const t = document.createElement('p'); t.className = 'moment'; t.textContent = text; f.appendChild(t);
+  if (hervor) {
+    const h = document.createElement('p'); h.className = 'ansage-ziel'; h.textContent = hervor; f.appendChild(h);
+  }
+  return warteKnopf(label || 'Weiter', 'btn-primary', true);
+}
 function warteWahl(text, optionen) {
   return new Promise(r => {
     const f = el('match-foot'); f.innerHTML = '';
@@ -5223,7 +5282,10 @@ async function spielAustragen(fx) {
   const p = S.p, ts = teamStand(fx), club = ts.team, gegner = CL(fx.gegnerId);
   const einsatz = einsatzBestimmen(fx);
   const spielt = einsatz.status === 'startelf' || einsatz.status === 'einwechslung';
-  const verlauf = baueSpielverlauf(fx, einsatz);
+  /* Der Auftrag steht vor dem Spielverlauf fest — sonst wuerfelt der Verlauf
+     die Momente, ohne zu wissen, was verlangt wird. */
+  const auftrag = einsatz.status === 'startelf' ? auftragWaehlen(ts) : null;
+  const verlauf = baueSpielverlauf(fx, einsatz, auftrag);
   const heimClub = fx.heim ? club : gegner, gastClub = fx.heim ? gegner : club;
 
   el('sb-comp').textContent = wettbewerbName(fx);
@@ -5267,13 +5329,21 @@ async function spielAustragen(fx) {
   }
   /* Nur die Startelf bekommt einen Auftrag — wer erst in der 70. Minute kommt,
      wird vom Trainer nicht mehr auf eine Aufgabe eingeschworen. */
-  const auftrag = einsatz.status === 'startelf' ? auftragWaehlen(ts) : null;
+  /* Der Auftrag stand nur als eine Zeile im Ticker und ging dort unter. Jetzt
+     ist er ein eigener Bildschirm, durch den man klicken muss — und weil sein
+     Knopf der Anpfiff selbst ist, kostet er keinen zusaetzlichen Druck. */
   if (auftrag) {
     const coach = ts.nat ? (S.natTrainer && S.natTrainer.name) : (S.trainer && S.trainer.name);
     tickerEintrag(0, 'Der Auftrag', (coach ? coach + ': ' : '') + '\u201E' + auftrag.text + '\u201C', 'ev-you');
+    el('sb-auftrag').className = 'sb-auftrag';
+    el('sb-auftrag').textContent = 'Auftrag: ' + auftrag.kurz;
+    el('sb-auftrag').hidden = false;
+    await warteAnsage((coach || 'Der Trainer') + ' vor dem Anpfiff',
+      '\u201E' + auftrag.text + '\u201C', auftrag.kurz, 'Anpfiff');
+  } else {
+    el('sb-auftrag').hidden = true;
+    await warteKnopf('Anpfiff');
   }
-
-  await warteKnopf('Anpfiff');
 
   for (const e of verlauf) {
     el('sb-min').textContent = e.min + '. Minute';
@@ -5401,6 +5471,8 @@ async function spielAustragen(fx) {
       tickerEintrag(abpfiff, auftragErfuellt ? 'Auftrag erfüllt' : 'Auftrag verfehlt',
         auftrag.kurz + (auftragErfuellt ? ' — der Trainer nickt.' : ' — der Trainer verschränkt die Arme.'),
         auftragErfuellt ? 'ev-goal' : 'ev-bad');
+      el('sb-auftrag').className = 'sb-auftrag ' + (auftragErfuellt ? 'erfuellt' : 'verfehlt');
+      el('sb-auftrag').textContent = (auftragErfuellt ? 'Auftrag erfüllt: ' : 'Auftrag verfehlt: ') + auftrag.kurz;
     }
     /* Laenderspiele zaehlen in die Laenderspielbilanz, nicht in die Saison
        beim Verein — sonst stuende am Saisonende eine Zahl, die kein Verein je
