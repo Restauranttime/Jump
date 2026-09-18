@@ -54,6 +54,34 @@ geöffnet, meldet er sich still ab und das Spiel läuft wie zuvor.
 (180 für iOS, 192 und 512 für das Manifest, dazu eine Maskable-Fassung, bei der das Motiv
 auf 80 % geschrumpft in der Sicherheitszone der Android-Maske liegt).
 
+## Wappen
+
+Ein Wappen war frueher ein abgerundetes Quadrat mit dem Vereinskürzel darin. Bei 442 Vereinen
+reichte das nicht: In der 2. Bundesliga sahen acht von zwölf Vereinen gleich aus — blaues
+Quadrat, drei Buchstaben. Gemessen über alle Ligen waren **149 von 442 Vereinen innerhalb der
+eigenen Liga verwechselbar** (gleiche Hauptfarbe, gleiches Muster).
+
+Jetzt ist es ein Schild mit einem von neun Mustern: einfarbig, senkrechte Streifen, waagrechte
+Bänder, Diagonale, Ring, geviertelt, Chevron, halbiert, Kreuz. **Kein einziges fremdes Bild** —
+alles entsteht aus Farbe, Form und Kürzel, die ohnehin in den Daten stehen. Die Datei wächst
+dadurch um 3,7 KB, nicht um Megabyte.
+
+**Die Muster werden je Liga kollisionsfrei vergeben.** Ein Hash allein reichte nicht: Er
+verteilt gleichmässig, aber drei blaue Vereine bekamen dreimal denselben Ring. Deshalb prüft
+`wappenVerteilen()` beim Aufbau, ob die Kombination aus Farbe und Muster in dieser Liga schon
+vergeben ist, und rückt sonst weiter. Der Startpunkt kommt aus dem Kürzel, damit ein Verein
+sein Wappen über alle Spielstände hinweg behält.
+
+**Die Muster aus den echten Trikots bleiben.** Wo zwei davon in einer Liga kollidieren — die
+spanische zweite Liga ist voller rot-weiss gestreifter Vereine — werden stattdessen die beiden
+Farben getauscht. Rot-weiss und weiss-rot gestreift sind nebeneinander klar zu unterscheiden.
+
+| | vorher | jetzt |
+|---|---|---|
+| Muster | 4 | **9** |
+| in der eigenen Liga verwechselbar | 149 von 442 | **20 von 442** |
+| Dateizuwachs | — | 3,7 KB |
+
 ## Das Tutorial
 
 Wer auf einen freien Platz tippt, wird zuerst gefragt: **„Zum ersten Mal hier?"** Zwei Knöpfe —

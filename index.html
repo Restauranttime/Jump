@@ -132,13 +132,13 @@ a{color:var(--accent)}
    darueber. Ohne das Band verschwanden die Buchstaben bei Laengsstreifen — BVB,
    BO4 und BMG waren schlicht nicht zu lesen. Das Band ist zugleich ein echtes
    Trikotmotiv, wirkt also nicht wie eine Notloesung. */
-.badge{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;flex:none;overflow:hidden;
-  font-family:var(--font-display);font-size:15px;letter-spacing:.02em;color:#0B0F0C;
-  box-shadow:inset 0 -12px 18px rgba(0,0,0,.28), 0 1px 0 rgba(255,255,255,.08)}
-.badge i{font-style:normal;display:block;width:100%;text-align:center;padding:2px 0;
-  background:var(--scrim,rgba(8,14,10,.55));line-height:1.12}
-.badge-sm{width:26px;height:26px;border-radius:8px;font-size:11px}
-.badge-lg{width:54px;height:54px;border-radius:15px;font-size:20px}
+.badge{width:38px;height:41px;display:grid;place-items:center;flex:none;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))}
+.badge .wappen{width:100%;height:100%;display:block;overflow:visible}
+.badge .wappen text{font-family:var(--font-display);font-size:13.5px;letter-spacing:.01em}
+.badge-sm{width:25px;height:27px}
+.badge-sm .wappen text{font-size:15px}
+.badge-lg{width:52px;height:57px}
 
 .meter{height:6px;border-radius:99px;background:var(--surface-3);overflow:hidden}
 .meter>span{display:block;height:100%;border-radius:99px;background:var(--accent);transition:width .35s ease}
@@ -485,6 +485,18 @@ table.tbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-
 textarea.input{min-height:120px;font-family:var(--font-data);font-size:12px;resize:vertical;line-height:1.35;word-break:break-all}
 </style>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <clipPath id="wappen-schild" clipPathUnits="userSpaceOnUse">
+      <path d="M3.2 2.4 H36.8 V24.5 C36.8 33.4 29.8 39.6 20 42.2 C10.2 39.6 3.2 33.4 3.2 24.5 Z"/>
+    </clipPath>
+    <linearGradient id="wappen-tiefe" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".16"/>
+      <stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity=".34"/>
+    </linearGradient>
+  </defs>
+</svg>
 <div id="app">
 
   <!-- ============ START ============ -->
@@ -918,6 +930,41 @@ for (const lid of Object.keys(CLUBS_RAW)) {
     CLUBS.push({ id: lid + '-' + i, name: c[0], kurz: c[1], liga: lid, staerke: c[2], farbe: c[3], farbe2: c[4], muster: c[5] });
   });
 }
+
+/* Wappenmuster verteilen. 256 der 442 Vereine tragen in den Daten das leere
+   "s", und ein Hash allein reichte nicht: In der 2. Bundesliga kamen dreimal
+   derselbe Ring auf Blau und zweimal dasselbe geviertelte Blau-Weiss heraus.
+   Deshalb wird je Liga geprueft, ob die Kombination aus Farbe und Muster dort
+   schon vergeben ist, und sonst weitergerueckt. Der Startpunkt kommt aus dem
+   Kuerzel, damit ein Verein sein Wappen ueber alle Spielstaende behaelt. */
+const WAPPEN_ABGELEITET = ['r', 'q', 'c', 'l', 'k', 's', 'd', 'h', 'v'];
+(function wappenVerteilen() {
+  const proLiga = {};
+  for (const c of CLUBS) (proLiga[c.liga] = proLiga[c.liga] || []).push(c);
+  for (const lid of Object.keys(proLiga)) {
+    const belegt = {};
+    const schluessel = c => (c.wappenTausch ? c.farbe2 : c.farbe) + '|' + c.wappen;
+    /* Die vorgegebenen Muster stammen aus den echten Trikots und bleiben.
+       Kollidieren zwei davon in einer Liga, werden stattdessen die beiden
+       Farben getauscht: Rot-weiss gestreift und weiss-rot gestreift sind
+       nebeneinander klar zu unterscheiden. */
+    for (const c of proLiga[lid]) if (c.muster && c.muster !== 's') {
+      c.wappen = c.muster;
+      if (belegt[schluessel(c)] && c.farbe2 && c.farbe2 !== c.farbe) c.wappenTausch = 1;
+      belegt[schluessel(c)] = 1;
+    }
+    for (const c of proLiga[lid]) {
+      if (c.wappen) continue;
+      let h = 0;
+      for (let i = 0; i < c.kurz.length; i++) h = (h * 31 + c.kurz.charCodeAt(i)) >>> 0;
+      for (let v = 0; v < WAPPEN_ABGELEITET.length; v++) {
+        c.wappen = WAPPEN_ABGELEITET[(h + v) % WAPPEN_ABGELEITET.length];
+        if (!belegt[schluessel(c)]) break;
+      }
+      belegt[schluessel(c)] = 1;
+    }
+  }
+})();
 /* Nationen treten im Spieltag als Pseudo-Vereine auf (siehe natClub). Der
    Rueckfall greift nur, wenn kein echter Verein passt, kostet also nichts. */
 const CL = id => CLUBS.find(c => c.id === id)
@@ -5873,29 +5920,62 @@ function helligkeit(f) {
   const r = parseInt(f.substr(1, 2), 16), g = parseInt(f.substr(3, 2), 16), b = parseInt(f.substr(5, 2), 16);
   return (.299 * r + .587 * g + .114 * b) / 255;
 }
-function badgeStil(club) {
-  const c1 = (club && club.farbe) || '#4A5A50';
-  const c2 = (club && club.farbe2) || '#FFFFFF';
-  const m = (club && club.muster) || 's';
-  let grund;
-  if (m === 'v') grund = 'repeating-linear-gradient(90deg,' + c1 + ' 0 24%,' + c2 + ' 24% 48%)';
-  else if (m === 'h') grund = 'linear-gradient(180deg,' + c1 + ' 0 33%,' + c2 + ' 33% 67%,' + c1 + ' 67%)';
-  else if (m === 'd') grund = 'linear-gradient(118deg,' + c1 + ' 0 42%,' + c2 + ' 42% 60%,' + c1 + ' 60%)';
-  else grund = c1;
-  /* Das Band richtet sich nach der helleren der beiden Trikotfarben: Ueber
-     hellen Trikots liegt dunkle Schrift auf hellem Band und umgekehrt. */
+/* ---------- Wappen ----------
+   Vorher war ein Wappen ein abgerundetes Quadrat mit dem Kuerzel darin. Bei
+   442 Vereinen sahen damit acht von zwoelf Zweitligisten gleich aus: blaues
+   Quadrat, drei Buchstaben. Jetzt ist es ein Schild mit einem von neun
+   Mustern in den echten Vereinsfarben. Kein einziges fremdes Bild: Alles
+   entsteht aus Farbe, Form und Kuerzel, die ohnehin in den Daten stehen. */
+const WAPPEN_FORM = 'M3.2 2.4 H36.8 V24.5 C36.8 33.4 29.8 39.6 20 42.2 C10.2 39.6 3.2 33.4 3.2 24.5 Z';
+
+/* Das Muster steht seit wappenVerteilen() am Verein. Nationen treten als
+   Pseudo-Vereine auf und haben keines - die fallen auf ihr Trikotmuster
+   zurueck. */
+function wappenMuster(club) { return (club && (club.wappen || club.muster)) || 's'; }
+
+function wappenFlaechen(m, c2) {
+  const f = ' fill="' + c2 + '"';
+  if (m === 'v') return '<path d="M8 0h5v44H8zM19 0h5v44h-5zM30 0h5v44h-5z"' + f + '/>';
+  if (m === 'h') return '<path d="M0 8h40v9H0zM0 25h40v9H0z"' + f + '/>';
+  if (m === 'd') return '<path d="M0 44 40 0v11L11 44z"' + f + '/>';
+  if (m === 'l') return '<path d="M0 0h20v44H0z"' + f + '/>';
+  if (m === 'q') return '<path d="M0 0h20v22H0zM20 22h20v22H20z"' + f + '/>';
+  if (m === 'c') return '<path d="M0 6 20 20 40 6v11L20 31 0 17z"' + f + '/>';
+  if (m === 'k') return '<path d="M16 0h8v44h-8zM0 15h40v8H0z"' + f + '/>';
+  if (m === 'r') return '<circle cx="20" cy="21" r="11" fill="none" stroke="' + c2 + '" stroke-width="5"/>';
+  return '';
+}
+
+/* Ueber hellen Wappen liegt dunkle Schrift auf hellem Band und umgekehrt -
+   sonst verschwindet das Kuerzel in einem gelben oder weissen Verein. */
+function wappenSvg(club) {
+  const t = club && club.wappenTausch;
+  const c1 = (club && (t ? club.farbe2 : club.farbe)) || '#4A5A50';
+  const c2 = (club && (t ? club.farbe : club.farbe2)) || '#FFFFFF';
+  const m = wappenMuster(club);
   const h = Math.max(helligkeit(c1), m === 's' ? 0 : helligkeit(c2));
   const hell = h > .55;
-  return 'background:' + grund + ';color:' + (hell ? '#0B0F0C' : '#F2F7F3')
-    + ';--scrim:' + (hell ? 'rgba(244,248,245,.78)' : 'rgba(8,14,10,.62)')
-    + ';box-shadow:inset 0 -12px 18px rgba(0,0,0,.24),inset 0 0 0 1px rgba(255,255,255,' + (h < .3 ? '.26' : '.12') + ')';
+  const band = hell ? 'rgba(244,248,245,.82)' : 'rgba(8,14,10,.66)';
+  const schrift = hell ? '#0B0F0C' : '#F2F7F3';
+  const rand = h < .3 ? 'rgba(255,255,255,.34)' : 'rgba(0,0,0,.34)';
+  return '<svg class="wappen" viewBox="0 0 40 44" aria-hidden="true">'
+    + '<g clip-path="url(#wappen-schild)">'
+    + '<path d="M0 0h40v44H0z" fill="' + c1 + '"/>'
+    + wappenFlaechen(m, c2)
+    + '<path d="M0 0h40v44H0z" fill="url(#wappen-tiefe)"/>'
+    + '<path d="M0 12.5h40v15H0z" fill="' + band + '"/>'
+    + '<text x="20" y="24.6" text-anchor="middle" fill="' + schrift + '"'
+    + ((club.kurz || '').length > 3 ? ' font-size="10.5"' : '') + '>' + esc(club.kurz || '') + '</text>'
+    + '</g>'
+    + '<path d="' + WAPPEN_FORM + '" fill="none" stroke="' + rand + '" stroke-width="1.6"/>'
+    + '</svg>';
 }
-const badgeHtml = (c, kl) => '<div class="badge ' + (kl || '') + '" style="' + badgeStil(c) + '"><i>' + esc(c.kurz) + '</i></div>';
+const badgeHtml = (c, kl) => '<div class="badge ' + (kl || '') + '">' + wappenSvg(c) + '</div>';
 function badgeSetzen(node, club) {
-  node.setAttribute('style', badgeStil(club));
-  node.innerHTML = '<i></i>';
-  node.firstChild.textContent = club.kurz;
+  node.removeAttribute('style');
+  node.innerHTML = wappenSvg(club);
 }
+
 const noteKl = n => 'note note-' + clamp(Math.floor(n), 1, 5);
 
 function frage({ eyebrow, titel, text, wahlen, extra }) {
