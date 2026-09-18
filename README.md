@@ -177,6 +177,25 @@ gerade steht; ein freier Platz wird hervorgehoben. Gefragt wird erst, nachdem de
 gelesen wurde — bei einem unlesbaren Code soll niemand vorher aussuchen, welche Karriere er
 dafür opfert.
 
+**Überlebt die Welt einen Ladevorgang?** Gespeichert werden dein eigener Kader, die Tabellen,
+die Torjägerlisten, die Weltspitze und eine Zeile je Wechsel (`Name → Verein`). Die Kader der
+anderen 121 Vereine dagegen werden bei jeder Abfrage neu berechnet — aus den Stammdaten, dem
+Jahr und ebenjenen Wechseln. Das spart viel Platz, taugt aber nur, wenn dieselbe Abfrage
+verlässlich dasselbe liefert.
+
+Gemessen wird das mit einem eigenen Treiber: volle Laufbahnen auf vier Positionen, dreimal
+quer durch die Karriere gespeichert und wieder eingelesen — genau über den Weg des
+Sicherungscodes, mitten in der Saison, nicht am Jahreswechsel. Verglichen werden dabei 33
+Größen: die Kader von 25 fremden Vereinen, die Torjägerlisten, die Weltspitze, das
+Nationalaufgebot, dein Kader, dein Rivale und beide Trainer. Zwölf Prüfungen, alle bestanden.
+
+**Ein Fall war es nicht.** Wo einer Nation der Nachwuchs ausgeht, weil die namentlich
+bekannten Spieler längst aufgehört haben, stellt der Verband jemanden auf Landesniveau auf.
+Diese Spieler stehen in keinem Spielstand — sie wurden bei jeder Abfrage neu gewürfelt. Nach
+fünfzehn Saisons hießen deshalb alle drei Torhüter des Aufgebots nach dem Laden anders. Jetzt
+kommen sie aus einem gesäten Generator: Aus Nation, Jahr, Position und Platz entsteht immer
+dieselbe Folge. Wer vor dir im Aufgebot steht, heißt nach einem Neustart genauso wie vorher.
+
 ## Gestaltung
 
 Ein dunkles Grün-Schwarz mit Bernstein als einziger Akzentfarbe, Anton für Zahlen und

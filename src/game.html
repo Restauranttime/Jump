@@ -3025,6 +3025,30 @@ function zufallsname(pool) {
   return { v: pick(p.v), n: pick(p.n) };
 }
 
+/* ---------- Gesaeter Zufall ----------
+   Manches muss bei jeder Abfrage gleich herauskommen, auch nach einem
+   Neustart: Wer im Aufgebot vor dir steht, darf nicht anders heissen, nur
+   weil das Spiel neu geladen wurde. Wo etwas nur beschrieben und nicht
+   gespeichert wird, liefert dieser Generator aus demselben Text immer
+   dieselbe Folge. */
+function saat(text) {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return function () {
+    h += 0x6D2B79F5;
+    let t = h;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const saatWahl = (r, liste) => liste[Math.floor(r() * liste.length)];
+const saatZahl = (r, a, b) => a + Math.floor(r() * (b - a + 1));
+function saatName(r, pool) {
+  const p = NAMEN[pool] || NAMEN.de;
+  return { v: saatWahl(r, p.v), n: saatWahl(r, p.n) };
+}
+
 /* ------------------------------ Positionen ------------------------------ */
 /* Der Torwart ist die achte Position und die einzige, die nicht mit denselben
    Augen bewertet wird: Er hat einen eigenen Vorrat an Schluesselmomenten, seine
@@ -6371,10 +6395,15 @@ function natKader(natId) {
        bekannten Spieler laengst aufgehoert haben —, stellt der Verband
        trotzdem jemanden auf Landesniveau auf. Ohne das waerst du nach fuenfzehn
        Jahren automatisch die Nummer eins deines Landes. */
+    /* Gesaet statt gewuerfelt: Diese Spieler stehen in keinem Spielstand, sie
+       werden bei jeder Abfrage neu beschrieben. Mit echtem Zufall hiessen sie
+       nach dem Laden anders — gemessen wechselten nach fuenfzehn Saisons alle
+       drei Torhueter des Aufgebots ihren Namen. */
     for (let i = da.length; i < anzahl; i++) {
-      const nm = zufallsname(nat.pool);
-      liste.push({ name: nm.v + ' ' + nm.n, pos, alter: ri(21, 31), natId,
-        ovr: clamp(Math.round(nat.staerke + (i === 0 ? rnd(-5, 1) : rnd(-13, -4))), 40, 93) });
+      const r = saat('nat|' + natId + '|' + S.jahr + '|' + pos + '|' + i);
+      const nm = saatName(r, nat.pool);
+      liste.push({ name: nm.v + ' ' + nm.n, pos, alter: saatZahl(r, 21, 31), natId,
+        ovr: clamp(Math.round(nat.staerke + (i === 0 ? saatZahl(r, -5, 1) : saatZahl(r, -13, -4))), 40, 93) });
     }
   }
   natKaderCache = { schluessel, liste };
