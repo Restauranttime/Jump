@@ -4390,15 +4390,53 @@ function rekord(schluessel, wert, text, kleiner) {
    Regeln wie fuer jeden anderen echten Spieler. Er altert also mit, wechselt
    ueber das Transferfenster den Klub und beendet irgendwann seine Laufbahn,
    ohne dass hier etwas doppelt gefuehrt wird. */
-function rivalenWaehlen(pos) {
-  const jung = [];
+/* Der Rivale soll aus der eigenen Liga kommen. Ganz streng geht das nicht:
+   ECHTE_KADER kennt nur die sechs obersten Ligen, alles darunter und die
+   Eredivisie haben keine echten Kaderdaten. Eine Karriere, die in der 3. Liga
+   oder der Championship beginnt — also die meisten — haette damit gar keinen
+   Rivalen mehr. Und selbst oben ist der Jahrgang duenn: In LaLiga gibt es
+   keinen einzigen jungen Torwart, Sechser oder Mittelstuermer.
+
+   Deshalb gestaffelt, und die Position bleibt in jeder Stufe gesetzt — sie
+   ist fuer den Vergleich wichtiger als die Liga: erst die eigene Liga, dann
+   das eigene Land, dann die ganze Welt. */
+function rivalenKandidaten(pos, filter, alterMax, ovrMin) {
+  const liste = [];
   for (const cid of Object.keys(ECHTE_KADER)) {
+    const c = CL(cid);
+    if (!c || (filter && !filter(c))) continue;
     for (const e of ECHTE_KADER[cid]) {
-      if (e[2] > 20 || e[4] < 70) continue;
-      jung.push(e);
+      if (e[1] !== pos || e[2] > alterMax || e[4] < ovrMin) continue;
+      liste.push(e);
     }
   }
-  let gleich = jung.filter(e => e[1] === pos);
+  return liste;
+}
+
+function rivalenWaehlen(pos, ligaId) {
+  const lg = ligaId && LG(ligaId);
+  const orte = [];
+  if (lg) {
+    orte.push(c => c.liga === ligaId);
+    /* Das eigene Land, aber nur seine Pyramide — nicht irgendeine Liga, die
+       zufaellig denselben Namen traegt. */
+    const pyr = PYRAMIDEN[lg.land] || [ligaId];
+    orte.push(c => pyr.indexOf(c.liga) >= 0);
+  }
+  orte.push(null);
+  /* Lieber den Jahrgang etwas weiter fassen als die Liga verlassen: Erst wird
+     in der eigenen Liga gelockert (bis 23 Jahre, ab Staerke 66), dann im
+     eigenen Land, und erst danach anderswo gesucht. Ohne das landeten
+     sechsundvierzig Prozent aller Karrieren bei einem Rivalen aus einer
+     fremden Liga — schlicht, weil es fuer die eigene Position im eigenen
+     Land keinen einzigen Kandidaten des Jahrgangs gibt. */
+  let gleich = [];
+  suche: for (const f of orte) {
+    for (const eng of [true, false]) {
+      gleich = rivalenKandidaten(pos, f, eng ? 20 : 23, eng ? 70 : 66);
+      if (gleich.length) break suche;
+    }
+  }
   /* Junge Torhüter mit diesen Werten gibt es kaum — sonst bekäme ausgerechnet
      ein Torwart einen Stürmer als lebenslangen Vergleich. */
   if (!gleich.length && pos === 'TW') {
@@ -4406,8 +4444,14 @@ function rivalenWaehlen(pos) {
       for (const e of ECHTE_KADER[cid]) if (e[1] === 'TW' && e[2] <= 27 && e[4] >= 72) gleich.push(e);
     }
   }
-  if (!gleich.length && !jung.length) return null;
-  const e = pick(gleich.length ? gleich : jung);
+  /* Letzter Ausweg: irgendein junger Spieler, egal auf welcher Position. */
+  if (!gleich.length) {
+    for (const cid of Object.keys(ECHTE_KADER)) {
+      for (const e of ECHTE_KADER[cid]) if (e[2] <= 20 && e[4] >= 70) gleich.push(e);
+    }
+  }
+  if (!gleich.length) return null;
+  const e = pick(gleich);
   return { name: e[0], pos: e[1], spiele: 0, tore: 0, vorlagen: 0, zuNull: 0, titel: 0, saisons: [] };
 }
 
@@ -6734,7 +6778,7 @@ function karriereStarten() {
     }
   };
   S.kader = kaderErzeugen(club.id);
-  S.rivale = rivalenWaehlen(NEU.pos);
+  S.rivale = rivalenWaehlen(NEU.pos, club.liga);
   baueStars();
   starteSaison();
   log('Profivertrag bei ' + club.name + ' unterschrieben: ' + money(gehalt) + ' pro Jahr.', 'gold');
@@ -6842,7 +6886,7 @@ function migriere() {
      Vorgeschichte, die zu den schon gespielten Saisons passt, statt bei null
      zu beginnen. */
   if (!S.rivale) {
-    S.rivale = rivalenWaehlen(S.p.pos);
+    S.rivale = rivalenWaehlen(S.p.pos, (CL(S.p.clubId) || {}).liga);
     const roh = S.rivale && SPIELER_ROH[S.rivale.name];
     if (roh) {
       for (let i = 0; i < S.karriere.length; i++) {

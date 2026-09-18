@@ -745,6 +745,27 @@ Beim Anlegen bekommst du einen echten Spieler deiner Position und deines Jahrgan
 zugelost — je nach Position Lamine Yamal, Kenan Yıldız, Pietro Comuzzo oder einen der anderen
 rund fünfzig Zwanzigjährigen aus den Kaderdaten. Er läuft die ganze Karriere neben dir her.
 
+**Er kommt aus deiner Liga, so weit die Daten das hergeben.** Vorher wurde er aus ganz Europa
+gezogen. Streng geht es nicht: `ECHTE_KADER` kennt nur die sechs obersten Ligen — alles
+darunter und die ganze Eredivisie haben keine echten Kaderdaten, und eine Karriere, die in der
+3. Liga oder der Championship beginnt, hätte damit gar keinen Rivalen mehr. Deshalb
+gestaffelt, wobei die Position in jeder Stufe gesetzt bleibt (sie ist für den Vergleich
+wichtiger als die Liga): eigene Liga → eigenes Land → irgendwo. Und lieber den Jahrgang etwas
+weiter fassen als die Liga verlassen — innerhalb der eigenen Liga wird auf 23 Jahre und
+Stärke 66 gelockert, bevor die nächste Stufe drankommt.
+
+Gemessen über 1.344 echte Karrierestarts:
+
+| | vorher | jetzt |
+|---|---|---|
+| aus der eigenen Liga oder dem eigenen Land | 54 % | **84 %** |
+| aus einer fremden Liga | 46 % | **16 %** |
+
+Die verbleibenden 16 % sind genau zwei Fälle: **die Niederlande**, wo für keine einzige
+Position Kaderdaten vorliegen, und **spanische Torhüter** — junge Keeper gibt es in den Daten
+praktisch nur in der Ligue 1. Für Deutschland, England, Italien, Frankreich und Österreich
+bleibt der Rivale auf allen acht Positionen im eigenen Land.
+
 Gespeichert wird nur sein Name und was er geleistet hat. Alter, Stärke und Verein ergeben sich
 aus denselben Regeln wie für jeden anderen echten Spieler — er altert also mit, wechselt über
 das Transferfenster den Klub und beendet irgendwann seine Laufbahn, ohne dass irgendetwas
