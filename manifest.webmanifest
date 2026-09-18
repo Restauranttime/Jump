@@ -9,7 +9,7 @@
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#07100B",
-  "theme_color": "#07100B",
+  "theme_color": "#0F1C15",
   "categories": ["games", "sports"],
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },

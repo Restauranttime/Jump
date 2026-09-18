@@ -21,8 +21,21 @@ ablegt. Der normale Browser-Cache reicht dafür nicht: den räumt Safari weg, so
 knapp wird. Gespeichert werden `index.html`, das Manifest, die Icons und die Google Fonts.
 
 Auf dem iPhone: Seite einmal mit Netz öffnen, dann Teilen → „Zum Home-Bildschirm". Das Icon
-startet das Spiel ohne Internet und im Vollbild ohne Safari-Leisten. Auf Android macht Chrome
-dasselbe über „App installieren".
+startet das Spiel ohne Internet und im Vollbild ohne Safari-Leisten.
+
+**Auf Android geht es genauso, und etwas besser.** Chrome bietet die Installation von selbst
+an oder man findet sie im Menü unter „App installieren". Anders als auf iOS entsteht dabei
+ein richtiger App-Eintrag: eigenes Symbol in der App-Liste, eigener Startbildschirm in den
+Vereinsfarben, und `orientation: portrait` wird eingehalten — das Spiel dreht sich nicht mit,
+wenn man das Telefon kippt. Alle Bedingungen, die Chrome dafür prüft, sind erfüllt: Manifest
+ohne Fehler, Icons in 192 und 512 samt maskabler Fassung, aktiver Service Worker mit
+`fetch`-Handler, ausgeliefert über https.
+
+**Android-Geräte sind oft niedriger als ein iPhone.** Geprüft auf 412×915, 360×780, 360×640
+und 320×568: kein Querscroll in irgendeinem Reiter, kein Knopf unter der Kante. Gefunden und
+behoben wurde dabei ein Fall — auf 360×640 stand der sechste Einstellungsknopf 54 Pixel zu
+tief (erreichbar, aber unsichtbar). Auf flachen Fenstern bauen die Wahlknöpfe jetzt enger;
+davon profitiert auch das iPhone SE mit seinen 667 Pixeln.
 
 **Strategie:** Der Seitenaufruf geht zuerst ans Netz und fällt offline auf die gespeicherte
 Fassung zurück — so kommt ein neuer Stand an, ohne dass Offline-Spielen daran hängt. Alles
