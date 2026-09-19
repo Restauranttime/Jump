@@ -1,0 +1,35 @@
+# Laeuft bei jedem Push auf den Entwicklungszweig und bei jedem Pull Request.
+# Ohne das faellt ein Fehler erst auf, wenn ein Tester ihn meldet - so war es
+# bei den Ligen, die sich nach einer neuen Karriere nicht zuruecksetzten.
+name: Pruefung
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pruefen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Alle Pruefungen
+        run: ./pruef.sh
+      - name: Der Bau muss durchlaufen
+        run: |
+          ./build.sh
+          test -s index.html
+          test -s sw.js
+      - name: index.html muss zu src/game.html passen
+        run: |
+          # build.sh erzeugt index.html aus src/game.html. Liegt im Repo eine
+          # aeltere Fassung, haette ein Push den Spielstand der Tester nicht
+          # erreicht - der Fehler waere unsichtbar geblieben.
+          git diff --exit-code --stat index.html sw.js || {
+            echo "index.html oder sw.js sind nicht neu gebaut. Bitte ./build.sh laufen lassen und mitgeben."
+            exit 1
+          }

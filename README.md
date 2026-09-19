@@ -211,6 +211,40 @@ andere Karriere hinweg zurückgeladen wird, findet die Welt exakt so vor, wie er
 hat — auch nach einer dritten Karriere dazwischen. Bestehende Spielstände bleiben stimmig:
 kein Tabelleneintrag für einen Verein, der laut Zuordnung woanders spielt.
 
+## Prüfung
+
+    ./pruef.sh
+
+Acht Fälle mit 48 Zusicherungen, in etwa einer Minute, ohne Abhängigkeiten außer Node.
+Rückgabewert 0, wenn alles bestanden ist. Einzelheiten in `pruef/LIESMICH.md`; bei jedem Push
+läuft dasselbe über `.github/workflows/pruefung.yml`.
+
+**Warum es das gibt.** Zwei ernste Fehler kamen von einem Tester, nicht aus einer Messung: die
+Namen im Nationalaufgebot, die nach dem Laden wechselten, und die Ligen, die sich nach einem
+Neustart nicht zurücksetzten. Beide gehören zur selben Klasse — etwas wird gewürfelt oder
+verändert, aber nicht gespeichert und nicht zurückgesetzt.
+
+| Fall | Was er sichert |
+|---|---|
+| 01-laufzeit | 16 volle Laufbahnen auf allen acht Positionen. Findet alles, was irgendwann wirft. |
+| 02-neustart | Eine neue Karriere beginnt in der Welt der Vorlage. |
+| 03-laden | Speichern und Laden mitten in der Saison, 33 verglichene Größen, zwölf Prüfungen. |
+| 04-plaetze | Drei Spielstände nebeneinander vermischen sich nicht. |
+| 05-vereinsseite | Kader und Trainer aller 442 Vereine sind beständig und vollständig. |
+| 06-kaderdaten | Die 2.332 hinterlegten Spieler sind in sich stimmig. |
+| 07-wappen | Wappen sind innerhalb ihrer Liga unterscheidbar. |
+| 08-bestaendig | Zehn Ansichten liefern beim zweiten Hinsehen dasselbe. |
+
+**Ein Fall, der nie fehlschlägt, ist wertlos.** Deshalb wurde jeder der vier wichtigsten gegen
+den eingebauten Fehler geprüft: Zurücksetzen ausgebaut, gesäten Generator durch Zufall
+ersetzt, Trainer würfeln lassen, einem Verein den Torwart genommen. Jedes Mal schlug genau der
+zuständige Fall an, und der Rückgabewert wurde 1.
+
+Geprüft wird die Simulation, nicht die Darstellung — wie etwas aussieht, wird im Browser
+angesehen. Der Spielcode ist für den Browser geschrieben; `pruef/bau.sh` schneidet ihn aus
+`src/game.html` und setzt ihn gegen ein Attrappen-DOM, dessen Proxy auf jeden Zugriff wieder
+sich selbst liefert.
+
 ## Gestaltung
 
 Ein dunkles Grün-Schwarz mit Bernstein als einziger Akzentfarbe, Anton für Zahlen und
