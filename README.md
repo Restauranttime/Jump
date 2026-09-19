@@ -196,6 +196,21 @@ fünfzehn Saisons hießen deshalb alle drei Torhüter des Aufgebots nach dem Lad
 kommen sie aus einem gesäten Generator: Aus Nation, Jahr, Position und Platz entsteht immer
 dieselbe Folge. Wer vor dir im Aufgebot steht, heißt nach einem Neustart genauso wie vorher.
 
+**Die Welt gehört dem Spielstand, nicht dem Programm.** Auf- und Abstieg schreiben die neue
+Liga direkt in das Vereinsobjekt, die Stärkendrift tut dasselbe mit der Stärke. Diese Objekte
+leben aber ausserhalb des Spielstands, und zurückgesetzt wurden sie nie. Wer eine Karriere bis
+2034 spielte und danach eine neue begann, fand deshalb **86 Vereine in der falschen Liga** vor
+und 377 mit veränderter Stärke: Hertha in der Bundesliga, Wolfsburg in der zweiten. Dasselbe
+beim Wechsel zwischen den drei Plätzen — Platz 2 erbte die Auf- und Abstiege von Platz 1.
+
+Jetzt gibt es neben `STAERKE_BASIS` auch `LIGA_BASIS`, und `weltVorlageHerstellen()` stellt
+beides wieder her: vor dem Anlegen einer Karriere (denn schon die Vereinsvorschläge lesen die
+Ligen), beim Start, und in `tauschAnwenden()` vor jedem Laden. Gemessen: nach dem Neustart 0
+von 442 Vereinen in der falschen Liga, 0 mit abweichender Stärke. Ein Platz, der über eine
+andere Karriere hinweg zurückgeladen wird, findet die Welt exakt so vor, wie er sie verlassen
+hat — auch nach einer dritten Karriere dazwischen. Bestehende Spielstände bleiben stimmig:
+kein Tabelleneintrag für einen Verein, der laut Zuordnung woanders spielt.
+
 ## Gestaltung
 
 Ein dunkles Grün-Schwarz mit Bernstein als einziger Akzentfarbe, Anton für Zahlen und

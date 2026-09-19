@@ -957,7 +957,19 @@ const ligaClubs = lid => CLUBS.filter(c => c.liga === lid);
    zwischen den Saisons laeuft immer ein Stueck dorthin zurueck — sonst waere die
    Rangordnung nach zwanzig Jahren reines Rauschen. */
 const STAERKE_BASIS = {};
-CLUBS.forEach(c => { STAERKE_BASIS[c.id] = c.staerke; });
+const LIGA_BASIS = {};
+CLUBS.forEach(c => { STAERKE_BASIS[c.id] = c.staerke; LIGA_BASIS[c.id] = c.liga; });
+
+/* Auf- und Abstieg schreiben die neue Liga direkt in das Vereinsobjekt, und
+   die Staerkendrift tut dasselbe mit der Staerke. Diese Objekte leben aber
+   ausserhalb des Spielstands: Wer eine Karriere bis 2034 spielt und danach
+   eine neue beginnt, faende sonst 86 Vereine in der falschen Liga vor und
+   377 mit veraenderter Staerke - Hertha in der Bundesliga, Wolfsburg in der
+   zweiten. Darum wird die Vorlage hergestellt, bevor ein Spielstand geladen
+   oder eine Karriere begonnen wird. */
+function weltVorlageHerstellen() {
+  for (const c of CLUBS) { c.liga = LIGA_BASIS[c.id]; c.staerke = STAERKE_BASIS[c.id]; }
+}
 
 /* ---------------------------- Echte Kader ----------------------------
    Aufstellungen nach bestem Wissensstand der Saison 2025/26. Wo ich mir
@@ -7124,6 +7136,9 @@ function weltTransferfenster() {
 }
 
 function tauschAnwenden() {
+  /* Immer von der Vorlage aus: Sonst blieben die Auf- und Abstiege des zuvor
+     geladenen Platzes stehen und mischten sich unter die eigenen. */
+  weltVorlageHerstellen();
   for (const id of Object.keys(S.ligaTausch || {})) { const c = CL(id); if (c) c.liga = S.ligaTausch[id]; }
   for (const id of Object.keys(S.staerkeTausch || {})) { const c = CL(id); if (c) c.staerke = S.staerkeTausch[id]; }
 }
@@ -9325,6 +9340,7 @@ function renderCreate() {
 }
 
 function karriereStarten() {
+  weltVorlageHerstellen();
   const weg = STARTWEGE.find(w => w.id === NEU.weg);
   const arch = ARCH(NEU.archetyp) || ARCH_LISTE(NEU.pos)[ARCH_LISTE(NEU.pos).length - 1];
   const club = CL(NEU.clubId);
@@ -9732,6 +9748,9 @@ async function zurueckZurStartseite() {
 }
 
 function neueKarriereAnlegen() {
+  /* Vor der Erstellung, nicht erst beim Start: startClubs() liest die Ligen,
+     und aus der falschen Liga kaemen die falschen Vereine zur Auswahl. */
+  weltVorlageHerstellen();
   const n = zufallsname('de');
   if (!NEU.vorname) NEU.vorname = n.v;
   if (!NEU.nachname) NEU.nachname = n.n;
